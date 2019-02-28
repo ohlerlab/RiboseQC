@@ -19,7 +19,7 @@ Two simple steps are required to use Ribo-seQC on your data:
 ```
 ?prepare_annotation_files
 ```
-parses a *.gtf* and a *.2bit* file. (once per annotation-genome combination, a .2bit file can be obtained froma fasta file using the *faToTwoBit* software from UCSC: https://genome.ucsc.edu/goldenpath/help/twoBit.html - http://hgdownload.soe.ucsc.edu/admin/exe/ )
+parses a *.gtf* and a *.2bit* file. (this need to be doneonce per each annotation-genome combination, a .2bit file can be obtained from a fasta file using the *faToTwoBit* software from UCSC: https://genome.ucsc.edu/goldenpath/help/twoBit.html - http://hgdownload.soe.ucsc.edu/admin/exe/ )
 
 
 and
