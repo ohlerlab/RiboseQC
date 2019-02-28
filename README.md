@@ -1,5 +1,5 @@
 # Ribo-seQC
-An analysis tool for Ribo-seq and small RNA-seq data
+A comprehensive analysis tool for Ribo-seq and small RNA-seq data
 
 
 **Ribo-seQC** (*RiboseQC*) is an R package (to be submitted to *Bioconductor*) that performs quality control analysis of small RNA-seq data, with a focus on Ribo-seq and related techniques. Thanks to syntax and functions present in *Bioconductor* packages like *GenomicFeatures*, *rtracklayer* or *BSgenome*, this package can perform comprehensive analyses on a variety of genomic regions. In addition, Ribo-seQC allows to automatically generage an html report for each analyzed sample, allowing for quick and interactive comparison of multiple samples at once.
