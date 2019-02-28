@@ -1,0 +1,421 @@
+---
+title: "Ribo-seq quality control report"
+author: "Generated with Ribo-seQC"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+params:
+  input_files: ""
+  input_sample_names: ""
+  output_fig_path: ""
+output:
+  html_document: 
+    toc: true
+    toc_float:
+      collapsed: false
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(RiboseQC) # RiboseQC package (contains report functions)
+library(knitr) # R Markdown to HTML wrapper
+library(DT) # interactive JavaScript-based tables
+library(ggplot2) # plotting
+library(reshape2) # data formatting for ggplot2
+library(gridExtra) # multiple plots per figure
+library(ggpubr)
+library(viridis) # nice coloring scheme
+library(Biostrings) # codon usage
+```
+
+```{r data, echo=FALSE, warning=FALSE}
+# get input from params
+input_files <- params$input_files # RData file paths to one or more samples (one RData file per sample)
+input_sample_names <- params$input_sample_names # user-defined sample names to be displayed in report (short(!) names)
+output_fig_path <- params$output_fig_path
+names(input_files) <- input_sample_names
+# load all RData files to R
+rdata_list <- generate_rdata_list(input_files)
+for(samplo in names(rdata_list)){
+    if(length(rdata_list[[samplo]]$profiles_P_sites$Codon_counts)>0){
+        rdata_list[[samplo]]$profiles_P_sites$Codon_counts<-lapply(rdata_list[[samplo]]$profiles_P_sites$Codon_counts, function(x){x<-x["all"]})}
+    if(length(rdata_list[[samplo]]$profiles_P_sites$P_sites_percodon)>0){
+        
+        rdata_list[[samplo]]$profiles_P_sites$P_sites_percodon<-lapply(rdata_list[[samplo]]$profiles_P_sites$P_sites_percodon, function(x){x<-x["all"]})}
+    if(length(rdata_list[[samplo]]$profiles_P_sites$P_sites_percodon_ratio)>0){
+        
+        rdata_list[[samplo]]$profiles_P_sites$P_sites_percodon_ratio<-lapply(rdata_list[[samplo]]$profiles_P_sites$P_sites_percodon_ratio, function(x){x<-x["all"]})}
+    
+}
+
+
+```
+
+
+# Data information
+
+Sample names and data file paths visualized in this report:
+
+```{r data_info, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+cat("\n\n")
+for (i in 1:length(input_files)){
+    cat("**", names(input_files[i]), "**: \n", sep="")
+    cat(input_files[i], "\n\n\n")
+}
+cat("\n\n")
+```
+
+
+# 1 Read location distribution
+
+Per sample, the distribution of reads across different originating compartment (e.g. cytoplasmic and organellar footprints) and biotypes (e.g. CDS regions of protein coding genes) is shown.
+
+## 1.1 By biotype (and originating compartment) {.tabset}
+```{r plot_read_biotype_dist_1, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+# plot barplot for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+  cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+  res_all <- rdata_list[[names(rdata_list)[i]]]
+  plot_read_biotype_dist_1(res_all$read_stats$positions, names(rdata_list)[i], paste0(output_fig_path, "rds/"))
+  cat("\n\n")
+}
+```
+
+## 1.2 By originating compartment (and biotype) {.tabset}
+```{r plot_read_biotype_dist_2, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, fig.height=7, dpi=150}
+# plot several stacked barplots per sample in one figure
+plot_read_biotype_dist_2(rdata_list, paste0(output_fig_path, "rds/"))
+cat("\n\n")
+```
+
+# 2 Read length distribution {.tabset}
+
+Per sample, the distribution of read lengths is shown per originating compartment.
+
+```{r plot_read_length_dist, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+# plot distribution for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+  cat("## ", names(rdata_list)[i], " {.tabset} \n \n")
+  res_all <- rdata_list[[names(rdata_list)[i]]]
+  plot_read_length_dist(res_all$read_stats$rld, names(rdata_list)[i], paste0(output_fig_path, "rds/"))
+  cat("\n\n")
+}
+```
+
+# 3 Read length and location distribution
+
+Per sample and originating compartment, read length and location distributions are shown.
+
+For each sample, absolute number of reads and normalized read length distributions are shown.
+
+## 3.1 Read length distribution per biotype {.tabset}
+
+*Read count* shows absolute read numbers; in *Read count fraction* the number of reads for each biotype sums up to 1.
+
+```{r plot_read_length_dist_by_biotype, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, fig.height=8, dpi=150}
+# plot read length distribution per biotype for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+  cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+  res_all <- rdata_list[[names(rdata_list)[i]]]
+  plot_read_length_dist_by_biotype(res_all$read_stats$reads_summary, names(rdata_list)[i], paste0(output_fig_path, "rds/"))
+  cat("\n\n")
+}
+```
+
+## 3.2 Read biotype distribution per read length {.tabset}
+
+Per read length, the read distribution for different biotypes is shown (stacked barplot).
+*Read count* shows absolute numbers; in *Read count fraction*, the number of reads for each read length sums up to 1.
+
+```{r plot_read_biotype_dist_by_length, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, fig.height=8, dpi=150}
+# plot read location distribution per read length for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+  cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+  res_all <- rdata_list[[names(rdata_list)[i]]]
+  plot_read_biotype_dist_by_length(res_all$read_stats$reads_summary, names(rdata_list)[i], paste0(output_fig_path, "rds/"))
+  cat("\n\n")
+}
+```
+
+# 4 Metagene analysis
+
+Profiles of 5' ends are displayed over a metagene plot aggregating signal over all covered transcripts.
+5'end profiles are calculated with sub-codon resolution, and using binned transcript regions.
+
+Different scaling methods can be applied to the calculated profiles.
+Profiles for individual read lengths (without scaling) can also be visualized.
+
+**Disclaimer**:When comparing between samples, you might find differences in read lengths displayed, since read lengths are chosen for each sample individually.
+
+## 4.1 5' profiles {.tabset}
+
+
+```{r fivepr_profiles, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=12, fig.height=10, dpi=110}
+for (i in c(1:length(rdata_list))){
+  cat("\n\n")
+  cat("### ", names(rdata_list)[i], " {.tabset} \n\n")
+  res_all <- rdata_list[[names(rdata_list)[i]]]
+  plot_metagene_hm_rmd(res_all, "profiles_fivepr", names(rdata_list)[i], paste0(output_fig_path, "rds/"))
+  cat("\n\n")
+}
+```
+
+## 4.2 Calculation of P-sites positions
+
+Read lengths, as well as their individual offsets, are selected according to the parameters specified in the Ribo-seQC run.
+
+**Note**: Not all samples and originating organelles might be displayed here. Please check the parameters used in the Ribo-seQC run.
+
+### 4.2.1 Per frame coverage {.tabset}
+
+The fraction of 5'ends (from Section 4.1) falling on the three possible frames is displayed, for each read length and organelle. Each data point represents one transcripts.
+
+
+```{r frame_dist, echo=FALSE, warning=FALSE, message=FALSE, results='asis',dpi=150}
+for (i in 1:length(rdata_list)){
+  cat("####", names(rdata_list)[i], " {.tabset} \n\n")
+  res_all <- rdata_list[[names(rdata_list)[i]]]
+  plot_frame_dist_boxplot_rmd(res_all$selection_cutoffs$analysis_frame_cutoff, names(rdata_list)[i], paste0(output_fig_path, "rds/"))
+  cat("\n\n")
+}
+```
+
+### 4.2.2 Selected read lengths and cutoffs {.tabset}
+
+Cutoffs and frame statistics are shown for selected read lengths:
+
+* *cutoff*: 5' end cutoff used to infer P-sites positions
+* *frame_preference*: fraction of coverage in the frame with most reads
+* *gain_frame_codons* = gain of in-frame signal, averaged over all transcripts
+* *gain_frame_new_codons*: gain of in-frame signal on codons not covered by other read lengths, averaged over all transcripts
+
+```{r rl_stats_data, echo=FALSE, error=FALSE, message=FALSE}
+datasets <- NULL
+for (i in c(1:length(rdata_list))) {
+  res_all <- rdata_list[[names(rdata_list)[i]]]
+  
+  sample <- names(rdata_list)[[i]]
+  comps <- names(res_all$selection_cutoffs$results_choice)
+  
+  for (comp in comps){
+    d <- as.data.frame(res_all$selection_cutoffs$results_choice[[comp]]$data)[c(3, 1, 2, 4, 5)]
+    names(d) <- c("read length", "cutoff", "frame preference (%)", "gain_frame_codons", "gain_frame_new_codons")
+    datasets[[sample]][[comp]] <- d
+  }
+}
+```
+
+```{r rl_stats_table, echo=FALSE, error=FALSE, message=FALSE, include=FALSE}
+out <- NULL
+for (i in c(1:length(datasets))) {
+  sample <- names(datasets)[[i]]
+  
+  knit_expanded <- paste0("\n\n```{r results='asis', echo=FALSE}\n\n
+                            cat(\"#### ", sample," {.tabset} \n \n\")\n\n
+                            ```") 
+  out = c(out, knit_expanded)
+  
+  for (comp in names(datasets[[sample]])){
+    knit_expanded <- paste0("\n\n```{r results='asis', echo=FALSE}\n\n
+                            cat(\"##### ", comp, "\n \n\")\n\n
+                            datatable(datasets[[\"", sample, "\"]][[\"", comp, "\"]], rownames=FALSE, options=list(dom='t')) %>% formatRound(c(3,4,5), 2)\n\n
+                            ```") 
+    out = c(out, knit_expanded)
+  }
+}
+```
+
+`r paste(knit(text = out), collapse = '\n')`
+
+
+### 4.2.3 Choice of read lengths {.tabset}
+
+Based on the parameters indicated in the Ribo-seQC run, the following read lengths (with their offsets) were selected to infer P-sites positions.
+
+
+```{r rl_sel_data, echo=FALSE, warning=FALSE, message=FALSE}
+datasets <- NULL
+for (i in 1:length(rdata_list)){
+  res_all <- rdata_list[[names(rdata_list)[i]]]
+  sample <- names(rdata_list)[[i]]
+  comps <- names(res_all$selection_cutoffs$results_choice)
+  
+  rl_choices_default <- NULL
+  for (j in comps){
+    data <- res_all$selection_cutoffs$results_choice[[j]]$data
+    data_default <- data[data[["max_coverage"]],][["read_length"]] # choose only read lengths with max_coverage=TRUE (default choice)
+    rl_choices_default <- rbind(rl_choices_default, c(compartment=j, 
+                                                      `read lengths of choice (ordered by frame preference)`=paste(data_default, collapse = ", ")))
+  }
+  datasets[[sample]] <- rl_choices_default
+}
+```
+
+```{r rl_sel_table, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+out = NULL
+for (i in c(1:length(datasets))) {
+  sample <- names(datasets)[[i]]
+  knit_expanded <- paste0("\n```{r results='asis', echo=FALSE}\n\n
+                          cat(\"#### ", sample," {.tabset} \n \n\")\n\n
+                          datatable(datasets[[\"", sample, "\"]], rownames=FALSE, options=list(dom='t'))\n\n
+                          ```")
+  out = c(out, knit_expanded)
+}
+```
+
+`r paste(knit(text = out), collapse = '\n')`
+
+
+## 4.3 P-site profiles {.tabset}
+
+Read coverage in form of P-site profiles is here displayed, with the same visualization options available in Section 4.2.
+
+**Note**: Not all samples and originating organelles might be displayed here. Please check the parameters used in the Ribo-seQC run.
+
+```{r psite_profiles, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=12, fig.height=10, dpi=110}
+for (i in c(1:length(rdata_list))){
+  res_all <- rdata_list[[names(rdata_list)[i]]]
+  
+  # display only those samples that have P-site profiles
+  
+  if(length(res_all$profiles_P_sites$P_sites_subcodon)!=0){
+    cat("\n\n")
+    cat("### ", names(rdata_list)[i], " {.tabset} \n\n")
+    plot_metagene_hm_rmd(res_all, "profiles_P_sites", names(rdata_list)[i], paste0(output_fig_path, "rds/"))
+  }
+  cat("\n\n")
+}
+```
+
+
+# 5 Top 50 mapping positions {.tabset}
+
+In order to reveal possible contaminating sequences, the top 50 mapping positions (using 5'ends) are listed, together with genomic feature annotation and nucleotide sequences.
+
+```{r top50_data, echo=FALSE, warning=FALSE, message=FALSE}
+datasets <- list()
+for (i in c(1:length(rdata_list))){
+  res_all <- rdata_list[[names(rdata_list)[i]]]
+  data <- as.data.frame(res_all$sequence_analysis)
+  data <- data[,c("score", "pct", "seqnames", "region", "gene_biotype", "gene", "seq")]
+  names(data) <- c("read count", "library fraction (%)", "seqnames", "region", "gene biotype", "gene", "sequence")
+  datasets[[i]] <- data
+}
+```
+
+```{r top50_table, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+out = NULL
+for (i in c(1:length(rdata_list))) {
+  knit_expanded <- paste0("\n```{r results='asis', echo=FALSE}\n\n
+                          cat(\"## \", names(rdata_list)[", i,"], \"\n \n\")\n\n
+                          datatable(datasets[[", i, "]], rownames=FALSE)\n\n
+                          ```")
+  out = c(out, knit_expanded)
+}
+```
+
+`r paste(knit(text = out), collapse = '\n')`
+
+
+# 6 Top 50 abundant genes {.tabset}
+The 50 genes with the highest read counts are listed below for (i) CDS regions of protein coding genes and for (ii) all genes.
+
+
+## CDS genes {.tabset}
+
+```{r topgenescds_data, echo=FALSE, message=FALSE}
+datasets <- list()
+for (i in c(1:length(rdata_list))){
+  res_all <- rdata_list[[names(rdata_list)[i]]]
+  rc_cds <- as.data.frame(res_all$read_stats$counts_cds_genes)
+  rc_cds <- rc_cds[with(rc_cds, order(-reads, chromosome)), ][1:100,]
+  datasets[[i]] <- rc_cds
+}
+```
+
+```{r topgenescds_table, include=FALSE}
+out = NULL
+for (k in c(1:length(rdata_list))) {
+  knit_expanded <- paste0("\n```{r results='asis', echo=FALSE}\n\n
+                          cat(\"### \", names(rdata_list)[",k ,"], \"\n \n\")\n\n
+                          datatable(datasets[[", k, "]])\n\n
+                          ```")
+  out = c(out, knit_expanded)
+}
+```
+
+`r paste(knit(text = out), collapse = '\n')`
+
+
+## All genes {.tabset}
+
+```{r topgenesall_data, echo=FALSE, message=FALSE}
+datasets <- list()
+for (i in c(1:length(rdata_list))){
+  res_all <- rdata_list[[names(rdata_list)[i]]]
+  rc_cds <- as.data.frame(res_all$read_stats$counts_all_genes)
+  rc_cds <- rc_cds[with(rc_cds, order(-reads, chromosome)), ][1:100,]
+  datasets[[i]] <- rc_cds
+}
+```
+
+```{r topgenesall_table, include=FALSE}
+out = NULL
+for (k in c(1:length(rdata_list))) {
+  knit_expanded <- paste0("\n```{r results='asis', echo=FALSE}\n\n
+                          cat(\"### \", names(rdata_list)[",k ,"], \"\n \n\")\n\n
+                          datatable(datasets[[", k, "]])\n\n
+                          ```")
+  out = c(out, knit_expanded)
+}
+```
+
+`r paste(knit(text = out), collapse = '\n')`
+
+# 7 Positional codon usage  {.tabset}
+
+Based on the P-site positions (Section 4.3), codon usage within CDS regions of protein coding genes is here shown.
+In addition, position-specific values are calculated for the first 11 codons of the CDS, 11 codons from the middle of the CDS, and for the last 11 codons of the CDS - those regions are referred to as *start*, *middle*, and *stop*, respectively. 
+
+Codon usage can be accessed with positional information, or summed up over all positions (Section 8 Bulk codon usage).
+
+*Codon counts* shows codon occurences per each position; *P-sites counts* shows number of P-sites position mapping to each codon and position; *P-sites per codon* simply shows the ratio of *P-sites counts* over *Codon counts*. Same calculations are performed using A-sites (shifting P-sites +3nt) and E-site (shifting P-sites -3nt) positions.
+Such values are calculated for all read lengths, and also for individual read lengths (available in the full report). Different scaling methods are also available.
+
+**Note**: The genetic code, which assigns amino acids to codons, can differ between organelles, species and originating genomes. Different scales are used for ATG/stop codons and other codons.
+
+**Note**: Codon usage calculation is dependent on successful P-sites calculation.
+
+```{r codon_usage_positional, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=12, fig.height=16, dpi=150}
+for (i in c(1:length(rdata_list))){
+  res_all <- rdata_list[[names(rdata_list)[i]]]
+  
+  if(length(res_all$profiles_P_sites$P_sites_percodon)!=0){
+    cat("\n\n")
+    cat("## ", names(rdata_list)[i], " {.tabset} \n\n")
+    plot_codon_usage_positional_rmd(res_all, names(rdata_list)[i], paste0(output_fig_path, "rds/"))
+  }
+  cat("\n\n")
+}
+```
+
+
+# 8 Bulk codon usage {.tabset}
+
+Codon usage (see Section 7) is here shown summed up over all CDS positions.
+
+**Note**: Codons, as well as corresponding amino acids, are listed. The genetic code, which assigns amino acids to codons, can differ between organelles, species and originating genomes.
+
+**Note**: Codon usage calculation is dependent on successful P-sites calculation.
+
+```{r codon_usage_bulk, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=12, fig.height=8, dpi=150}
+for (i in c(1:length(rdata_list))){
+  res_all <- rdata_list[[names(rdata_list)[i]]]
+  if(length(res_all$profiles_P_sites$P_sites_percodon)!=0){
+    cat("\n\n")
+    cat("## ", names(rdata_list)[i], " {.tabset} \n\n")
+    plot_codon_usage_bulk_rmd(res_all, names(rdata_list)[i], paste0(output_fig_path, "rds/"))
+  }
+  cat("\n\n")
+}
+```
+

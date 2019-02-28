@@ -1,0 +1,15 @@
+Package: RiboseQC
+Title: Ribo-seQC, a comprehensive Ribo-seq analysis tool
+Version: 0.99.0
+Authors@R: c(person("Lorenzo", "Calviello", email = "calviello.l.bio@gmail.com", role = c("aut")),
+    person("Dominique", "Sydow", email = "dominique.sydow@posteo.de", role = c("aut")),
+    person("Dermott", "Harnett", email = "Dermot.Harnett@mdc-berlin.de", role = c("ctb","cre")),
+    person("Uwe", "Ohler", email = "Uwe.Ohler@mdc-berlin.de", role = c("rev","fnd")))
+Description: Ribo-seQC is a powerful analysis tool for the analysis of Ribo-seq data, which is able to provide read-length specific analysis of both cytoplasmic and organellar ribosome, and provides interactive visualization of results in a dynamic html report
+Depends: rmarkdown, rtracklayer, GenomicAlignments, BSgenome, GenomicFiles, devtools, reshape2, ggplot2, knitr, DT, gridExtra, ggpubr, viridis, Biostrings, GenomicFeatures, BiocGenerics
+License: GPL-3 or above
+Encoding: UTF-8
+LazyData: FALSE
+Name: RiboseQC
+biocViews: RiboSeq, GenomeAnnotation, Transcriptomics, Software
+RoxygenNote: 6.1.1
