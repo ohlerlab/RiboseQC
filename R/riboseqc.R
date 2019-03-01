@@ -4,7 +4,6 @@
 # Lorenzo Calviello (calviello.l.bio@gmail.com)
 # Dominique Sydow (dominique.sydow@posteo.de)
 # Dermott Harnett (Dermot.Harnett@mdc-berlin.de)
-# Altuna Akalin (Altuna.Akalin@mdc-berlin.de)
 # Uwe Ohler (Uwe.Ohler@mdc-berlin.de)
 #
 # This software is free software: you can redistribute it and/or
