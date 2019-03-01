@@ -10,6 +10,10 @@ An example Ribo-seQC html report for Ribo-seq data from Arabodopsis roots and sh
 
 https://drive.google.com/open?id=1C0ykty-pxJjNWq6cBv9oBKdgNHowZWk1
 
+Here another report created using data from a TCP-seq (Archer *et al*, Nature 2016) experiment in yeast (*Warning*, file size is ~130Mb): 
+
+https://drive.google.com/open?id=1lSwgTnFFAlKAP_IKI4nIncwZ1-kBvUbX
+
 
 
 To install Ribo-seQC:
