@@ -6,6 +6,11 @@ A comprehensive analysis tool for Ribo-seq and small RNA-seq data
 
 This tools focuses on the analysis of different read lengths, taking into account the genomic regions they map to (e.g. coding sequence, UTRs, non-coding RNAs, mitochondria or chloroplasts, etc...). Other useful features, such as automatic P-sites position calculation or analysis the top mapping positions, are available in the Ribo-seQC package, and we encourage to donwload and have a look at the vignette (**RiboseQC.html** https://htmlpreview.github.io/?https://github.com/lcalviell/Ribo-seQC/blob/master/RiboseQC.html ), our manual (**RiboseQC-manual.pdf**), and our manuscript (to be added soon...).
 
+An example report run on Ribo-seq data from Arabodopsis roots and shoots (Hsu *et al*, PNAS 2016) is available here, and can be downloaded and opened using a browser like Chrome, Firefox or others (*Warning*, file size is ~130mb):
+
+https://drive.google.com/open?id=1C0ykty-pxJjNWq6cBv9oBKdgNHowZWk1
+
+
 
 To install the package:
 ```
