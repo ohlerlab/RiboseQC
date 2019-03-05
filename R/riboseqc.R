@@ -2268,6 +2268,9 @@ load_annotation<-function(path){
 #' all the calculated cutoffs in \code{cutoffs}, data used for the frame analysis in \code{frames},
 #' and profiles around start codons in  \code{profiles_start}.
 #' @seealso \code{\link{RiboseQC_analysis}}
+#' @example
+#' data(res2)
+#' calc_cutoffs_from_profiles(res_2[["five_prime_subcodon"]][[1]][[1]],length_max = 100)
 #' @export
 
 calc_cutoffs_from_profiles<-function(reads_profile,length_max){
