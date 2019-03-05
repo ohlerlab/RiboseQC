@@ -20,26 +20,13 @@
 # along with this software. If not, see
 # <http://www.gnu.org/licenses/>.
 
-#' @import rmarkdown
-#' @import rtracklayer
-#' @import GenomicAlignments
-#' @import BSgenome
-#' @import GenomicFiles
-#' @import devtools
-#' @import reshape2
-#' @import ggplot2
-#' @import knitr
-#' @import DT
-#' @import gridExtra
-#' @import ggpubr
-#' @import viridis
-#' @import Biostrings
-#' @import GenomicFeatures
-#' @import BiocGenerics
+
 
 ######################################################################################################
 # Methods for RiboseQC report
 ######################################################################################################
+
+
 
 #' Create the RiboseQC analysis report in html
 #'
@@ -2430,7 +2417,8 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 #' @seealso \code{\link{load_annotation}}, \code{\link{forgeBSgenomeDataPkg}}, \code{\link{makeTxDbFromGFF}}.
 #' @export
 
-prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,scientific_name="Homo.sapiens",annotation_name="genc25",export_bed_tables_TxDb=T,forge_BSgenome=T,create_TxDb=T){
+prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,scientific_name="Homo.sapiens",
+                                   annotation_name="genc25",export_bed_tables_TxDb=T,forge_BSgenome=T,create_TxDb=T){
 
 
     DEFAULT_CIRC_SEQS <- unique(c("chrM","MT","MtDNA","mit","Mito","mitochondrion",
@@ -2491,10 +2479,11 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
 
         seed_dest<-paste(annotation_directory,"/",basename(twobit_file),"_",scientific_name,"_seed",sep = "")
 
+
+
         if(length(circseed)==1){
             seed_text<-paste(seed_text,"\n",
                              "circ_seqs: \"",circseed,"\"",sep="")
-            writeLines(text = seed_text,con = seed_dest)
         }
 
         if(length(circseed)>1){
@@ -2504,7 +2493,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
             cat(seed_text,"\n","circ_seqs: ",circseed,"\n",sep="",file = seed_dest)
         }
 
-
+        writeLines(text = seed_text,con = seed_dest)
 
         unlink(paste(annotation_directory,pkgnm,sep="/"),recursive=T)
 
