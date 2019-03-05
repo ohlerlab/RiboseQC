@@ -18,8 +18,8 @@ that can be saved as RDS object file.
 }
 \description{
 This function plots the read location distribution by originating compartment (and biotype)
-for all input samples. \cr \cr 
-This plot is used in the Ribo-seQC report in section 1.2.
+for all input samples. \cr \cr
+This plot is used in the RiboseQC report in section 1.2.
 }
 \seealso{
 \code{\link{create_html_report}}
@@ -27,4 +27,4 @@ This plot is used in the Ribo-seQC report in section 1.2.
 \author{
 Dominique Sydow, \email{dominique.sydow@posteo.de}
 }
-\keyword{Ribo-seQC}
+\keyword{RiboseQC}

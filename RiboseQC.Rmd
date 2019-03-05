@@ -1,5 +1,5 @@
 ---
-title: "Ribo-seQC vignette"
+title: "RiboseQC vignette"
 author: "Lorenzo Calviello"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output:
@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-Ribo-seQC is a package that performs quality control analysis of small RNA-seq data (in .bam format), with a focus on Ribo-seq [1] and related techniques. Thanks to syntax and functions present in packages like *GenomicFeatures*, *rtracklayer* or *BSgenome*, this package can perform comprehensive analyses of alignments on a variety of genomic regions.
+RiboseQC is a package that performs quality control analysis of small RNA-seq data (in .bam format), with a focus on Ribo-seq [1] and related techniques. Thanks to syntax and functions present in packages like *GenomicFeatures*, *rtracklayer* or *BSgenome*, this package can perform comprehensive analyses of alignments on a variety of genomic regions.
 This vignette illustrates the usage of the package using example data and annotation from three different experiments performed in three different organisms.
 
 **Warning**: While we encourage users to get familiar with each outlined step, executing all the code on your machine will generate a lot of data (~550 Mb) and it might take some time (5-10 minutes for each analysis and report creation). Please make sure to have enough disk space if you decide to execute code from all the sections.
@@ -143,7 +143,7 @@ For example, the profile of P-site positions along the CDS can be visualized usi
 readRDS("test_human_hek.html_plots/rds/sample1_nucl_4_profiles_P_sites_metagene_subcodon_all")[[1]]
 ```
 
-Let's now use Ribo-seQC to analyze different samples at once.
+Let's now use RiboseQC to analyze different samples at once.
 
 
 ## Analyze multiple samples (yeast)
@@ -173,7 +173,7 @@ GTF_annotation$cds_txs
 GTF_annotation$trann
 ```
 
-We will now download three files corresponding to sample data from a TCP-seq experiment [4], where the three experiments aim at extracting RNA fragments covered by scanning ribosomes (SSU), elongating ribosomes (RS) and input material (input). Ribo-seQC analysis is followed by the creation of a report containing results for all the three experiments.
+We will now download three files corresponding to sample data from a TCP-seq experiment [4], where the three experiments aim at extracting RNA fragments covered by scanning ribosomes (SSU), elongating ribosomes (RS) and input material (input). RiboseQC analysis is followed by the creation of a report containing results for all the three experiments.
 
 ```{r yeast_3}
 download.file("https://drive.google.com/uc?export=download&id=1Nwlf7u-hHC_fX0fUJuJu_dr2WxwGazVJ",destfile = "test_yeast_TCP_input.bam")

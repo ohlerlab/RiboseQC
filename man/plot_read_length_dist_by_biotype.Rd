@@ -2,7 +2,7 @@
 % Please edit documentation in R/riboseqc.R
 \name{plot_read_length_dist_by_biotype}
 \alias{plot_read_length_dist_by_biotype}
-\title{Plot read length and location distribution 
+\title{Plot read length and location distribution
 (distribution per biotype)}
 \usage{
 plot_read_length_dist_by_biotype(reads_summary, sample,
@@ -21,13 +21,13 @@ given in the \code{input_sample_names} parameter of \code{create_html_report}).}
 Defaults to NOT save RDS; to save RDS, provide path to destination folder.}
 }
 \value{
-This function returns a plot that can be integrated in the html report and 
+This function returns a plot that can be integrated in the html report and
 that can be saved as RDS object file.
 }
 \description{
 This funtion plots the read length distribution for each originating compartment as distribtion per biotype
 for one input sample (displayed as read count and as read count fraction). \cr \cr
-This plot is used in the Ribo-seQC report in section 3.1.
+This plot is used in the RiboseQC report in section 3.1.
 }
 \seealso{
 \code{\link{create_html_report}}
@@ -35,4 +35,4 @@ This plot is used in the Ribo-seQC report in section 3.1.
 \author{
 Dominique Sydow, \email{dominique.sydow@posteo.de}
 }
-\keyword{Ribo-seQC}
+\keyword{RiboseQC}

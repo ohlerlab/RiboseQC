@@ -21,4 +21,4 @@ This function generates figures as PDF files from RDS object files.
 \author{
 Dominique Sydow, \email{dominique.sydow@posteo.de}
 }
-\keyword{Ribo-seQC}
+\keyword{RiboseQC}
