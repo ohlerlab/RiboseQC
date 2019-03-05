@@ -9,51 +9,55 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE}
+```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+library(RiboseQC)
 ```
 
 ## Step 1. Creating Annotation and Sequence Files for RiboseQC
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
-
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
+The first step is to create the necessary bioconductor objects and store them in a folder so they can be re-used. The function ```prepare_annotation_file``` takes the name of the directory it should store the annoation, as well as a gtf file and a twobit file containing sequence information for your data. You can also supply a scientific name for the organism, and a name for the gene annotation, for use in the metadata of the BSgenome package that will be created.
 
 ```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+gtf_file <- system.file("extdata", "example.gtf", 
+                        package = "RiboseQC",mustWork = TRUE)
+twobit_file <- system.file("extdata", "example.2bit",
+                           package = "RiboseQC",mustWork = TRUE)
+output_dir <- tempdir()
+
+prepare_annotation_files(output_dir,twobit_file,gtf_file,
+                         scientific_name = "Arabidopsis.thaliana", 
+                         annotation_name = "tair10.42" )
+
+annotation_file <- file.path(output_dir,paste0(basename(gtf_file),'_Rannot'))
+
+stopifnot(file.exists(annotation_file))
+
+output_dir%>%list.files
+
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+## Step 2: Runnning RiboseQC
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+RiboseQC can be run with a single command. Riboseqc_analysis takes as it's input the annotation file created in the previous step, and a vector of bam files. Options allow tweaking of the procedure or p-site selection and which read lengths are included for downstream analysis. 
 
 ```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+# save.image('~/rdebug')
+# stop()
+bam_file <- system.file('extdata','example.bam',
+                        package='RiboseQC',mustWork = TRUE)
+
+RiboseQC_analysis(annotation_file = annotation_file,
+                  bam_files = bam_file,
+                  fast_mode = TRUE,
+                  create_report = FALSE )
+
+file.exists(bam_file)
+
+dirname(bam_file)%>%list.files
+
 ```
-
-Also a quote using `>`:
-
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))

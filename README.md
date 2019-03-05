@@ -32,7 +32,7 @@ Two simple steps are required to use RiboseQC on your data:
 parses a *.gtf* and a *.2bit* file. (this need to be done once per each annotation-genome combination, a .2bit file can be obtained from a fasta file using the *faToTwoBit* software from UCSC: https://genome.ucsc.edu/goldenpath/help/twoBit.html - http://hgdownload.soe.ucsc.edu/admin/exe/ )
 
 
-and
+an
 ```
 ?RiboseQC_analysis
 ```

@@ -2415,7 +2415,18 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 #' @return a TxDb file and a *Rannot files are created in the specified \code{annotation_directory}.
 #' In addition, a BSgenome object is forged, installed, and linked to the *Rannot object
 #' @seealso \code{\link{load_annotation}}, \code{\link{forgeBSgenomeDataPkg}}, \code{\link{makeTxDbFromGFF}}.
+#' @examples
+#' gtf_file <- system.file("extdata", "example.gtf",
+#' package = "RiboseQC",mustWork = TRUE)
+#' twobit_file <- system.file("extdata", "example.2bit",
+#'                            package = "RiboseQC",mustWork = TRUE)
+#' output_dir <- tempdir()
+#' prepare_annotation_files(output_dir,twobit_file,gtf_file,
+#'                    scientific_name = "Arabidopsis.thaliana",
+#'                    annotation_name = "tair10.42" )
+#'
 #' @export
+
 
 prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,scientific_name="Homo.sapiens",
                                    annotation_name="genc25",export_bed_tables_TxDb=T,forge_BSgenome=T,create_TxDb=T){
