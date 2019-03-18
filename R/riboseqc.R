@@ -80,7 +80,7 @@
 #' create_html_report(input_files=paste(sampnames,"_results_RiboseQC",sep = ""), input_sample_names=sampnames,output_file =  'test_root_shoots.html',extended = FALSE)
 #' @export
 
-create_html_report <- function(input_files, input_sample_names, output_file,extended=F){
+create_html_report <- function(input_files, input_sample_names, output_file,extended=FALSE){
 
     # get input and output file paths
     input_files <- paste(normalizePath(dirname(input_files)),basename(input_files),sep="/")
@@ -307,7 +307,7 @@ plot_read_biotype_dist_2 <- function(rdata_list, output_rds_path=""){
     # read count
     g1 <- ggplot(data=data.m, aes(x=L1, y=value, fill=Var1)) +
         geom_bar(stat="identity", position=position_stack(reverse=TRUE)) +
-        scale_fill_viridis(discrete=T) +
+        scale_fill_viridis(discrete=TRUE) +
         labs(x="\nsample", y="read count\n") +
         facet_grid(Var2~., scales="free_y") +
         theme_minimal() +
@@ -325,7 +325,7 @@ plot_read_biotype_dist_2 <- function(rdata_list, output_rds_path=""){
     # read count percentage
     g2 <- ggplot(data=data.m, aes(x=L1, y=value, fill=Var1)) +
         geom_bar(stat="identity", position=position_fill(reverse=TRUE)) +
-        scale_fill_viridis(discrete=T) +
+        scale_fill_viridis(discrete=TRUE) +
         labs(x="\nsample", y="read count fraction\n") +
         facet_grid(Var2~., scales="free_y") +
         theme_minimal() +
@@ -505,7 +505,7 @@ plot_read_length_dist_by_biotype <- function(reads_summary, sample, output_rds_p
         geom_line(aes(colour=Var1, group=Var1), size=lw) +
         scale_x_continuous(breaks=scales::pretty_breaks(n=8)) +
         labs(x="\nread length", y="read count\n") +
-        scale_color_viridis(discrete=T,alpha = .8) +
+        scale_color_viridis(discrete=TRUE,alpha = .8) +
         facet_grid(L1~., scales="free_y") +
         theme_minimal() +
         theme(plot.margin = margin(.3, .3, .3, .3, "cm"),
@@ -532,7 +532,7 @@ plot_read_length_dist_by_biotype <- function(reads_summary, sample, output_rds_p
         geom_line(aes(colour=Var1, group=Var1), size=lw) +
         scale_x_continuous(breaks=scales::pretty_breaks(n=8)) +
         labs(x="\nread length", y="read count fraction\n") +
-        scale_color_viridis(discrete=T,alpha = .8) +
+        scale_color_viridis(discrete=TRUE,alpha = .8) +
         facet_grid(L1~., scales="free_y") +
         theme_minimal() +
         theme(plot.margin = margin(.3, .3, .3, .3, "cm"),
@@ -613,7 +613,7 @@ plot_read_biotype_dist_by_length <- function(reads_summary, sample, output_rds_p
     g1 <- ggplot(data=rld.m, aes(x=Var2, y=value, fill=Var1)) +
         geom_bar(stat="identity", position=position_stack(reverse=TRUE)) +
         scale_x_continuous(breaks=scales::pretty_breaks(n=8)) +
-        scale_fill_viridis(discrete=T) +
+        scale_fill_viridis(discrete=TRUE) +
         labs(x="\nread length (nt)", y="read count\n") +
         facet_grid(L1~., scales="free_y") +
         theme_minimal() +
@@ -632,7 +632,7 @@ plot_read_biotype_dist_by_length <- function(reads_summary, sample, output_rds_p
     g2 <- ggplot(data=rld.m, aes(x=Var2, y=value, fill=Var1)) +
         geom_bar(stat="identity", position=position_fill(reverse=TRUE)) +
         scale_x_continuous(breaks=scales::pretty_breaks(n=8)) +
-        scale_fill_viridis(discrete=T) +
+        scale_fill_viridis(discrete=TRUE) +
         labs(x="\nread length (nt)", y="read count fraction\n") +
         facet_grid(L1~., scales="free_y") +
         theme_minimal() +
@@ -750,7 +750,7 @@ get_metagene_data <- function(data, profile_type, res, comp){
     # get available read lengths
     rl_ok <- names(signal)
     # sort read lengths in ascending order and "all" at the beginning
-    rl_ok <- c(rl_ok[1], as.character(sort(as.integer(rl_ok[-1], decreasing=F))))
+    rl_ok <- c(rl_ok[1], as.character(sort(as.integer(rl_ok[-1], decreasing=FALSE))))
 
     # prepare BARPLOTS data
 
@@ -775,7 +775,7 @@ get_metagene_data <- function(data, profile_type, res, comp){
 
     # single read lengths
     rl_ok_single <- rl_ok[-1]
-    rl_ok_single <- c(as.character(sort(as.integer(rl_ok_single), decreasing = F)))
+    rl_ok_single <- c(as.character(sort(as.integer(rl_ok_single), decreasing = FALSE)))
     data_none <- do.call(signal[rl_ok_single], what=rbind)
     rownames(data_none) <- rl_ok_single
     colnames(data_none) <- 1:dim(data_none)[2]
@@ -2040,9 +2040,9 @@ choose_readlengths<-function(summary_data,choice="max_coverage",nt_signals){
         choices_res[[i]]<-c()
         data<-DataFrame(summary_data[[i]])
         sign<-nt_signals[[i]]
-        data<-data[grep(rownames(data),pattern = "all",invert = T),]
+        data<-data[grep(rownames(data),pattern = "all",invert = TRUE),]
         if(dim(data)[1]==0){next}
-        data<-data[order(data$frame_preference,decreasing = T),]
+        data<-data[order(data$frame_preference,decreasing = TRUE),]
         mat_fr<-matrix(0,nrow = nrow(sign[[1]]),ncol = 99)
         net_all<-c()
         net_all_cov<-c()
@@ -2278,9 +2278,9 @@ get_ps_fromsplicemin<-function(x,cutoff){
 
 load_annotation<-function(path){
     GTF_annotation<-get(load(path))
-    #genome_sequence<-get(library(GTF_annotation$genome_package,character.only = T))
+    #genome_sequence<-get(library(GTF_annotation$genome_package,character.only = TRUE))
 
-    library(GTF_annotation$genome_package,character.only = T)
+    library(GTF_annotation$genome_package,character.only = TRUE)
     genome_sequence<-get(GTF_annotation$genome_package)
 
     GTF_annotation<<-GTF_annotation
@@ -2319,7 +2319,7 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
     profok<-as.matrix(reads_profile[,grep("CDS",x = colnames(reads_profile))])
     #profok<-do.call(args = reads_profile[c("CDS_1","CDS_2")],what = cbind.data.frame)
     sums<-rowSums(profok)
-    profok<-profok[sums>0,,drop=F]
+    profok<-profok[sums>0,,drop=FALSE]
     #what if no reads?
     if((dim(profok)[1])<5){return(c())}
 
@@ -2352,7 +2352,7 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
     profok<-profok[,colnames(profok)%in%as.character(-24:0)]
     profok<-profok[,abs(as.numeric(colnames(profok)))<=length_max]
     sums<-rowSums(profok)
-    profok<-profok[sums>0,,drop=F]
+    profok<-profok[sums>0,,drop=FALSE]
     #what if no reads?
     if((dim(profok)[1])<5){return(c())}
 
@@ -2401,8 +2401,8 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
     cutoffs<-c(cutoff,cutoff_fra,cutoff_km,cutoff_km_fra,km_meta,km_meta_fra,cutoff_meta,cutoff_meta_fra)
     names(cutoffs)<-c("absolute_tab","in_frame_tab","absolute_km_tab","in_frame_km_tab","absolute_km_meta","in_frame_km_meta","absolute_meta","in_frame_meta")
     cutt<-cutoffs[!is.na(cutoffs)]
-    final_cutoff<-as.numeric(names(sort(table(cutt[grep(names(cutt),pattern = "frame")]),decreasing = T)[1]))
-    frames_res<-c(sort(tbfra,decreasing = T)[1],as.numeric(frameans[which.max(frameans)]))
+    final_cutoff<-as.numeric(names(sort(table(cutt[grep(names(cutt),pattern = "frame")]),decreasing = TRUE)[1]))
+    frames_res<-c(sort(tbfra,decreasing = TRUE)[1],as.numeric(frameans[which.max(frameans)]))
     names(frames_res)<-c("max_frame_in_pctORF","mean_pct_max_frame")
 
     results<-list(final_cutoff=final_cutoff,frames_res=frames_res,cutoffs=cutoffs,frames=frames,profiles_start=profok)
@@ -2474,7 +2474,7 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 
 
 prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,scientific_name="Homo.sapiens",
-                                   annotation_name="genc25",export_bed_tables_TxDb=T,forge_BSgenome=T,create_TxDb=T){
+                                   annotation_name="genc25",export_bed_tables_TxDb=TRUE,forge_BSgenome=TRUE,create_TxDb=TRUE){
 
 
     DEFAULT_CIRC_SEQS <- unique(c("chrM","MT","MtDNA","mit","Mito","mitochondrion",
@@ -2484,7 +2484,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
     #adjust variable names (some chars not permitted)
     annotation_name<-gsub(annotation_name,pattern = "_",replacement = "")
     annotation_name<-gsub(annotation_name,pattern = "-",replacement = "")
-    if(!dir.exists(annotation_directory)){dir.create(path = annotation_directory,recursive = T)}
+    if(!dir.exists(annotation_directory)){dir.create(path = annotation_directory,recursive = TRUE)}
     annotation_directory<-normalizePath(annotation_directory)
     twobit_file<-normalizePath(twobit_file)
     gtf_file<-normalizePath(gtf_file)
@@ -2551,7 +2551,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
 
         writeLines(text = seed_text,con = seed_dest)
 
-        unlink(paste(annotation_directory,pkgnm,sep="/"),recursive=T)
+        unlink(paste(annotation_directory,pkgnm,sep="/"),recursive=TRUE)
 
         forgeBSgenomeDataPkg(x=seed_dest,destdir=annotation_directory,seqs_srcdir=dirname(twobit_file))
         cat(paste("Creating the BSgenome package --- Done! ",date(),"\n",sep = ""))
@@ -2611,18 +2611,18 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         intergenicRegions <- gaps(reduce(intergenicRegions))
         intergenicRegions<-intergenicRegions[strand(intergenicRegions)=="*"]
 
-        cds_tx<-cdsBy(annotation,"tx",use.names=T)
+        cds_tx<-cdsBy(annotation,"tx",use.names=TRUE)
         txs_gene<-transcriptsBy(annotation,by="gene")
         genes_red<-reduce(sort(genes(annotation)))
 
-        exons_tx<-exonsBy(annotation,"tx",use.names=T)
+        exons_tx<-exonsBy(annotation,"tx",use.names=TRUE)
 
         transcripts_db<-transcripts(annotation)
-        intron_names_tx<-intronsByTranscript(annotation,use.names=T)
+        intron_names_tx<-intronsByTranscript(annotation,use.names=TRUE)
 
 
         #define exonic bins, including regions overlapping multiple genes
-        nsns<-disjointExons(annotation,aggregateGenes=T)
+        nsns<-disjointExons(annotation,aggregateGenes=TRUE)
 
 
 
@@ -2649,7 +2649,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
 
         trann<-unique(mcols(import.gff2(gtf_file,colnames=c("gene_id","gene_biotype","gene_type","gene_name","gene_symbol","transcript_id","transcript_biotype","transcript_type"))))
         trann<-trann[!is.na(trann$transcript_id),]
-        trann<-data.frame(unique(trann),stringsAsFactors=F)
+        trann<-data.frame(unique(trann),stringsAsFactors=FALSE)
 
         if(sum(!is.na(trann$transcript_biotype))==0 & sum(!is.na(trann$transcript_type))==0 ){
             trann$transcript_biotype<-"no_type"
@@ -2734,13 +2734,13 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         trsl<-suppressWarnings(translate(seqcds,genetic.code = getGeneticCode(cd),if.fuzzy.codon = "solve"))
         trslend<-as.character(narrow(trsl,end = width(trsl),width = 1))
         stop_inannot<-NA
-        if(names(sort(table(trslend),decreasing = T)[1])=="*"){stop_inannot<-"*"}
+        if(names(sort(table(trslend),decreasing = TRUE)[1])=="*"){stop_inannot<-"*"}
 
         cds_txscoords$gene_id<-trann$gene_id[match(as.vector(seqnames(cds_txscoords)),trann$transcript_id)]
         cds_cc<-cds_txscoords
         strand(cds_cc)<-"*"
         sta_cc<-resize(cds_cc,width = 1,"start")
-        sta_cc<-unlist(pmapFromTranscripts(sta_cc,exons_tx[seqnames(sta_cc)],ignore.strand=F))
+        sta_cc<-unlist(pmapFromTranscripts(sta_cc,exons_tx[seqnames(sta_cc)],ignore.strand=FALSE))
         sta_cc$gene_id<-trann$gene_id[match(names(sta_cc),trann$transcript_id)]
         sta_cc<-sta_cc[sta_cc$hit]
         strand(sta_cc)<-structure(as.vector(strand(transcripts_db)),names=transcripts_db$tx_name)[names(sta_cc)]
@@ -2753,7 +2753,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         sto_cc<-shift(sto_cc,-2)
         if(is.na(stop_inannot)){sto_cc<-shift(sto_cc,3)}
 
-        sto_cc<-unlist(pmapFromTranscripts(sto_cc,exons_tx[seqnames(sto_cc)],ignore.strand=F))
+        sto_cc<-unlist(pmapFromTranscripts(sto_cc,exons_tx[seqnames(sto_cc)],ignore.strand=FALSE))
         sto_cc<-sto_cc[sto_cc$hit]
         sto_cc$gene_id<-trann$gene_id[match(names(sto_cc),trann$transcript_id)]
         strand(sto_cc)<-structure(as.vector(strand(transcripts_db)),names=transcripts_db$tx_name)[names(sto_cc)]
@@ -2796,7 +2796,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         df<-cbind.DataFrame(as.character(seqnames(cds_txscoords)),width(cds_txscoords),start(cds_txscoords),cds_txscoords$mostfreq_stasto,cds_txscoords$gene_id)
         colnames(df)<-c("txid","cdslen","utr5len","var","gene_id")
         repres_freq<-by(df[,c("txid","cdslen","utr5len","var")],df$gene_id,function(x){
-            x<-x[order(x$var,x$utr5len,x$cdslen,decreasing = T),]
+            x<-x[order(x$var,x$utr5len,x$cdslen,decreasing = TRUE),]
             x<-x[x$var==max(x$var),]
             ok<-x$txid[which(x$cdslen==max(x$cdslen) & x$utr5len==max(x$utr5len) & x$var==max(x$var))][1]
             if(length(ok)==0 | is.na(ok[1])){ok<-x$txid[1]}
@@ -2806,7 +2806,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         df<-cbind.DataFrame(as.character(seqnames(cds_txscoords)),width(cds_txscoords),start(cds_txscoords),cds_txscoords$upstr_stasto,cds_txscoords$gene_id)
         colnames(df)<-c("txid","cdslen","utr5len","var","gene_id")
         repres_upstr<-by(df[,c("txid","cdslen","utr5len","var")],df$gene_id,function(x){
-            x<-x[order(x$var,x$utr5len,x$utr5len,decreasing = T),]
+            x<-x[order(x$var,x$utr5len,x$utr5len,decreasing = TRUE),]
             x<-x[x$var==max(x$var),]
             ok<-x$txid[which(x$cdslen==max(x$cdslen) & x$utr5len==max(x$utr5len) & x$var==max(x$var))][1]
             if(length(ok)==0 | is.na(ok[1])){ok<-x$txid[1]}
@@ -2815,7 +2815,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         df<-cbind.DataFrame(as.character(seqnames(cds_txscoords)),width(cds_txscoords),start(cds_txscoords),cds_txscoords$upstr_stasto,cds_txscoords$gene_id)
         colnames(df)<-c("txid","cdslen","utr5len","var","gene_id")
         repres_len5<-by(df[,c("txid","cdslen","utr5len","var")],df$gene_id,function(x){
-            x<-x[order(x$utr5len,x$var,x$cdslen,decreasing = T),]
+            x<-x[order(x$utr5len,x$var,x$cdslen,decreasing = TRUE),]
             ok<-x$txid[which(x$utr5len==max(x$utr5len) & x$var==max(x$var))][1]
             if(length(ok)==0 | is.na(ok[1])){ok<-x$txid[1]}
             ok
@@ -2848,7 +2848,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
 
 
         #create tables and bed files (with colnames, so with header)
-        if(export_bed_tables_TxDb==T){
+        if(export_bed_tables_TxDb==TRUE){
             cat(paste("Exporting annotation tables ... ",date(),"\n",sep = ""))
             for(bed_file in c("fiveutrs","threeutrs","ncIsof","ncRNAs","introns","cds_txs_coords")){
                 bf<-GTF_annotation[[bed_file]]

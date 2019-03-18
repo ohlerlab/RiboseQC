@@ -74,8 +74,8 @@
 #'   create_report = FALSE )
 #' @export
 
-RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_choice_method="max_coverage",
-                            chunk_size=5000000L,write_tmp_files=T,dest_names=NA,rescue_all_rls=FALSE,fast_mode=T,create_report=T,sample_names=NA,report_file=NA,extended_report=F,pdf_plots=T){
+RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlength_choice_method="max_coverage",
+                            chunk_size=5000000L,write_tmp_files=TRUE,dest_names=NA,rescue_all_rls=FALSE,fast_mode=TRUE,create_report=TRUE,sample_names=NA,report_file=NA,extended_report=FALSE,pdf_plots=TRUE){
 
   if(length(dest_names)==1){
     if(is.na(dest_names)){
@@ -161,7 +161,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
     param <- ScanBamParam(flag=scanBamFlag(isDuplicate=FALSE,isSecondaryAlignment=FALSE),what=c("mapq"),tag = "MD")
 
     dira<-paste(dirname(dest_name),paste("tmp_RiboseQC",basename(dest_name),sep="_"),sep="/")
-    suppressWarnings(dir.create(dira,recursive = T))
+    suppressWarnings(dir.create(dira,recursive = TRUE))
 
     seqs <- seqinfo(opts)
     circs_seq<-seqnames(GTF_annotation$seqinfo)[which(isCircular(GTF_annotation$seqinfo))]
@@ -215,12 +215,12 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
       x_I<-x[grep("I",cigar(x))]
 
       if(length(x_I)>0){
-        x<-x[grep("I",cigar(x),invert=T)]
+        x<-x[grep("I",cigar(x),invert=TRUE)]
 
       }
       x_D<-x[grep("D",cigar(x))]
       if(length(x_D)>0){
-        x<-x[grep("D",cigar(x),invert=T)]
+        x<-x[grep("D",cigar(x),invert=TRUE)]
 
       }
 
@@ -321,12 +321,12 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
       x_I<-x[grep("I",cigar(x))]
 
       if(length(x_I)>0){
-        x<-x[grep("I",cigar(x),invert=T)]
+        x<-x[grep("I",cigar(x),invert=TRUE)]
 
       }
       x_D<-x[grep("D",cigar(x))]
       if(length(x_D)>0){
-        x<-x[grep("D",cigar(x),invert=T)]
+        x<-x[grep("D",cigar(x),invert=TRUE)]
 
       }
 
@@ -418,7 +418,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
       for(i in c("nucl", circs)){
         list_rld_loc[[i]] <- (assay(summarizeOverlaps(reads=x,
                                                       features=GRangesList(list_locat[[i]]),
-                                                      ignore.strand=F,
+                                                      ignore.strand=FALSE,
                                                       mode="Union",
                                                       inter.feature=FALSE)))
       }
@@ -430,7 +430,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
       for(i in c("nucl", circs)){
         list_rld_loc_unq[[i]] <- (assay(summarizeOverlaps(reads=x_uniq,
                                                           features=GRangesList(list_locat[[i]]),
-                                                          ignore.strand=F,
+                                                          ignore.strand=FALSE,
                                                           mode="Union",
                                                           inter.feature=FALSE)))
       }
@@ -450,7 +450,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
 
         rgs<-GRangesList(list_locat[[i]])
         ovs<-lapply(rdss,FUN = function(x){
-          suppressWarnings(assay(summarizeOverlaps(reads=x,features=rgs,ignore.strand=F,mode="Union",inter.feature=FALSE)))
+          suppressWarnings(assay(summarizeOverlaps(reads=x,features=rgs,ignore.strand=FALSE,mode="Union",inter.feature=FALSE)))
         })
         nope<-readlengths[which(!readlengths%in%names(ovs))]
         if(length(nope)>0){
@@ -482,7 +482,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
 
         rgs<-GRangesList(list_locat[[i]])
         ovs<-lapply(rdss,FUN = function(x){
-          suppressWarnings(assay(summarizeOverlaps(reads=x,features=rgs,ignore.strand=F,mode="Union",inter.feature=FALSE)))
+          suppressWarnings(assay(summarizeOverlaps(reads=x,features=rgs,ignore.strand=FALSE,mode="Union",inter.feature=FALSE)))
         })
         nope<-readlengths[which(!readlengths%in%names(ovs))]
         if(length(nope)>0){
@@ -526,16 +526,16 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
 
 
       cnts_cds_genes <- assay(summarizeOverlaps(reads=x, features=red_cdss,
-                                                ignore.strand=F, mode="Union", inter.feature=FALSE))
+                                                ignore.strand=FALSE, mode="Union", inter.feature=FALSE))
 
       cnts_all_genes <- assay(summarizeOverlaps(reads=x, features=red_ex,
-                                                ignore.strand=F, mode="Union", inter.feature=FALSE))
+                                                ignore.strand=FALSE, mode="Union", inter.feature=FALSE))
 
       cnts_cds_genes_unq <- assay(summarizeOverlaps(reads=x_uniq, features=red_cdss,
-                                                    ignore.strand=F, mode="Union", inter.feature=FALSE))
+                                                    ignore.strand=FALSE, mode="Union", inter.feature=FALSE))
 
       cnts_all_genes_unq <- assay(summarizeOverlaps(reads=x_uniq, features=red_ex,
-                                                    ignore.strand=F, mode="Union", inter.feature=FALSE))
+                                                    ignore.strand=FALSE, mode="Union", inter.feature=FALSE))
 
 
       chrsss <- seqgene[match(rownames(cnts_cds_genes), seqgene[,2]), 1]
@@ -647,7 +647,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
       summm<-read_stats$reads_summary
       a<-unlist(summm[[comp]]["cds",])+unlist(summm[[comp]]["fiveutrs",])+unlist(summm[[comp]]["threeutrs",])
       names(a)<-gsub(names(a),pattern = "reads_",replacement = "")
-      a<-sort(a/(sum(a)/100),decreasing = T)
+      a<-sort(a/(sum(a)/100),decreasing = TRUE)
       cuma<-cumsum(a)
       if(length(cuma)==0){
         ps_signals_tiles_all[[comp]]<-c()
@@ -655,9 +655,9 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
         next
       }
       #if read subset, discard low abundance
-      if(read_subset[bammo]==T){
+      if(read_subset[bammo]==TRUE){
         rl_ok<-names(cuma[1:which(cuma>99)[1]])
-        #rl_ok<-as.character(seq(sort(as.numeric(rl_ok),decreasing = F)[1],sort(as.numeric(rl_ok),decreasing = T)[1]))
+        #rl_ok<-as.character(seq(sort(as.numeric(rl_ok),decreasing = FALSE)[1],sort(as.numeric(rl_ok),decreasing = TRUE)[1]))
         ps_comp<-ps_comp[names(ps_comp)%in%rl_ok]
       }
 
@@ -685,12 +685,12 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
       }
 
       if(length(ok_txs)>5000){
-        cnts_txss_agg<-sort(sum(covtx),decreasing = T)
+        cnts_txss_agg<-sort(sum(covtx),decreasing = TRUE)
         ok_txs<-names(cnts_txss_agg)[1:5000]
       }
-      if(fast_mode[bammo]==T){
+      if(fast_mode[bammo]==TRUE){
         if(length(ok_txs)>500){
-          cnts_txss_agg<-sort(sum(covtx),decreasing = T)
+          cnts_txss_agg<-sort(sum(covtx),decreasing = TRUE)
           ok_txs<-names(cnts_txss_agg)[1:500]
         }
       }
@@ -699,14 +699,14 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
 
       fivs<-GRanges(seqnames = seqnames(GTF_annotation$cds_txs_coords),ranges = IRanges(start=1,end = start(GTF_annotation$cds_txs_coords)),strand="*")
       fivs<-fivs[as.character(seqnames(fivs))%in%ok_txs]
-      fivs_gen<-unlist(pmapFromTranscripts(fivs,transcripts = GTF_annotation$exons_txs[as.character(seqnames(fivs))],ignore.strand=F))
+      fivs_gen<-unlist(pmapFromTranscripts(fivs,transcripts = GTF_annotation$exons_txs[as.character(seqnames(fivs))],ignore.strand=FALSE))
       fivs_gen<-fivs_gen[fivs_gen$hit]
       fivs_gen<-split(fivs_gen,names(fivs_gen))
 
 
       threes<-GRanges(seqnames = seqnames(GTF_annotation$cds_txs_coords),ranges = IRanges(start=end(GTF_annotation$cds_txs_coords),end = GTF_annotation$cds_txs_coords$lentx),strand="*")
       threes<-threes[as.character(seqnames(threes))%in%ok_txs]
-      threes_gen<-unlist(pmapFromTranscripts(threes,transcripts = GTF_annotation$exons_txs[as.character(seqnames(threes))],ignore.strand=F))
+      threes_gen<-unlist(pmapFromTranscripts(threes,transcripts = GTF_annotation$exons_txs[as.character(seqnames(threes))],ignore.strand=FALSE))
       threes_gen<-threes_gen[threes_gen$hit]
       threes_gen<-split(threes_gen,names(threes_gen))
 
@@ -906,7 +906,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
     rl_cutoffs_comp<-lapply(res_rls, function(x){x$final_choice})
 
     #rescue all read lengths
-    if(rescue_all_rls[bammo]==T){
+    if(rescue_all_rls[bammo]==TRUE){
       all_rlsss<-as.numeric(names(read_stats$reads_pos1))
       for(rilo in c("nucl",circs)){
         ralo<-rl_cutoffs_comp[[rilo]]
@@ -1067,12 +1067,12 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
       x_I<-x[grep("I",cigar(x))]
 
       if(length(x_I)>0){
-        x<-x[grep("I",cigar(x),invert=T)]
+        x<-x[grep("I",cigar(x),invert=TRUE)]
 
       }
       x_D<-x[grep("D",cigar(x))]
       if(length(x_D)>0){
-        x<-x[grep("D",cigar(x),invert=T)]
+        x<-x[grep("D",cigar(x),invert=TRUE)]
 
       }
 
@@ -1208,7 +1208,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
           ps_plus_uniq_mm<-ps_plus
 
           if(length(ok_reads)>0){
-            unspl<-ok_reads[grep(pattern="N",x=cigar(ok_reads),invert=T)]
+            unspl<-ok_reads[grep(pattern="N",x=cigar(ok_reads),invert=TRUE)]
 
             ps_unspl<-shift(resize(GRanges(unspl),width=1,fix="start"),shift=ct)
 
@@ -1264,7 +1264,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
           ps_neg_uniq_mm<-ps_neg
 
           if(length(ok_reads)>0){
-            unspl<-ok_reads[grep(pattern="N",x=cigar(ok_reads),invert=T)]
+            unspl<-ok_reads[grep(pattern="N",x=cigar(ok_reads),invert=TRUE)]
 
             ps_unspl<-shift(resize(GRanges(unspl),width=1,fix="start"),shift=-ct)
 
@@ -1488,13 +1488,13 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
         }
 
         if(length(ok_txs)>5000){
-          cnts_txss_agg<-sort(sum(covtx),decreasing = T)
+          cnts_txss_agg<-sort(sum(covtx),decreasing = TRUE)
           ok_txs<-names(cnts_txss_agg)[1:5000]
         }
 
-        if(fast_mode[bammo]==T){
+        if(fast_mode[bammo]==TRUE){
           if(length(ok_txs)>500){
-            cnts_txss_agg<-sort(sum(covtx),decreasing = T)
+            cnts_txss_agg<-sort(sum(covtx),decreasing = TRUE)
             ok_txs<-names(cnts_txss_agg)[1:500]
           }
         }
@@ -1502,14 +1502,14 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
 
         fivs<-GRanges(seqnames = seqnames(GTF_annotation$cds_txs_coords),ranges = IRanges(start=1,end = start(GTF_annotation$cds_txs_coords)),strand="*")
         fivs<-fivs[as.character(seqnames(fivs))%in%ok_txs]
-        fivs_gen<-unlist(pmapFromTranscripts(fivs,transcripts = GTF_annotation$exons_txs[as.character(seqnames(fivs))],ignore.strand=F))
+        fivs_gen<-unlist(pmapFromTranscripts(fivs,transcripts = GTF_annotation$exons_txs[as.character(seqnames(fivs))],ignore.strand=FALSE))
         fivs_gen<-fivs_gen[fivs_gen$hit]
         fivs_gen<-split(fivs_gen,names(fivs_gen))
 
 
         threes<-GRanges(seqnames = seqnames(GTF_annotation$cds_txs_coords),ranges = IRanges(start=end(GTF_annotation$cds_txs_coords),end = GTF_annotation$cds_txs_coords$lentx),strand="*")
         threes<-threes[as.character(seqnames(threes))%in%ok_txs]
-        threes_gen<-unlist(pmapFromTranscripts(threes,transcripts = GTF_annotation$exons_txs[as.character(seqnames(threes))],ignore.strand=F))
+        threes_gen<-unlist(pmapFromTranscripts(threes,transcripts = GTF_annotation$exons_txs[as.character(seqnames(threes))],ignore.strand=FALSE))
         threes_gen<-threes_gen[threes_gen$hit]
         threes_gen<-split(threes_gen,names(threes_gen))
 
@@ -1967,7 +1967,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
     rds_st$len_adj<-as.numeric(names(rds_st))
     names(rds_st)<-NULL
 
-    rds_st<-rds_st[order(rds_st$score,decreasing = T)]
+    rds_st<-rds_st[order(rds_st$score,decreasing = TRUE)]
     rds_st$pct<-round(rds_st$score/(sum(rds_st$score)/100),digits = 4)
     top50<-head(rds_st,50)
     top50<-resize(top50,width = top50$len_adj,fix = "start")
@@ -2020,7 +2020,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
       save(res_all, file=paste(dest_name,"_results_RiboseQC_all",sep = ""))
     }
     write.table(finn, file=paste(dest_name,"_P_sites_calcs",sep = ""),sep = "\t",quote = FALSE,row.names = FALSE,col.names = TRUE)
-    unlink(dira,recursive = T)
+    unlink(dira,recursive = TRUE)
     res_all$read_stats$reads_pos1<-""
     res_all$P_sites_stats<-""
 
