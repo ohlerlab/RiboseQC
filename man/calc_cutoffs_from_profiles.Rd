@@ -33,6 +33,10 @@ Three methods are used and combined in the final choice:
  for each method, all reads ("absolute_") or only in-frame positions ("in_frame_") are considered. The final choice takes the most
  frequent cutoff chosen in all methods applied to in-frame positions.
 }
+\examples{
+data(profiles_fivepr)
+calc_cutoffs_from_profiles(profiles_fivepr[["five_prime_subcodon"]][[1]][[1]],length_max = 100)
+}
 \seealso{
 \code{\link{RiboseQC_analysis}}
 }

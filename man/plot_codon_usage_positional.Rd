@@ -32,6 +32,9 @@ is examplatory calculated
 \item for the last 11 codons of the CDS (referred to as \emph{stop}).
 }
 }
+\examples{
+data(res_all)
+}
 \seealso{
 \code{\link{create_html_report}}
 }

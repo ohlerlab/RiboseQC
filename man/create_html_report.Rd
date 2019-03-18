@@ -42,6 +42,11 @@ Example: \cr
 the html report \code{\\mydir\\myreport.html} and
 the folder \code{\\mydir\\myreport_plots\\} for the RDS object files to be stored in.
 }
+\examples{
+sampnames = c("root","shoot")
+message('foo')
+create_html_report(input_files=paste(sampnames,"_results_RiboseQC",sep = ""), input_sample_names=sampnames,output_file =  'test_root_shoots.html',extended = FALSE)
+}
 \seealso{
 \code{\link{plot_read_biotype_dist_1}}, \code{\link{plot_read_biotype_dist_2}},
 \code{\link{plot_read_length_dist}}, \code{\link{plot_read_length_dist_by_biotype}},

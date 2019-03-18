@@ -577,41 +577,41 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
 
     cat(paste("Analyzing BAM file:",bam_file,"...", date(),"\n"))
 
-    res_1 <- reduceByYield(X=opts, YIELD=yiel, MAP=mapp, REDUCE=reduc)
-    names(res_1) <- c("rld","rld_unq", "positions","positions_unq" ,"reads_pos1", "counts_cds_genes","counts_cds_genes_unq", "counts_all_genes","counts_all_genes_unq", "reads_summary", "reads_summary_unq")
+    read_stats <- reduceByYield(X=opts, YIELD=yiel, MAP=mapp, REDUCE=reduc)
+    names(read_stats) <- c("rld","rld_unq", "positions","positions_unq" ,"reads_pos1", "counts_cds_genes","counts_cds_genes_unq", "counts_all_genes","counts_all_genes_unq", "reads_summary", "reads_summary_unq")
 
-    cds_cnts<-res_1$counts_cds_genes
+    cds_cnts<-read_stats$counts_cds_genes
     cds_cnts$RPKM<-cds_cnts$reads/(sum(cds_cnts$reads)/1e06)
     cds_cnts$RPKM<-round(cds_cnts$RPKM/(sum(width(red_cdss))/1000),digits = 4)
     cds_cnts$TPM<-cds_cnts$reads/(sum(width(red_cdss))/1000)
     cds_cnts$TPM<-round(cds_cnts$TPM/(sum(cds_cnts$TPM)/1e06),digits = 4)
-    res_1$counts_cds_genes<-cds_cnts
+    read_stats$counts_cds_genes<-cds_cnts
 
-    cds_cnts_unq<-res_1$counts_cds_genes_unq
+    cds_cnts_unq<-read_stats$counts_cds_genes_unq
     cds_cnts_unq$RPKM<-cds_cnts_unq$reads/(sum(cds_cnts_unq$reads)/1e06)
     cds_cnts_unq$RPKM<-round(cds_cnts_unq$RPKM/(sum(width(red_cdss))/1000),digits = 4)
     cds_cnts_unq$TPM<-cds_cnts_unq$reads/(sum(width(red_cdss))/1000)
     cds_cnts_unq$TPM<-round(cds_cnts_unq$TPM/(sum(cds_cnts_unq$TPM)/1e06),digits = 4)
-    res_1$counts_cds_genes_unq<-cds_cnts_unq
+    read_stats$counts_cds_genes_unq<-cds_cnts_unq
 
-    ex_cnts<-res_1$counts_all_genes
+    ex_cnts<-read_stats$counts_all_genes
     ex_cnts$RPKM<-ex_cnts$reads/(sum(ex_cnts$reads)/1e06)
     ex_cnts$RPKM<-round(ex_cnts$RPKM/(sum(width(red_ex))/1000),digits = 4)
     ex_cnts$TPM<-ex_cnts$reads/(sum(width(red_ex))/1000)
     ex_cnts$TPM<-round(ex_cnts$TPM/(sum(ex_cnts$TPM)/1e06),digits = 4)
-    res_1$counts_all_genes<-ex_cnts
+    read_stats$counts_all_genes<-ex_cnts
 
-    ex_cnts_unq<-res_1$counts_all_genes_unq
+    ex_cnts_unq<-read_stats$counts_all_genes_unq
     ex_cnts_unq$RPKM<-ex_cnts_unq$reads/(sum(ex_cnts_unq$reads)/1e06)
     ex_cnts_unq$RPKM<-round(ex_cnts_unq$RPKM/(sum(width(red_ex))/1000),digits = 4)
     ex_cnts_unq$TPM<-ex_cnts_unq$reads/(sum(width(red_ex))/1000)
     ex_cnts_unq$TPM<-round(ex_cnts_unq$TPM/(sum(ex_cnts_unq$TPM)/1e06),digits = 4)
-    res_1$counts_all_genes_unq<-ex_cnts_unq
+    read_stats$counts_all_genes_unq<-ex_cnts_unq
 
-    save(res_1,file = paste(dira,"res_1",sep = "/"))
+    save(read_stats,file = paste(dira,"read_stats",sep = "/"))
     cat(paste("Analyzing BAM file --- Done!", date(),"\n"))
 
-    ps<-res_1$reads_pos1
+    ps<-read_stats$reads_pos1
 
     tile_cds<-GTF_annotation$cds_txs_coords
     tile_cds<-tile_cds[tile_cds$reprentative_mostcommon]
@@ -644,7 +644,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
 
       #select only some read lenghts, otherwise too much output and computation
 
-      summm<-res_1$reads_summary
+      summm<-read_stats$reads_summary
       a<-unlist(summm[[comp]]["cds",])+unlist(summm[[comp]]["fiveutrs",])+unlist(summm[[comp]]["threeutrs",])
       names(a)<-gsub(names(a),pattern = "reads_",replacement = "")
       a<-sort(a/(sum(a)/100),decreasing = T)
@@ -859,9 +859,9 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
       ps_signals_win_all[[comp]]<-ps_win
     }
 
-    res_2<-list(ps_signals_tiles_all,ps_signals_win_all)
-    names(res_2)<-c("five_prime_bins","five_prime_subcodon")
-    save(res_2,file = paste(dira,"res_2",sep = "/"))
+    profiles_fivepr<-list(ps_signals_tiles_all,ps_signals_win_all)
+    names(profiles_fivepr)<-c("five_prime_bins","five_prime_subcodon")
+    save(profiles_fivepr,file = paste(dira,"profiles_fivepr",sep = "/"))
 
     cat(paste("Building aggregate 5' profiles --- Done!", date(),"\n"))
 
@@ -870,7 +870,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
 
     #calculate cutoffs for each read length
 
-    list_cutoff<-lapply(res_2[["five_prime_subcodon"]],function(x){
+    list_cutoff<-lapply(profiles_fivepr[["five_prime_subcodon"]],function(x){
       list_res<-list()
       for(i in names(x)){
         if(i=="all"){lnmax=100}else{lnmax=as.numeric(i)}
@@ -889,25 +889,25 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
 
     #choose readlengths
 
-    res_rls<-choose_readlengths(summary_res,choice=readlength_choice_method[bammo],nt_signals=res_2[["five_prime_subcodon"]])
+    res_rls<-choose_readlengths(summary_res,choice=readlength_choice_method[bammo],nt_signals=profiles_fivepr[["five_prime_subcodon"]])
 
     cat(paste("Calculating P-sites offsets --- Done!", date(),"\n"))
-    res_3<-list(res_rls,summary_res,list_cutoff)
-    names(res_3)<-c("results_choice","results_cutoffs","analysis_frame_cutoff")
-    save(res_3,file = paste(dira,"res_3",sep = "/"))
+    selection_cutoffs<-list(res_rls,summary_res,list_cutoff)
+    names(selection_cutoffs)<-c("results_choice","results_cutoffs","analysis_frame_cutoff")
+    save(selection_cutoffs,file = paste(dira,"selection_cutoffs",sep = "/"))
 
 
 
     #extract P-sites positions given selection above
 
     param <- ScanBamParam(flag=scanBamFlag(isDuplicate=FALSE,isSecondaryAlignment=FALSE),what=c("mapq"),tag = "MD")
-    seqllll<-seqlevels(unlist(unlist(res_1$reads_pos1)))
-    seqleee<-seqlengths(unlist(unlist(res_1$reads_pos1)))
+    seqllll<-seqlevels(unlist(unlist(read_stats$reads_pos1)))
+    seqleee<-seqlengths(unlist(unlist(read_stats$reads_pos1)))
     rl_cutoffs_comp<-lapply(res_rls, function(x){x$final_choice})
 
     #rescue all read lengths
     if(rescue_all_rls[bammo]==T){
-      all_rlsss<-as.numeric(names(res_1$reads_pos1))
+      all_rlsss<-as.numeric(names(read_stats$reads_pos1))
       for(rilo in c("nucl",circs)){
         ralo<-rl_cutoffs_comp[[rilo]]
         if(is.null(ralo)){ralo<-DataFrame()}
@@ -1423,12 +1423,12 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
     }
     cat(paste("Calculating P-sites positions and junctions ...", date(),"\n"))
 
-    res_4<-reduceByYield(X=opts,YIELD=yiel,MAP=mapp,REDUCE=reduc)
-    save(res_4,file = paste(dira,"res_4",sep = "/"))
+    P_sites_stats<-reduceByYield(X=opts,YIELD=yiel,MAP=mapp,REDUCE=reduc)
+    save(P_sites_stats,file = paste(dira,"P_sites_stats",sep = "/"))
 
     cat(paste("Calculating P-sites positions and junctions --- Done!", date(),"\n"))
 
-    ps<-res_4$P_sites_all
+    ps<-P_sites_stats$P_sites_all
 
     cat(paste("Building aggregate P-sites profiles ...", date(),"\n"))
 
@@ -1873,17 +1873,17 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
       }
     }
 
-    res_5<-list(ps_signals_tiles_all,ps_signals_win_all,codons_win_all,ps_codons_counts,ps_codons_ratio,as_codons_counts,as_codons_ratio,es_codons_counts,es_codons_ratio)
+    sequence_analysis<-list(ps_signals_tiles_all,ps_signals_win_all,codons_win_all,ps_codons_counts,ps_codons_ratio,as_codons_counts,as_codons_ratio,es_codons_counts,es_codons_ratio)
 
-    names(res_5)<-c("P_sites_bins","P_sites_subcodon","Codon_counts","P_sites_percodon","P_sites_percodon_ratio",
+    names(sequence_analysis)<-c("P_sites_bins","P_sites_subcodon","Codon_counts","P_sites_percodon","P_sites_percodon_ratio",
                     "A_sites_percodon","A_sites_percodon_ratio","E_sites_percodon","E_sites_percodon_ratio")
-    save(res_5,file = paste(dira,"res_5",sep = "/"))
+    save(sequence_analysis,file = paste(dira,"sequence_analysis",sep = "/"))
     #save(list = c("ps_signals_tiles","ps_signals_tiles_all","ps_signals_win","ps_signals_win_all"),file = "ps_results_preprjan15")
     cat(paste("Building aggregate P-sites profiles --- Done!", date(),"\n"))
 
     cat(paste("Exporting files ...", date(),"\n"))
 
-    merged_all_ps<-unlist(res_4$P_sites_all)
+    merged_all_ps<-unlist(P_sites_stats$P_sites_all)
     if(length(merged_all_ps)>0){
       covv_pl<-coverage(merged_all_ps[strand(merged_all_ps)=="+"],weight = merged_all_ps[strand(merged_all_ps)=="+"]$score)
       covv_pl<-GRanges(covv_pl)
@@ -1901,7 +1901,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
       export(covv_min,con=paste(dest_name,"_P_sites_minus.bw",sep = ""))
     }
 
-    merged_uniq_ps<-unlist(res_4$P_sites_uniq)
+    merged_uniq_ps<-unlist(P_sites_stats$P_sites_uniq)
     if(length(merged_uniq_ps)>0){
 
       covv_pl<-coverage(merged_uniq_ps[strand(merged_uniq_ps)=="+"],weight = merged_uniq_ps[strand(merged_uniq_ps)=="+"]$score)
@@ -1921,7 +1921,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
     }
 
 
-    merged_uniq_mm_ps<-unlist(res_4$P_sites_uniq_mm)
+    merged_uniq_mm_ps<-unlist(P_sites_stats$P_sites_uniq_mm)
     if(length(merged_uniq_mm_ps)>0){
 
       covv_pl<-coverage(merged_uniq_mm_ps[strand(merged_uniq_mm_ps)=="+"],weight = merged_uniq_mm_ps[strand(merged_uniq_mm_ps)=="+"]$score)
@@ -1937,12 +1937,12 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
     }
 
 
-    export(res_4$coverage_all_plus,con=paste(dest_name,"_coverage_plus.bw",sep = ""))
-    export(res_4$coverage_all_min,con=paste(dest_name,"_coverage_minus.bw",sep = ""))
-    export(res_4$coverage_uniq_plus,con=paste(dest_name,"_coverage_uniq_plus.bw",sep = ""))
-    export(res_4$coverage_uniq_min,con=paste(dest_name,"_coverage_uniq_minus.bw",sep = ""))
+    export(P_sites_stats$coverage_all_plus,con=paste(dest_name,"_coverage_plus.bw",sep = ""))
+    export(P_sites_stats$coverage_all_min,con=paste(dest_name,"_coverage_minus.bw",sep = ""))
+    export(P_sites_stats$coverage_uniq_plus,con=paste(dest_name,"_coverage_uniq_plus.bw",sep = ""))
+    export(P_sites_stats$coverage_uniq_min,con=paste(dest_name,"_coverage_uniq_minus.bw",sep = ""))
 
-    juns<-res_4$junctions
+    juns<-P_sites_stats$junctions
     save(juns,file=paste(dest_name,"_junctions",sep=""))
 
 
@@ -1953,7 +1953,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
     # Store top 50 occupied regions (possible contaminants)
 
 
-    rds_st<-res_1$reads_pos1
+    rds_st<-read_stats$reads_pos1
     rds_st<-sort(unlist(rds_st))
 
     regions <- list(reduce(unlist(GTF_annotation$cds_genes)), GTF_annotation$fiveutrs, GTF_annotation$threeutrs,
@@ -1989,14 +1989,14 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
     top50$gene_biotype<-CharacterList("")
     top50$gene[subs]<-a_nam
     top50$gene_biotype[subs]<-a_biot
-    res_6<-top50
+    sequence_analysis<-top50
 
     # save as list_results
 
-    save(res_6,file = paste(dira,"res_6",sep = "/"))
+    save(sequence_analysis,file = paste(dira,"sequence_analysis",sep = "/"))
 
 
-    res_all <- list(res_1,res_2,res_3,res_4,res_5,res_6)
+    res_all <- list(read_stats,profiles_fivepr,selection_cutoffs,P_sites_stats,sequence_analysis,sequence_analysis)
     names(res_all) <- c("read_stats", "profiles_fivepr","selection_cutoffs","P_sites_stats","profiles_P_sites","sequence_analysis")
     if(length(merged_all_ps)>0){
 
@@ -2009,7 +2009,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
     finn<-do.call(rbind,args = finn)
     finn$comp<-namfinn
 
-    pct_lib<-round(t(res_1$rld/sum(res_1$rld)*100),digits = 4)
+    pct_lib<-round(t(read_stats$rld/sum(read_stats$rld)*100),digits = 4)
     rownames(pct_lib)<-gsub(rownames(pct_lib),pattern = "reads_",replacement = "")
     finn$pct_map<-0
     for(i in unique(namfinn)){finn$pct_map[finn$comp==i]<-pct_lib[match(finn$read_length[finn$comp==i],rownames(pct_lib)),i]}
@@ -2059,5 +2059,6 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
     if(pdf_plots){create_pdfs_from_rds_objects(output_rds_path = paste(report_file,"_plots/rds/",sep=""))}
 
   }
-
+ 
 }
+

@@ -27,6 +27,10 @@ the "max_inframe" method starts with the most accurate read length and
 progressively selects read lengths which add in-frame signals in codons not covered by previous read lengths;
 the "all" method selects all available read lengths
 }
+\examples{
+data(res_all)
+choose_readlengths(res_all$results_cutoffs,choice="max_coverage",nt_signals=res_all$profiles_fivepr[["five_prime_subcodon"]])
+}
 \seealso{
 \code{\link{calc_cutoffs_from_profiles}}
 }

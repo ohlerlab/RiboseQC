@@ -66,6 +66,17 @@ the most upstream/downstream start/stop codons and the start/stop codons residin
 \code{genome_package}: the name of the forged BSgenome package. Loaded with \code{load_annotation} function.\cr
 \code{stop_in_gtf}: stop codon, as defined in the annotation.\cr
 }
+\examples{
+gtf_file <- system.file("extdata", "example.gtf",
+package = "RiboseQC",mustWork = TRUE)
+twobit_file <- system.file("extdata", "example.2bit",
+                           package = "RiboseQC",mustWork = TRUE)
+output_dir <- tempdir()
+prepare_annotation_files(output_dir,twobit_file,gtf_file,
+                   scientific_name = "Arabidopsis.thaliana",
+                   annotation_name = "tair10.42" )
+
+}
 \seealso{
 \code{\link{load_annotation}}, \code{\link{forgeBSgenomeDataPkg}}, \code{\link{makeTxDbFromGFF}}.
 }

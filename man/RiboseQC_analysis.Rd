@@ -78,6 +78,12 @@ coverage for entire reads (no 5'ends or P_sites-transformed) on different strand
 number of reads mapping (also in percentage of total n of reads), and genomic feature annotation.\cr\cr
 \code{summary_P_sites}: contains a DataFrame object summarizing the P_sites calculation and read length selection, including statistics on percentage of total reads used.
 }
+\examples{
+RiboseQC_analysis(annotation_file = annotation_file,
+  bam_files = bam_file,
+  fast_mode = TRUE,
+  create_report = FALSE )
+}
 \seealso{
 \code{\link{prepare_annotation_files}}, \code{\link{calc_cutoffs_from_profiles}}, \code{\link{choose_readlengths}}, \code{\link{create_html_report}}.
 }

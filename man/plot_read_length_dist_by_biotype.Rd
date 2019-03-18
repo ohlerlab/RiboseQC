@@ -29,6 +29,10 @@ This funtion plots the read length distribution for each originating compartment
 for one input sample (displayed as read count and as read count fraction). \cr \cr
 This plot is used in the RiboseQC report in section 3.1.
 }
+\examples{
+data(res_all)
+plot_read_length_dist_by_biotype(res_all$read_stats$reads_summary, 'shoot', paste0('myfigpath', "rds/"))
+}
 \seealso{
 \code{\link{create_html_report}}
 }

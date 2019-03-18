@@ -32,6 +32,10 @@ is examplatory calculated
 \item for the last 11 codons of the CDS (referred to as \emph{stop}).
 }
 }
+\examples{
+data(res_all)
+plot_codon_usage_bulk_rmd(res_all, 'shoot', paste0('myfigpath', "rds/"))
+}
 \seealso{
 \code{\link{create_html_report}}
 }
