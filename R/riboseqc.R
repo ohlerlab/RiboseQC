@@ -111,7 +111,7 @@ create_html_report <- function(input_files, input_sample_names, output_file,exte
 
 #' Generate PDF files from RDS object files
 #'
-#' This function generates figures as PDF files from RDS object files - 
+#' This function generates figures as PDF files from RDS object files -
 #' it's essentially a workaround for  difficulty integrating pdfs into
 #' html reports.
 #'
@@ -124,7 +124,7 @@ create_html_report <- function(input_files, input_sample_names, output_file,exte
 #'
 #' @seealso \code{\link{create_html_report}}
 #' @examples
-#'  
+#'
 #' @examples
 #' create_pdfs_from_rds_objects(paste('test_root_shoots.html',"_plots/rds/",sep=""))
 #' @export
@@ -180,7 +180,7 @@ create_pdfs_from_rds_objects <- function(output_rds_path){
 #'
 #' @seealso \code{\link{create_html_report}}
 #' @examples
-#'  
+#'
 #' @examples
 #' rdata_list <- generate_rdata_list("root_results_RiboseQC")
 #' @export
@@ -217,7 +217,7 @@ generate_rdata_list <- function(input_files){
 #' that can be saved as RDS object file.
 #'
 #' @seealso \code{\link{create_html_report}}
-#' 
+#'
 #' @examples
 #' data(res_all)
 #' plot_read_biotype_dist_1(

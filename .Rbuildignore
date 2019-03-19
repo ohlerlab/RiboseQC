@@ -1,3 +1,6 @@
 ^RiboseQC\.Rproj$
 ^\.Rproj\.user$
-devnotes_dermot.txt
+devnotes_dermot.txtdevnotes_dermot
+.DS_Store
+.git
+.RiboseQC.html

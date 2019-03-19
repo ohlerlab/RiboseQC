@@ -12,6 +12,6 @@ License: GPL-3 or above
 Encoding: UTF-8
 LazyData: FALSE
 Name: RiboseQC
-biocViews: RiboSeq, GenomeAnnotation, Transcriptomics, Software, GenomicFeatures
+biocViews: RiboSeq, GenomeAnnotation, Transcriptomics, Software, Coverage, RNASeq,
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
