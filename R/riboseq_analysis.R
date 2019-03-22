@@ -76,7 +76,7 @@
 
 RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlength_choice_method="max_coverage",
 														chunk_size=5000000L,write_tmp_files=TRUE,dest_names=NA,rescue_all_rls=FALSE,fast_mode=TRUE,create_report=TRUE,sample_names=NA,report_file=NA,extended_report=FALSE,pdf_plots=TRUE){
-
+	stopifnot(exists('get_ps_fromspliceplus'))
 	if(length(dest_names)==1){
 		if(is.na(dest_names)){
 			dest_names=bam_files
@@ -2051,6 +2051,9 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 
 		cat(paste("Exporting files --- Done!", date(),"\n\n"))
 	}
+
+	for(i in ls()) assign(i,get(i),envir=.GlobalEnv)
+	save.image('debug.Rdata')
 
 	if(create_report){
 		cat(paste("Creating html report in ",report_file," ... ", date(),"\n",sep=""))

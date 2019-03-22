@@ -3,12 +3,11 @@ title: "RiboseQC vignette"
 author: "Lorenzo Calviello"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output:
-  rmarkdown::html_vignette
-  html_document: 
-    toc: true
-    toc_float:
-      collapsed: false
-    toc_depth: 2
+    BiocStyle::html_document:
+      toc: true
+      toc_float:
+        collapsed: false
+      toc_depth: 2
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
@@ -29,7 +28,7 @@ This vignette illustrates the usage of the package using example data and annota
 As a first step, let's load the package:
 
 ```{r load_lib}
-suppressPackageStartupMessages(library("RiboseQC"))
+library("RiboseQC")
 ```
 
 
@@ -42,6 +41,7 @@ Let's now download annotation for *Homo sapiens*: a subset of the GENCODE 25 ann
 download.file("https://drive.google.com/uc?export=download&id=1n6UA5cSz6djx0dY_7sI57177T-kyZhhT",destfile = "test_human.2bit")
 
 download.file("https://drive.google.com/uc?export=download&id=19Am9-iMEyB-AcIsVRdIqrF-BVdQYrcaI",destfile = "test_human.gtf")
+
 ```
 
 
@@ -52,10 +52,12 @@ Moreover, such function reads a genome file in *.2bit* to forge a *BSgenome* pac
 
 
 ```{r create_annot_hum}
+
 prepare_annotation_files(annotation_directory = ".",
                          twobit_file = "test_human.2bit",
                          gtf_file = "test_human.gtf",scientific_name = "Human.test",
                          annotation_name = "genc25_22M",export_bed_tables_TxDb = F,forge_BSgenome = T,create_TxDb = T)
+
 ```
 
 
@@ -130,7 +132,7 @@ Let's now download a subset of a Ribo-seq dataset in HEK293 cells [2].
 
 
 ```{r human_report_1}
-download.file("https://drive.google.com/uc?export=download&id=11PP5y2QH7si81rbEBJsOB-Lt3l_JowRW",destfile = "test_human_hek.bam")
+if(!file.exists('test_human_hek.bam')) download.file("https://drive.google.com/uc?export=download&id=11PP5y2QH7si81rbEBJsOB-Lt3l_JowRW",destfile = "test_human_hek.bam")
 ```
 
 We now perform different sets of calculations on our data (including read-length and organelle-specific metagene analyses), using the annotation we previously created. Several files (including automatically generated P_sites positions, and other output from the analysis pipeline) will be automatically created. 
@@ -145,7 +147,9 @@ Moreover, all the generated plots are available in *.pdf* format and as *RDS* fi
 For example, the profile of P-site positions along the CDS can be visualized using:
 
 ```{r human_report_3,warning=FALSE, results='asis', fig.width=12, fig.height=10, dpi=120}
+
 readRDS("test_human_hek.html_plots/rds/sample1_nucl_4_profiles_P_sites_metagene_subcodon_all")[[1]]
+
 ```
 
 Let's now use RiboseQC to analyze different samples at once.
@@ -246,7 +250,7 @@ readRDS("test_root_shoots.html_plots/rds/all_samples_1_readlocdist")[[1]]
 or visualize z-scored positional codon usage values, calculated using A-site positions for chloroplast ribosomes in the shoots sample:
 
 ```{r arab_4, warning=FALSE, results='asis', fig.width=12, fig.height=16, dpi=150}
-as_ggplot(readRDS("test_root_shoots.html_plots/rds/shoots_ChrC_7_codonusage_positional_A-sites_per_codon_all_zscore")[[1]])
+as_ggplot(readRDS("./test_root_shoots.html_plots/rds/shoots_ChrC_7_codonusage_positional_A-sites_per_codon_all_zscore")[[1]])
 ```
 
 Much more information is available in the html reports, including read length distributions per biotype and compartment, statistics on codon usage, and analysis of the highest mapping positions in the genome.
