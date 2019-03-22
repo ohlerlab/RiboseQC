@@ -3,8 +3,8 @@ title: "RiboseQC vignette"
 author: "Lorenzo Calviello"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output:
-  rmarkdown::html_vignette
-  html_document: 
+  rmarkdown::html_vignette:
+  html_document:
     toc: true
     toc_float:
       collapsed: false
