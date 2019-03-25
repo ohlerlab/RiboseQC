@@ -1873,11 +1873,11 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 			}
 		}
 
-		sequence_analysis<-list(ps_signals_tiles_all,ps_signals_win_all,codons_win_all,ps_codons_counts,ps_codons_ratio,as_codons_counts,as_codons_ratio,es_codons_counts,es_codons_ratio)
+		profiles_P_sites<-list(ps_signals_tiles_all,ps_signals_win_all,codons_win_all,ps_codons_counts,ps_codons_ratio,as_codons_counts,as_codons_ratio,es_codons_counts,es_codons_ratio)
 
-		names(sequence_analysis)<-c("P_sites_bins","P_sites_subcodon","Codon_counts","P_sites_percodon","P_sites_percodon_ratio",
+		names(profiles_P_sites)<-c("P_sites_bins","P_sites_subcodon","Codon_counts","P_sites_percodon","P_sites_percodon_ratio",
 										"A_sites_percodon","A_sites_percodon_ratio","E_sites_percodon","E_sites_percodon_ratio")
-		save(sequence_analysis,file = paste(dira,"sequence_analysis",sep = "/"))
+		save(profiles_P_sites,file = paste(dira,"profiles_P_sites",sep = "/"))
 		#save(list = c("ps_signals_tiles","ps_signals_tiles_all","ps_signals_win","ps_signals_win_all"),file = "ps_results_preprjan15")
 		cat(paste("Building aggregate P-sites profiles --- Done!", date(),"\n"))
 
@@ -1997,7 +1997,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 		save(sequence_analysis,file = paste(dira,"sequence_analysis",sep = "/"))
 
 
-		res_all <- list(read_stats,profiles_fivepr,selection_cutoffs,P_sites_stats,sequence_analysis,sequence_analysis)
+		res_all <- list(read_stats,profiles_fivepr,selection_cutoffs,P_sites_stats,profiles_P_sites,sequence_analysis)
 		names(res_all) <- c("read_stats", "profiles_fivepr","selection_cutoffs","P_sites_stats","profiles_P_sites","sequence_analysis")
 		if(length(merged_all_ps)>0){
 
