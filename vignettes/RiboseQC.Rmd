@@ -10,7 +10,7 @@ output:
       collapsed: false
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{RiboseQC vignette}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -57,7 +57,10 @@ Moreover, such function reads a genome file in *.2bit* to forge a *BSgenome* pac
 prepare_annotation_files(annotation_directory = ".",
                          twobit_file = "test_human.2bit",
                          gtf_file = "test_human.gtf",scientific_name = "Human.test",
-                         annotation_name = "genc25_22M",export_bed_tables_TxDb = F,forge_BSgenome = T,create_TxDb = T)
+                         annotation_name = "genc25_22M",
+                         export_bed_tables_TxDb = FALSE,
+                         forge_BSgenome = TRUE,
+                         create_TxDb = TRUE)
 
 ```
 
@@ -169,7 +172,10 @@ download.file("https://drive.google.com/uc?export=download&id=1yffqKkfohGx9y7XRZ
 prepare_annotation_files(annotation_directory = ".",
                          twobit_file = "test_yeast.2bit",
                          gtf_file = "test_yeast.gtf",scientific_name = "yeast.test",
-                         annotation_name = "yeast_custom",export_bed_tables_TxDb = T,forge_BSgenome = T,create_TxDb = T)
+                         annotation_name = "yeast_custom",
+                         export_bed_tables_TxDb = TRUE,
+                         forge_BSgenome = TRUE,
+                         create_TxDb = TRUE)
 ```
 
 As before, we can explore different sequences and regions extracted from annotation.
@@ -222,7 +228,9 @@ download.file("https://drive.google.com/uc?export=download&id=1jYbdvaGfVnMx38X1P
 prepare_annotation_files(annotation_directory = ".",
                          twobit_file = "test_arabidopsis.2bit",
                          gtf_file = "test_arabidopsis.gtf.gz",scientific_name = "arabidopsis.test",
-                         annotation_name = "araport11_custom",export_bed_tables_TxDb = T,forge_BSgenome = T,create_TxDb = T)
+                         annotation_name = "araport11_custom",export_bed_tables_TxDb = TRUE,
+                         forge_BSgenome = TRUE,
+                         create_TxDb = TRUE)
 ```
 
 We will now download two sample datasets from a Ribo-seq experiments in Arabidopsis roots and shoots [5].
@@ -237,7 +245,7 @@ download.file("https://drive.google.com/uc?export=download&id=1VVdMi0ho0LiRCld6-
 
 bam_filepath=c("test_arabidopsis_root.bam","test_arabidopsis_shoot.bam")
 
-RiboseQC_analysis(annotation_file=annotation,bam_files = bam_filepath,fast_mode = T,report_file = "test_root_shoots.html",dest_names = c("root","shoots"),sample_names = c("root","shoots"),write_tmp_files = F)
+RiboseQC_analysis(annotation_file=annotation,bam_files = bam_filepath,fast_mode = TRUE,report_file = "test_root_shoots.html",dest_names = c("root","shoots"),sample_names = c("root","shoots"),write_tmp_files = FALSE)
 ```
 
 Despite the lack of a dedicated treatment to purify chloroplast ribosomes in these Ribo-seq experiments (e.g. using chloramphenicol), it is possible to detect footprints from distinct organelles, enriched in the shoots sample rather than roots one.
