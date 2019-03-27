@@ -30,6 +30,8 @@ As a first step, let's load the package:
 
 ```{r load_lib}
 library("RiboseQC")
+tmp_dir <- tempdir()
+file.path()
 ```
 
 
@@ -39,9 +41,8 @@ Let's now download annotation for *Homo sapiens*: a subset of the GENCODE 25 ann
 
 ```{r create_dirs_hum}
 
-download.file("https://drive.google.com/uc?export=download&id=1n6UA5cSz6djx0dY_7sI57177T-kyZhhT",destfile = "test_human.2bit")
-
-download.file("https://drive.google.com/uc?export=download&id=19Am9-iMEyB-AcIsVRdIqrF-BVdQYrcaI",destfile = "test_human.gtf")
+download.file("https://drive.google.com/uc?export=download&id=1n6UA5cSz6djx0dY_7sI57177T-kyZhhT",destfile = file.path(tmp_dir,"test_human.2bit"))
+download.file("https://drive.google.com/uc?export=download&id=19Am9-iMEyB-AcIsVRdIqrF-BVdQYrcaI",destfile = file.path(tmp_dir,"test_human.gtf"))
 
 ```
 
@@ -54,9 +55,9 @@ Moreover, such function reads a genome file in *.2bit* to forge a *BSgenome* pac
 
 ```{r create_annot_hum}
 
-prepare_annotation_files(annotation_directory = ".",
-                         twobit_file = "test_human.2bit",
-                         gtf_file = "test_human.gtf",scientific_name = "Human.test",
+prepare_annotation_files(annotation_directory = tmp_dir,
+                         twobit_file = file.path(tmp_dir,"test_human.2bit"),
+                         gtf_file = file.path(tmp_dir,"test_human.gtf"),scientific_name = "Human.test",
                          annotation_name = "genc25_22M",
                          export_bed_tables_TxDb = FALSE,
                          forge_BSgenome = TRUE,
@@ -136,14 +137,14 @@ Let's now download a subset of a Ribo-seq dataset in HEK293 cells [2].
 
 
 ```{r human_report_1}
-if(!file.exists('test_human_hek.bam')) download.file("https://drive.google.com/uc?export=download&id=11PP5y2QH7si81rbEBJsOB-Lt3l_JowRW",destfile = "test_human_hek.bam")
+if(!file.exists('test_human_hek.bam')) download.file("https://drive.google.com/uc?export=download&id=11PP5y2QH7si81rbEBJsOB-Lt3l_JowRW",destfile = file.path(tmp_dir,"test_human_hek.bam"))
 ```
 
 We now perform different sets of calculations on our data (including read-length and organelle-specific metagene analyses), using the annotation we previously created. Several files (including automatically generated P_sites positions, and other output from the analysis pipeline) will be automatically created. 
 Furthermore, an html dynamic report which illustrated the analysis results is created:
 
 ```{r human_report_2}
-RiboseQC_analysis(annotation_file="test_human.gtf_Rannot",bam_files = "test_human_hek.bam",report_file = "test_human_hek.html",write_tmp_files = F)
+RiboseQC_analysis(annotation_file=file.path(tmp_dir,"test_human.gtf_Rannot"),bam_files = file.path(tmp_dir,"test_human_hek.bam"),report_file = file.path(tmp_dir,"test_human_hek.html"),write_tmp_files = F)
 ```
 
 The html report can be opened by different browsers such as firefox, chrome etc...
@@ -165,13 +166,13 @@ Let's now create annotation for *Saccharomyces cerevisiae*. We will use a custom
 
 ```{r yeast_1}
 
-download.file("https://drive.google.com/uc?export=download&id=1ul_mqVimaavfhJs76R3TaOyTcUgwJvS2",destfile = "test_yeast.2bit")
+download.file("https://drive.google.com/uc?export=download&id=1ul_mqVimaavfhJs76R3TaOyTcUgwJvS2",destfile = file.path(tmp_dir,"test_yeast.2bit"))
 
-download.file("https://drive.google.com/uc?export=download&id=1yffqKkfohGx9y7XRZO05vhjYUXgjiKBF",destfile = "test_yeast.gtf")
+download.file("https://drive.google.com/uc?export=download&id=1yffqKkfohGx9y7XRZO05vhjYUXgjiKBF",destfile = file.path(tmp_dir,"test_yeast.gtf"))
 
-prepare_annotation_files(annotation_directory = ".",
-                         twobit_file = "test_yeast.2bit",
-                         gtf_file = "test_yeast.gtf",scientific_name = "yeast.test",
+prepare_annotation_files(annotation_directory = tmp_dir,
+                         twobit_file = file.path(tmp_dir,"test_yeast.2bit"),
+                         gtf_file = file.path(tmp_dir,"test_yeast.gtf"),scientific_name = "yeast.test",
                          annotation_name = "yeast_custom",
                          export_bed_tables_TxDb = TRUE,
                          forge_BSgenome = TRUE,
@@ -192,15 +193,15 @@ GTF_annotation$trann
 We will now download three files corresponding to sample data from a TCP-seq experiment [4], where the three experiments aim at extracting RNA fragments covered by scanning ribosomes (SSU), elongating ribosomes (RS) and input material (input). RiboseQC analysis is followed by the creation of a report containing results for all the three experiments.
 
 ```{r yeast_3}
-download.file("https://drive.google.com/uc?export=download&id=1Nwlf7u-hHC_fX0fUJuJu_dr2WxwGazVJ",destfile = "test_yeast_TCP_input.bam")
+download.file("https://drive.google.com/uc?export=download&id=1Nwlf7u-hHC_fX0fUJuJu_dr2WxwGazVJ",destfile = file.path(tmp_dir,"test_yeast_TCP_input.bam"))
 
-download.file("https://drive.google.com/uc?export=download&id=18gQF2SxxsGQqVfhUw-wFo2dBt1mafiAB",destfile = "test_yeast_TCP_RS.bam")
+download.file("https://drive.google.com/uc?export=download&id=18gQF2SxxsGQqVfhUw-wFo2dBt1mafiAB",destfile = file.path(tmp_dir,"test_yeast_TCP_RS.bam"))
 
-download.file("https://drive.google.com/uc?export=download&id=1HBb58mOt1vmf58yqz-wkZzfxZhBl_tmO",destfile = "test_yeast_TCP_SSU.bam")
+download.file("https://drive.google.com/uc?export=download&id=1HBb58mOt1vmf58yqz-wkZzfxZhBl_tmO",destfile = file.path(tmp_dir,"test_yeast_TCP_SSU.bam"))
 
 bam_filepath_y<-c("test_yeast_TCP_input.bam","test_yeast_TCP_RS.bam","test_yeast_TCP_SSU.bam")
 
-RiboseQC_analysis(annotation_file="test_yeast.gtf_Rannot",bam_files = bam_filepath_y,fast_mode = T,report_file = "test_yeast_TCP.html",sample_names = c("input","RS","SSU"),dest_names = c("input","RS","SSU"),write_tmp_files = F)
+RiboseQC_analysis(annotation_file=file.path(tmp_dir,"test_yeast.gtf_Rannot"),bam_files = bam_filepath_y,fast_mode = T,report_file = file.path(tmp_dir,"test_yeast_TCP.html"),sample_names = c("input","RS","SSU"),dest_names = file.path(tmp_dir,c("input","RS","SSU")),write_tmp_files = F)
 ```
 
 The report allows to compare different samples side-by-side using tabs for different samples.
@@ -221,13 +222,13 @@ We now create the annotation files for *Arabidopsis thaliana*. We will use a cus
 
 ```{r arab_1}
 
-download.file("https://drive.google.com/uc?export=download&id=1gTxlR66fRX0GsHsWtJB7piLelM8jhZGu",destfile = "test_arabidopsis.2bit")
+download.file("https://drive.google.com/uc?export=download&id=1gTxlR66fRX0GsHsWtJB7piLelM8jhZGu",destfile = file.path(tmp_dir,"test_arabidopsis.2bit"))
 
-download.file("https://drive.google.com/uc?export=download&id=1jYbdvaGfVnMx38X1P85Ounyq9jGwRVgP",destfile = "test_arabidopsis.gtf.gz")
+download.file("https://drive.google.com/uc?export=download&id=1jYbdvaGfVnMx38X1P85Ounyq9jGwRVgP",destfile = file.path(tmp_dir,"test_arabidopsis.gtf.gz"))
 
-prepare_annotation_files(annotation_directory = ".",
-                         twobit_file = "test_arabidopsis.2bit",
-                         gtf_file = "test_arabidopsis.gtf.gz",scientific_name = "arabidopsis.test",
+prepare_annotation_files(annotation_directory = tmp_dir,
+                         twobit_file = file.path(tmp_dir,"test_arabidopsis.2bit"),
+                         gtf_file = file.path(tmp_dir,"test_arabidopsis.gtf.gz"),scientific_name = "arabidopsis.test",
                          annotation_name = "araport11_custom",export_bed_tables_TxDb = TRUE,
                          forge_BSgenome = TRUE,
                          create_TxDb = TRUE)
@@ -240,12 +241,12 @@ We will now download two sample datasets from a Ribo-seq experiments in Arabidop
 annotation="test_arabidopsis.gtf.gz_Rannot"
 
 
-download.file("https://drive.google.com/uc?export=download&id=144PIK15iJrDSshMWsGbl9zQvT27Z1fzt",destfile = "test_arabidopsis_root.bam")
-download.file("https://drive.google.com/uc?export=download&id=1VVdMi0ho0LiRCld6-3vzibtg_CyPSTj3",destfile = "test_arabidopsis_shoot.bam")
+download.file("https://drive.google.com/uc?export=download&id=144PIK15iJrDSshMWsGbl9zQvT27Z1fzt",destfile = file.path(tmp_dir,"test_arabidopsis_root.bam"))
+download.file("https://drive.google.com/uc?export=download&id=1VVdMi0ho0LiRCld6-3vzibtg_CyPSTj3",destfile = file.path(tmp_dir,"test_arabidopsis_shoot.bam"))
 
-bam_filepath=c("test_arabidopsis_root.bam","test_arabidopsis_shoot.bam")
+bam_filepath=file.path(tmp_dir,c("test_arabidopsis_root.bam","test_arabidopsis_shoot.bam"))
 
-RiboseQC_analysis(annotation_file=annotation,bam_files = bam_filepath,fast_mode = TRUE,report_file = "test_root_shoots.html",dest_names = c("root","shoots"),sample_names = c("root","shoots"),write_tmp_files = FALSE)
+RiboseQC_analysis(annotation_file=file.path(annotation,bam_files = bam_filepath,fast_mode = TRUE,report_file = file.path(tmp_dir,"test_root_shoots.html"),dest_names = c("root","shoots"),sample_names = c("root","shoots"),write_tmp_files = FALSE)
 ```
 
 Despite the lack of a dedicated treatment to purify chloroplast ribosomes in these Ribo-seq experiments (e.g. using chloramphenicol), it is possible to detect footprints from distinct organelles, enriched in the shoots sample rather than roots one.

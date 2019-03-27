@@ -2034,7 +2034,7 @@ choose_readlengths<-function(summary_data,choice="max_coverage",nt_signals){
     if(!choice%in%c("max_coverage","max_inframe","all")){
         stop("choice must be one of 'max_coverage','max_inframe' or 'all'")
     }
-
+    stopifnot(names(summary_data) == names(nt_signals))
     choices_res<-list()
     for(i in names(summary_data)){
         choices_res[[i]]<-c()
@@ -2558,7 +2558,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
 
         cat(paste("Installing the BSgenome package ... ",date(),"\n",sep = ""))
 
-        install(paste(annotation_directory,pkgnm,sep="/"))
+        install(paste(annotation_directory,pkgnm,sep="/"),upgrade = F)
         cat(paste("Installing the BSgenome package --- Done! ",date(),"\n",sep = ""))
 
     }
