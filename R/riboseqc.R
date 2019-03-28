@@ -1385,8 +1385,8 @@ get_top50_mapping <- function(rdata_list) {
     for (i in c(1:length(rdata_list))){
         res_all <- rdata_list[[names(rdata_list)[i]]]
         data <- as.data.frame(res_all$sequence_analysis)
-        data <- data[,c("score", "pct", "seqnames", "region", "gene_biotype", "gene", "seq")]
-        names(data) <- c("read count", "library fraction (%)", "seqnames", "region", "gene biotype", "gene", "sequence")
+        data <- data[,c("score", "pct", "seqnames", "start", "end", "strand","region", "gene_biotype", "gene", "seq")]
+        names(data) <- c("read count", "library fraction (%)", "chromosome", "start","end","strand","region", "gene biotype", "gene", "sequence")
         datasets[[names(rdata_list)[i]]] <- data
     }
     return(datasets)
