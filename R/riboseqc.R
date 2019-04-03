@@ -288,7 +288,7 @@ plot_read_biotype_dist_2 <- function(rdata_list, output_rds_path=""){
     g1 <- ggplot(data=data.m, aes(x=L1, y=value, fill=Var1)) +
         geom_bar(stat="identity", position=position_stack(reverse=TRUE)) +
         scale_fill_viridis(discrete=T) +
-        labs(x="\nsample", y="read count\n") +
+        labs(x="", y="read count\n") +
         facet_grid(Var2~., scales="free_y") +
         theme_minimal() +
         theme(plot.margin = margin(.3, .3, .3, .3, "cm"),
@@ -306,7 +306,7 @@ plot_read_biotype_dist_2 <- function(rdata_list, output_rds_path=""){
     g2 <- ggplot(data=data.m, aes(x=L1, y=value, fill=Var1)) +
         geom_bar(stat="identity", position=position_fill(reverse=TRUE)) +
         scale_fill_viridis(discrete=T) +
-        labs(x="\nsample", y="read count fraction\n") +
+        labs(x="", y="read count fraction\n") +
         facet_grid(Var2~., scales="free_y") +
         theme_minimal() +
         theme(plot.margin = margin(.3, .3, .3, .3, "cm"),
