@@ -8,7 +8,7 @@ This tools focuses on the analysis of different read lengths, taking into accoun
 
 ### Ribo-seQC: comprehensive analysis of cytoplasmic and organellar ribosome profiling data ###
 
-*Lorenzo Calviello\*, *Dominique Sydow\*, Dermot Harnett, Uwe Ohler
+*Lorenzo Calviello\*, Dominique Sydow\*, Dermot Harnett, Uwe Ohler^*
 
 **biorXiv (2019)**, doi: https://doi.org/10.1101/601468
 
