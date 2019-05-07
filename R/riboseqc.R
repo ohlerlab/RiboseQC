@@ -3865,6 +3865,9 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
         #operations on the chunk (here count reads and whatnot)
         
         mapp<-function(x){
+            
+            mcols(x)$MD[which(is.na(mcols(x)$MD))]<-"NO"
+            
             x_I<-x[grep("I",cigar(x))]
             
             if(length(x_I)>0){
