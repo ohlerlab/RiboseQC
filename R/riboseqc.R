@@ -2415,13 +2415,13 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 #' @seealso \code{\link{load_annotation}}, \code{\link{forgeBSgenomeDataPkg}}, \code{\link{makeTxDbFromGFF}}.
 #' @export
 
-prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,scientific_name="Homo.sapiens",annotation_name="genc25",export_bed_tables_TxDb=T,forge_BSgenome=T,create_TxDb=T){
+prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,scientific_name="Homo.sapiens",annotation_name="genc25",export_bed_tables_TxDb=T,forge_BSgenome=T,create_TxDb=T,additional_circ_seqs=NULL){
     
-    
+   if(!is.null(additional_circ_seqs)) stopifnot(is.character(additional_circ_seqs))
     DEFAULT_CIRC_SEQS <- unique(c("chrM","MT","MtDNA","mit","Mito","mitochondrion",
                                   "dmel_mitochondrion_genome","Pltd","ChrC","Pt","chloroplast",
                                   "Chloro","2micron","2-micron","2uM",
-                                  "Mt", "NC_001879.2", "NC_006581.1","ChrM"))
+                                  "Mt", "NC_001879.2", "NC_006581.1","ChrM",additional_circ_seqs))
     #adjust variable names (some chars not permitted)
     annotation_name<-gsub(annotation_name,pattern = "_",replacement = "")
     annotation_name<-gsub(annotation_name,pattern = "-",replacement = "")
@@ -2475,7 +2475,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         
         
         seed_dest<-paste(annotation_directory,"/",basename(twobit_file),"_",scientific_name,"_seed",sep = "")
-        
+       if(length(circseed)==0)  writeLines(text = seed_text,con = seed_dest)
         if(length(circseed)==1){
             seed_text<-paste(seed_text,"\n",
                              "circ_seqs: \"",circseed,"\"",sep="")
