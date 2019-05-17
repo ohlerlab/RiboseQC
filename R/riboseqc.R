@@ -2155,12 +2155,6 @@ choose_readlengths<-function(summary_data,choice="max_coverage",nt_signals){
             data$max_coverage[mtc]<-TRUE
         }
 
-        # data$best_coverage<-FALSE
-        # if(length(net_all_cov)>0){
-        #     mtc<-match(rownames(net_all_cov_ok),rownames(data))
-        #     data$best_coverage[mtc]<-TRUE
-        # }
-        #
         final_choice<-data[,c("read_length","cutoff")][data[,choice],]
         if(length(final_choice)==0){final_choice<-c()}
         choices<-list(final_choice=final_choice,data=data)
@@ -2280,11 +2274,11 @@ load_annotation<-function(path){
     GTF_annotation<-get(load(path))
     #genome_sequence<-get(library(GTF_annotation$genome_package,character.only = TRUE))
 
-    library(GTF_annotation$genome_package,character.only = TRUE)
-    genome_sequence<-get(GTF_annotation$genome_package)
+    # library(GTF_annotation$genome_package,character.only = TRUE)
+    # genome_sequence<-get(GTF_annotation$genome_package)
 
     GTF_annotation<<-GTF_annotation
-    genome_seq<<-genome_sequence
+    # genome_seq<<-genome_sequence
 }
 
 #' Calculate offsets from 5'end profiles
@@ -2472,9 +2466,8 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 #'
 #' @export
 
-
 prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,scientific_name="Homo.sapiens",
-                                   annotation_name="genc25",export_bed_tables_TxDb=TRUE,forge_BSgenome=TRUE,create_TxDb=TRUE){
+                                   annotation_name="genc25",export_bed_tables_TxDb=TRUE,forge_BSgenome=TRUE,genome_seq=NULL,create_TxDb=TRUE){
 
 
     DEFAULT_CIRC_SEQS <- unique(c("chrM","MT","MtDNA","mit","Mito","mitochondrion",
@@ -2486,10 +2479,9 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
     annotation_name<-gsub(annotation_name,pattern = "-",replacement = "")
     if(!dir.exists(annotation_directory)){dir.create(path = annotation_directory,recursive = TRUE)}
     annotation_directory<-normalizePath(annotation_directory)
-    twobit_file<-normalizePath(twobit_file)
     gtf_file<-normalizePath(gtf_file)
 
-    for (f in c(twobit_file,gtf_file)){
+    for (f in c(gtf_file)){
         if(file.access(f, 0)==-1) {
             stop("
                  The following files don't exist:\n",
@@ -2498,23 +2490,37 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
     }
 
 
-    scientific_name_spl<-strsplit(scientific_name,"[.]")[[1]]
-    ok<-length(scientific_name_spl)==2
-    if(!ok){stop("\"scientific_name\" must be two words separated by a \".\", like \"Homo.sapiens\"")}
-
     #get circular sequences
-
-    seqinfotwob<-seqinfo(TwoBitFile(twobit_file))
-    circss<-seqnames(seqinfotwob)[which(seqnames(seqinfotwob)%in%DEFAULT_CIRC_SEQS)]
-    seqinfotwob@is_circular[which(seqnames(seqinfotwob)%in%DEFAULT_CIRC_SEQS)]<-TRUE
-    pkgnm<-paste("BSgenome",scientific_name,annotation_name,sep=".")
-
-    circseed<-circss
-    if(length(circseed)==0){circseed<-NULL}
 
     #Forge a BSGenome package
 
     if(forge_BSgenome){
+        scientific_name_spl<-strsplit(scientific_name,"[.]")[[1]]
+        ok<-length(scientific_name_spl)==2
+        if(!ok){stop("\"scientific_name\" must be two words separated by a \".\", like \"Homo.sapiens\"")}
+
+
+        twobit_file<-normalizePath(twobit_file)
+    
+        for (f in c(twobit_file)){
+            if(file.access(f, 0)==-1) {
+                stop("
+                     The following files don't exist:\n",
+                     f, "\n")
+            }
+        }
+
+        seqinfotwob<-seqinfo(TwoBitFile(twobit_file))
+        circss<-seqnames(seqinfotwob)[which(seqnames(seqinfotwob)%in%DEFAULT_CIRC_SEQS)]
+        seqinfotwob@is_circular[which(seqnames(seqinfotwob)%in%DEFAULT_CIRC_SEQS)]<-TRUE
+
+
+        circseed<-circss
+        if(length(circseed)==0){circseed<-NULL}
+
+        pkgnm<-paste("BSgenome",scientific_name,annotation_name,sep=".")
+
+
         cat(paste("Creating the BSgenome package ... ",date(),"\n",sep = ""))
         seed_text<-paste("Package: BSgenome.",scientific_name,".",annotation_name,"\n",
                          "Title: Full genome sequences for ",scientific_name,", ",annotation_name,"\n",
@@ -2561,6 +2567,12 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         install(paste(annotation_directory,pkgnm,sep="/"),upgrade = F)
         cat(paste("Installing the BSgenome package --- Done! ",date(),"\n",sep = ""))
 
+        seqinfo_genome <- seqinfotwob
+    }else{
+        if(!is(genome_seq,'FaFile')) genome_seq <- Rsamtools::FaFile(genome_seq)
+        seqinfo_genome<-seqinfo(genome_seq)
+        seqinfo_genome@is_circular[which(seqnames(seqinfo_genome)%in%DEFAULT_CIRC_SEQS)]<-TRUE
+
     }
 
     #Create the TxDb from GTF and BSGenome info
@@ -2568,7 +2580,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
     if(create_TxDb){
         cat(paste("Creating the TxDb object ... ",date(),"\n",sep = ""))
 
-        annotation<-makeTxDbFromGFF(file=gtf_file,format="gtf",chrominfo = seqinfotwob)
+        annotation<-makeTxDbFromGFF(file=gtf_file,format="gtf",chrominfo = seqinfo_genome)
 
         saveDb(annotation, file=paste(annotation_directory,"/",basename(gtf_file),"_TxDb",sep=""))
         cat(paste("Creating the TxDb object --- Done! ",date(),"\n",sep = ""))
@@ -2725,8 +2737,14 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
 
         #define start and stop codons (genome space)
 
-        suppressPackageStartupMessages(library(pkgnm,character.only=TRUE))
-        genome<-get(pkgnm)
+        if(forge_BSgenome){
+            suppressPackageStartupMessages(library(pkgnm,character.only=TRUE))
+            genome<-get(pkgnm)
+        }else{
+            stopifnot(!is.null(genome_seq))
+            genome<-genome_seq
+            pkgnm<-NA
+        }
         tocheck<-as.character(runValue(seqnames(cds_tx)))
         tocheck<-cds_tx[!tocheck%in%circs]
         seqcds<-extractTranscriptSeqs(genome,transcripts = tocheck)
@@ -2879,3 +2897,6 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
     }
 
 }
+
+
+

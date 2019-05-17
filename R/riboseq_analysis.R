@@ -74,14 +74,16 @@
 #'   create_report = FALSE )
 #' @export
 
-RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlength_choice_method="max_coverage",
-														chunk_size=5000000L,write_tmp_files=TRUE,dest_names=NA,rescue_all_rls=FALSE,fast_mode=TRUE,create_report=TRUE,sample_names=NA,report_file=NA,extended_report=FALSE,pdf_plots=TRUE){
+RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlength_choice_method="max_coverage",genome_seq=NULL,
+														chunk_size=5000000L,write_tmp_files=TRUE,dest_names=NA,rescue_all_rls=FALSE,fast_mode=TRUE,create_report=TRUE,sample_names=NA,report_file=NA,extended_report=FALSE,pdf_plots=TRUE,offsets_df=NULL){
 	stopifnot(exists('get_ps_fromspliceplus'))
 	if(length(dest_names)==1){
 		if(is.na(dest_names)){
 			dest_names=bam_files
 		}
 	}
+
+	
 
 	if(sum(duplicated(dest_names))>0){
 		stop(paste("duplicated 'dest_names' parameter (possibly same bam file). Please specify different 'dest_names'.",date(),"\n"))
@@ -124,14 +126,22 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 
 	if(sum(!readlength_choice_method%in%c("max_coverage","max_inframe","all"))>0){stop(paste("'readlength_choice_method' must be one of 'max_coverage','max_inframe','all'.",date(),"\n"))}
 
+	if(!is.null(offsets_df)) stopifnot(c("read_length","cutoff") %in% colnames(offsets_df))
+
+	if(!is.null(genome_seq)){
+		stopifnot(file.exists(genome_seq))
+		genome_seq<-Rsamtools::FaFile(genome_seq)
+	}
+	
+
 	list_annotations<-list()
 
 	for(annots in 1:length(annotation_file)){
 		cat(paste("Loading annotation files in ",annotation_file[annots]," ... ", date(),"\n",sep = ""))
 
 		load_annotation(annotation_file[annots])
-		lst<-list(GTF_annotation,genome_seq)
-		names(lst)<-c("GTF_annotation","genome_seq")
+		lst<-list(GTF_annotation)
+		names(lst)<-c("GTF_annotation")
 		list_annotations[[annots]]<-lst
 
 	}
@@ -139,7 +149,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 	cat(paste("Loading annotation files --- Done! ", date(),"\n",sep = ""))
 
 	GTF_annotation<-list_annotations[[1]]$GTF_annotation
-	genome_seq<-list_annotations[[1]]$genome_seq
+	
 
 
 	for(bammo in 1:length(bam_files)){
@@ -147,11 +157,9 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 		chunk_size<-as.integer(chunk_size)
 
 		GTF_annotation<-list_annotations[[1]]$GTF_annotation
-		genome_seq<-list_annotations[[1]]$genome_seq
 
 		if(length(annotation_file)>1 & bammo>1){
 			GTF_annotation<-list_annotations[[bammo]]$GTF_annotation
-			genome_seq<-list_annotations[[bammo]]$genome_seq
 		}
 
 		bam_file<-bam_files[bammo]
@@ -239,6 +247,9 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 		cat(paste("Extracting read lengths from ",bam_file," ... ", date(),"\n",sep=""))
 		maxmin <- reduceByYield(X=opts, YIELD=yiel, MAP=mapp, REDUCE=reduc)
 		cat(paste("Extracting read lengths --- Done! ", date(),"\n",sep=""))
+		
+		cat(paste("Extracting read lengths --- Done! ", date(),"\n",sep=""))
+		
 		readlengths<-seq(maxmin[[2]],maxmin[[1]])
 
 
@@ -888,7 +899,6 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 
 
 		#choose readlengths
-
 		res_rls<-choose_readlengths(summary_res,choice=readlength_choice_method[bammo],nt_signals=profiles_fivepr[["five_prime_subcodon"]])
 
 		cat(paste("Calculating P-sites offsets --- Done!", date(),"\n"))
@@ -899,10 +909,22 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 
 
 		#extract P-sites positions given selection above
-
 		param <- ScanBamParam(flag=scanBamFlag(isDuplicate=FALSE,isSecondaryAlignment=FALSE),what=c("mapq"),tag = "MD")
 		seqllll<-seqlevels(unlist(unlist(read_stats$reads_pos1)))
 		seqleee<-seqlengths(unlist(unlist(read_stats$reads_pos1)))
+
+
+
+		#if we've provided our own choice of offsets, we should repeat it for each compartment, should we need to
+		if(!is.null(offsets_df)){
+			if(is.data.frame(offsets_df)){
+				res_rls$nucl$final_choice<-offsets_df%>%mutate(read_length=as.character(read_length))%>%DataFrame
+			}
+		}else{
+			stopifnot(names(res_rls)%in%names(offsets_df))
+			for(comp in names(res_rls)) res_rls[[comp]]$final_choice<-offsets_df[[comp]] 
+		}
+
 		rl_cutoffs_comp<-lapply(res_rls, function(x){x$final_choice})
 
 		#rescue all read lengths
@@ -1251,7 +1273,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 						ps_plus<-c(ps_unspl,firstok,lastok,ps_spl)
 
 						ps_plus_uniq<-ps_plus[mcols(ok_reads)$mapq>50]
-						ps_plus_uniq_mm<-ps_plus[mcols(ok_reads)$mapq>50 & nchar(mcols(ok_reads)$MD)>3]
+						ps_plus_uniq_mm<-ps_plus[mcols(ok_reads)$mapq>50 & grepl(x=mcols(ok_reads)$MD,pattern="\\W|.{3,}")]
 
 					}
 					ok_reads<-neg[mcols(neg)$len_adj%in%rl]
@@ -1262,6 +1284,9 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 					seqlengths(ps_neg)<-seqleee
 					ps_neg_uniq<-ps_neg
 					ps_neg_uniq_mm<-ps_neg
+
+					#The original: nchar(mcols(ok_reads)$MD)>3 was failing on hte occasion 'multibyte string'
+					#str_detect("\\W|.{3,}")
 
 					if(length(ok_reads)>0){
 						unspl<-ok_reads[grep(pattern="N",x=cigar(ok_reads),invert=TRUE)]
@@ -1307,7 +1332,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 						ps_neg<-c(ps_unspl,firstok,lastok,ps_spl)
 						ps_neg_uniq<-ps_neg[mcols(ok_reads)$mapq>50]
 
-						ps_neg_uniq_mm<-ps_neg[mcols(ok_reads)$mapq>50 & nchar(mcols(ok_reads)$MD)>3]
+						ps_neg_uniq_mm<-ps_neg[mcols(ok_reads)$mapq>50 & grepl(x=mcols(ok_reads)$MD,pattern="\\W|.{3,}")]
 
 					}
 
@@ -1421,6 +1446,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 
 
 		}
+
 		cat(paste("Calculating P-sites positions and junctions ...", date(),"\n"))
 
 		P_sites_stats<-reduceByYield(X=opts,YIELD=yiel,MAP=mapp,REDUCE=reduc)
@@ -1448,6 +1474,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 		if(length(ps)==0){
 			print("Not enough signal or low frame preference, skipped P-sites & codon occupancy calculation. \n Set 'all' in the 'choose_readlengths' choice to ignore this warning and get P-sites positions in a new run")
 		}
+
 		if(length(ps)>0){
 
 			for(comp in c("nucl",circs)){
@@ -1877,7 +1904,9 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 
 		names(profiles_P_sites)<-c("P_sites_bins","P_sites_subcodon","Codon_counts","P_sites_percodon","P_sites_percodon_ratio",
 										"A_sites_percodon","A_sites_percodon_ratio","E_sites_percodon","E_sites_percodon_ratio")
+		
 		save(profiles_P_sites,file = paste(dira,"profiles_P_sites",sep = "/"))
+		
 		#save(list = c("ps_signals_tiles","ps_signals_tiles_all","ps_signals_win","ps_signals_win_all"),file = "ps_results_preprjan15")
 		cat(paste("Building aggregate P-sites profiles --- Done!", date(),"\n"))
 
@@ -2000,8 +2029,9 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 		res_all <- list(read_stats,profiles_fivepr,selection_cutoffs,P_sites_stats,profiles_P_sites,sequence_analysis)
 		names(res_all) <- c("read_stats", "profiles_fivepr","selection_cutoffs","P_sites_stats","profiles_P_sites","sequence_analysis")
 		if(length(merged_all_ps)>0){
-
-			save(for_SaTAnn,file = paste(dest_name,"_for_SaTAnn",sep = ""))
+			SaTAnnfile<-paste(dest_name,"_for_SaTAnn",sep = "")
+			cat(paste("Exporting file for SaTAnn - ",SaTAnnfile, date(),"\n\n"))
+			save(for_SaTAnn,file = SaTAnnfile)
 		}
 		finn<-lapply(res_all$selection_cutoffs$results_choice,function(x){x$data})
 		nope<-length(finn)
@@ -2052,14 +2082,12 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 		cat(paste("Exporting files --- Done!", date(),"\n\n"))
 	}
 
-	for(i in ls()) assign(i,get(i),envir=.GlobalEnv)
-	save.image('debug.Rdata')
-
 	if(create_report){
 		cat(paste("Creating html report in ",report_file," ... ", date(),"\n",sep=""))
 
 		create_html_report(input_files=paste(dest_names,"_results_RiboseQC",sep = ""), input_sample_names=sample_names,output_file =  report_file,extended = extended_report)
 		cat(paste("Creating html report --- Done!", date(),"\n\n"))
+
 		if(pdf_plots){create_pdfs_from_rds_objects(output_rds_path = paste(report_file,"_plots/rds/",sep=""))}
 
 	}
