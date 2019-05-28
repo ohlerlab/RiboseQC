@@ -8,7 +8,8 @@ RiboseQC_analysis(annotation_file, bam_files, read_subset = T,
   readlength_choice_method = "max_coverage", chunk_size = 5000000L,
   write_tmp_files = T, dest_names = NA, rescue_all_rls = FALSE,
   fast_mode = T, create_report = T, sample_names = NA,
-  report_file = NA, extended_report = F, pdf_plots = T)
+  report_file = NA, extended_report = F, pdf_plots = T,
+  stranded = T, normalize_cov = T)
 }
 \arguments{
 \item{annotation_file}{Full path to the annotation file (*Rannot). Or, a vector with paths to one annotation file per bam file.}
@@ -38,6 +39,10 @@ RiboseQC_analysis(annotation_file, bam_files, read_subset = T,
 \item{extended_report}{creates a large html report including codon occupancy for each read length. Defaults to \code{FALSE}}
 
 \item{pdf_plots}{creates a pdf file for each produced plot. Defaults to \code{TRUE}}
+
+\item{stranded}{are the analyzed libraries strand-specific? TRUE, FALSE or "inverse". Defaults to \code{TRUE}}
+
+\item{normalize_cov}{export normalized (sum to 1 million) bigwigs for coverage tracks? Defaults to \code{TRUE}}
 }
 \value{
 the function saves a "results_RiboseQC_all" R file appended to the bam_files path including the complete list of outputs described here.
