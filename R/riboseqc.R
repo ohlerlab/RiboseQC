@@ -4752,7 +4752,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
             merged_uniq_mm_ps<-sort(c(covv_pl,covv_min))
         }
         
-        if(!normalize_cov){
+        if(!normalize_cov[bammo]){
             export(res_4$coverage_all_plus,con=paste(dest_name,"_coverage_plus.bw",sep = ""))
             export(res_4$coverage_all_min,con=paste(dest_name,"_coverage_minus.bw",sep = ""))
             export(res_4$coverage_uniq_plus,con=paste(dest_name,"_coverage_uniq_plus.bw",sep = ""))
@@ -4761,7 +4761,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
         
         
         
-        if(normalize_cov){
+        if(normalize_cov[bammo]){
             bwpl<-res_4$coverage_all_plus
             bwmn<-res_4$coverage_all_min
             
