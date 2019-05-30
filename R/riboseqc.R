@@ -4765,7 +4765,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
             bwpl<-res_4$coverage_all_plus
             bwmn<-res_4$coverage_all_min
             
-            correction<-(sum(unlist(runValue(bwpl))*unlist(runLength(bwpl)))+sum(unlist(runValue(bwmn))*unlist(runLength(bwmn))))/1e06
+            correction<-(sum(as.numeric(unlist(runValue(bwpl))*unlist(runLength(bwpl))))+sum(as.numeric(unlist(runValue(bwmn))*unlist(runLength(bwmn)))))/1e06
             runValue(bwpl)<-runValue(bwpl)/correction
             runValue(bwmn)<-runValue(bwmn)/correction
             
@@ -4776,7 +4776,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
             bwpl<-res_4$coverage_uniq_plus
             bwmn<-res_4$coverage_uniq_min
             
-            correction<-(sum(unlist(runValue(bwpl))*unlist(runLength(bwpl)))+sum(unlist(runValue(bwmn))*unlist(runLength(bwmn))))/1e06
+            correction<-(sum(as.numeric(unlist(runValue(bwpl))*unlist(runLength(bwpl))))+sum(as.numeric(unlist(runValue(bwmn))*unlist(runLength(bwmn)))))/1e06
             runValue(bwpl)<-runValue(bwpl)/correction
             runValue(bwmn)<-runValue(bwmn)/correction
             
