@@ -42,11 +42,11 @@ RiboseQC_analysis(annotation_file, bam_files, read_subset = T,
 
 \item{stranded}{are the analyzed libraries strand-specific? TRUE, FALSE or "inverse". Defaults to \code{TRUE}}
 
-\item{normalize_cov}{export normalized (sum to 1 million) bigwigs for coverage tracks? Defaults to \code{TRUE}}
+\item{normalize_cov}{export normalized (sum to 1 million) bedgraph files for coverage tracks? Defaults to \code{TRUE}}
 }
 \value{
 the function saves a "results_RiboseQC_all" R file appended to the bam_files path including the complete list of outputs described here.
-In addition, bigwig files for coverage value and P_sites position is appended to the bam_files path, including also a summary of P_sites selection statistics, 
+In addition, bedgraph files for coverage value and P_sites position is appended to the bam_files path, including also a summary of P_sites selection statistics, 
 a smaller "results_RiboseQC" R file used for creating a dynamic html report, and a "for_SaTAnn" R object that can be used in the SaTAnn pipeline.
 }
 \description{
