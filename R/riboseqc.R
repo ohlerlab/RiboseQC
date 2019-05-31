@@ -95,11 +95,13 @@ create_html_report <- function(input_files, input_sample_names, output_file,exte
     dir.create(paste0(output_fig_path, "pdf/"), recursive=TRUE, showWarnings=FALSE)
     sink(file = paste(output_file,"_report_text_output.txt",sep = ""))
     # render RMarkdown file > html report
+    knitclean<-knitr::knit_meta(class=NULL, clean = TRUE)
     suppressWarnings(render(rmd_path, 
            params = list(input_files = input_files,
                          input_sample_names = input_sample_names,
                          output_fig_path = output_fig_path),
            output_file = output_file))
+    gici<-gc()
     sink()
 }
 
@@ -2844,9 +2846,9 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
 #' @param extended_report creates a large html report including codon occupancy for each read length. Defaults to \code{FALSE}
 #' @param pdf_plots creates a pdf file for each produced plot. Defaults to \code{TRUE}
 #' @param stranded are the analyzed libraries strand-specific? TRUE, FALSE or "inverse". Defaults to \code{TRUE}
-#' @param normalize_cov export normalized (sum to 1 million) bigwigs for coverage tracks? Defaults to \code{TRUE}
+#' @param normalize_cov export normalized (sum to 1 million) bedgraph files for coverage tracks? Defaults to \code{TRUE}
 #' @return the function saves a "results_RiboseQC_all" R file appended to the bam_files path including the complete list of outputs described here.
-#' In addition, bigwig files for coverage value and P_sites position is appended to the bam_files path, including also a summary of P_sites selection statistics, 
+#' In addition, bedgraph files for coverage value and P_sites position is appended to the bam_files path, including also a summary of P_sites selection statistics, 
 #' a smaller "results_RiboseQC" R file used for creating a dynamic html report, and a "for_SaTAnn" R object that can be used in the SaTAnn pipeline.
 #' @details This function loads different genomic regions created in the \code{prepare_annotation_files} step, 
 #' separating features on different recognized organelles. The bam files is then analyzed in chunks to minimize RAM usage.\cr
@@ -4713,8 +4715,8 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
             merged_all_ps<-sort(c(covv_pl,covv_min))
             
             
-            export(covv_pl,con=paste(dest_name,"_P_sites_plus.bw",sep = ""))
-            export(covv_min,con=paste(dest_name,"_P_sites_minus.bw",sep = ""))
+            export(covv_pl,con=paste(dest_name,"_P_sites_plus.bedgraph",sep = ""))
+            export(covv_min,con=paste(dest_name,"_P_sites_minus.bedgraph",sep = ""))
         }
         
         merged_uniq_ps<-unlist(res_4$P_sites_uniq)
@@ -4732,8 +4734,8 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
             merged_uniq_ps<-sort(c(covv_pl,covv_min))
             
             
-            export(covv_pl,con=paste(dest_name,"_P_sites_uniq_plus.bw",sep = ""))
-            export(covv_min,con=paste(dest_name,"_P_sites_uniq_minus.bw",sep = ""))
+            export(covv_pl,con=paste(dest_name,"_P_sites_uniq_plus.bedgraph",sep = ""))
+            export(covv_min,con=paste(dest_name,"_P_sites_uniq_minus.bedgraph",sep = ""))
         }
         
         
@@ -4753,10 +4755,10 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
         }
         
         if(!normalize_cov[bammo]){
-            export(res_4$coverage_all_plus,con=paste(dest_name,"_coverage_plus.bw",sep = ""))
-            export(res_4$coverage_all_min,con=paste(dest_name,"_coverage_minus.bw",sep = ""))
-            export(res_4$coverage_uniq_plus,con=paste(dest_name,"_coverage_uniq_plus.bw",sep = ""))
-            export(res_4$coverage_uniq_min,con=paste(dest_name,"_coverage_uniq_minus.bw",sep = ""))
+            export(res_4$coverage_all_plus,con=paste(dest_name,"_coverage_plus.bedgraph",sep = ""))
+            export(res_4$coverage_all_min,con=paste(dest_name,"_coverage_minus.bedgraph",sep = ""))
+            export(res_4$coverage_uniq_plus,con=paste(dest_name,"_coverage_uniq_plus.bedgraph",sep = ""))
+            export(res_4$coverage_uniq_min,con=paste(dest_name,"_coverage_uniq_minus.bedgraph",sep = ""))
         }
         
         
@@ -4766,22 +4768,28 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
             bwmn<-res_4$coverage_all_min
             
             correction<-(sum(as.numeric(unlist(runValue(bwpl))*unlist(runLength(bwpl))))+sum(as.numeric(unlist(runValue(bwmn))*unlist(runLength(bwmn)))))/1e06
-            runValue(bwpl)<-runValue(bwpl)/correction
-            runValue(bwmn)<-runValue(bwmn)/correction
+            okround<-sort(unique(unlist(runValue(bwpl))))[2]
+            okround<-nchar(format(okround/correction, digits=3, nsmall=2))-2
             
-            export(bwpl,con=paste(dest_name,"_coverage_plus.bw",sep = ""))
-            export(bwmn,con=paste(dest_name,"_coverage_minus.bw",sep = ""))
+            runValue(bwpl)<-round(runValue(bwpl)/correction,digits = okround)
+            runValue(bwmn)<-round(runValue(bwmn)/correction,digits = okround)
+            
+            export(bwpl,con=paste(dest_name,"_coverage_plus.bedgraph",sep = ""))
+            export(bwmn,con=paste(dest_name,"_coverage_minus.bedgraph",sep = ""))
             
             
             bwpl<-res_4$coverage_uniq_plus
             bwmn<-res_4$coverage_uniq_min
             
             correction<-(sum(as.numeric(unlist(runValue(bwpl))*unlist(runLength(bwpl))))+sum(as.numeric(unlist(runValue(bwmn))*unlist(runLength(bwmn)))))/1e06
-            runValue(bwpl)<-runValue(bwpl)/correction
-            runValue(bwmn)<-runValue(bwmn)/correction
+            okround<-sort(unique(unlist(runValue(bwpl))))[2]
+            okround<-nchar(format(okround/correction, digits=3, nsmall=2))-2
             
-            export(bwpl,con=paste(dest_name,"_coverage_uniq_plus.bw",sep = ""))
-            export(bwmn,con=paste(dest_name,"_coverage_uniq_minus.bw",sep = ""))
+            runValue(bwpl)<-round(runValue(bwpl)/correction,digits = okround)
+            runValue(bwmn)<-round(runValue(bwmn)/correction,digits = okround)
+            
+            export(bwpl,con=paste(dest_name,"_coverage_uniq_plus.bedgraph",sep = ""))
+            export(bwmn,con=paste(dest_name,"_coverage_uniq_minus.bedgraph",sep = ""))
             
         }
         
@@ -4891,7 +4899,8 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
         }
         
         save(res_all, file=paste(dest_name,"_results_RiboseQC",sep = ""))
-        
+        rm(res_all,res_1,res_2,res_3,res_4,res_5,res_6)
+        gici<-gc()
         cat(paste("Exporting files --- Done!", date(),"\n\n"))
     }
     
