@@ -2569,7 +2569,12 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
 
         seqinfo_genome <- seqinfotwob
     }else{
-        if(!is(genome_seq,'FaFile')) genome_seq <- Rsamtools::FaFile(genome_seq)
+        if(!is(genome_seq,'FaFile')){
+            genome_seq <- Rsamtools::FaFile(genome_seq)
+        }
+        if(!is(genome_seq,'FaFile_Circ')){
+            genome_seq <- FaFile_Circ(genome_seq,circularRanges=circss)
+        }
         seqinfo_genome<-seqinfo(genome_seq)
         seqinfo_genome@is_circular[which(seqnames(seqinfo_genome)%in%DEFAULT_CIRC_SEQS)]<-TRUE
 
