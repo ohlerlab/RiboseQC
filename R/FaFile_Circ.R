@@ -35,7 +35,7 @@ FaFile_Circ<-setRefClass("FaFile_Circ",
 )
 
 setMethod(seqinfo,'FaFile_Circ',function (x){
-    gr <- scanFaIndex(x)
+    gr <- scanFaIndex(x$path)
     Seqinfo(as.character(seqnames(gr)), width(gr), as.character(seqnames(gr)) %in% x$circularRanges )
 })
 
@@ -52,9 +52,11 @@ setMethod('getSeq','FaFile_Circ', function (x, ...){
         }
         else {
             if (is(param, "GRanges")) {
-            	seqinfo(param) <- seqinfo(x)
+                browser()
+            	  stopifnot(all(seqlevels(param) %in% seqinfo(x)@seqnames))
+                seqinfo(param) <- seqinfo(x)[seqlevels(param)]
                 idx <- as.logical(strand(param) == "-")
-				chrends <- seqlengths(param)[as.character(param@seqnames)]
+				        chrends <- seqlengths(param)[as.character(param@seqnames)]
               	is_wrapping <- end(param) > chrends
               	is_wrapping <- purrr::map_lgl(is_wrapping,isTRUE)
               	circs_wrap <- isCircular(param)[as.character(seqnames(param[is_wrapping]))]

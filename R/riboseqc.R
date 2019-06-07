@@ -2270,15 +2270,19 @@ get_ps_fromsplicemin<-function(x,cutoff){
 #' load_annotation('test_arabidopsis.gtf.gz_Rannot')
 #' @export
 
-load_annotation<-function(path){
-    GTF_annotation<-get(load(path))
-    #genome_sequence<-get(library(GTF_annotation$genome_package,character.only = TRUE))
+load_annotation<-function(path,GTF_only=FALSE){
 
-    # library(GTF_annotation$genome_package,character.only = TRUE)
-    # genome_sequence<-get(GTF_annotation$genome_package)
+    GTF_annotation<-get(load(path))
+    if(!GTF_only){
+      genome_sequence<-get(library(GTF_annotation$genome_package,character.only = TRUE))
+      library(GTF_annotation$genome_package,character.only = TRUE)
+      genome_sequence<-get(GTF_annotation$genome_package)
+
+      assign('genome_seq',genome_sequence,envir = parent.frame())
+    }
 
     GTF_annotation<<-GTF_annotation
-    # genome_seq<<-genome_sequence
+
 }
 
 #' Calculate offsets from 5'end profiles
@@ -2501,7 +2505,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
 
 
         twobit_file<-normalizePath(twobit_file)
-    
+
         for (f in c(twobit_file)){
             if(file.access(f, 0)==-1) {
                 stop("

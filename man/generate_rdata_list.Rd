@@ -20,7 +20,7 @@ This function generates a list of loaded RData files
 to be used during RiboseQC report generation.
 }
 \examples{
- 
+
 rdata_list <- generate_rdata_list("root_results_RiboseQC")
 }
 \seealso{
