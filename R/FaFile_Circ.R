@@ -48,11 +48,10 @@ setMethod('getSeq','FaFile_Circ', function (x, ...){
 	}
     .local <- function (x, param, ...){
         if (missing(param)) {
-            scanFa(x, ...)
+            scanFa(x$path, ...)
         }
         else {
             if (is(param, "GRanges")) {
-                browser()
             	  stopifnot(all(seqlevels(param) %in% seqinfo(x)@seqnames))
                 seqinfo(param) <- seqinfo(x)[seqlevels(param)]
                 idx <- as.logical(strand(param) == "-")
@@ -75,8 +74,8 @@ setMethod('getSeq','FaFile_Circ', function (x, ...){
 					#also get the within bounds ranges
 					nonwrapped_grs <- restrict(param,end=chrends)
 					#scan seperately
-					dna <- scanFa(x, nonwrapped_grs,...)
-					wrap_dna <- scanFa(x, wrapped_grs,...)
+					dna <- scanFa(x$path, nonwrapped_grs,...)
+					wrap_dna <- scanFa(x$path, wrapped_grs,...)
 
 					#append the positive wraps to the end of the '+' rnages
 					if(any(is_wrapping[!idx])) dna[is_wrapping & (!idx)] <- xscat( dna[is_wrapping & (!idx)], wrap_dna[!idx[is_wrapping]] )
@@ -90,16 +89,19 @@ setMethod('getSeq','FaFile_Circ', function (x, ...){
 						}
 					}
 				}else{
-					dna <- scanFa(x, param, ...)
+					dna <- scanFa(x$path, param, ...)
 					idx <- as.logical(strand(param) == "-")
                 	if (any(idx)) dna[idx] <- reverseComplement(dna[idx])
 				}
             }else{
-            	dna <- scanFa(x, param, ...)
+            	dna <- scanFa(x$path, param, ...)
             }
             dna
         }
     }
     do.call(.local,c(list(x=x), dots))
 })
+
+
+
 
