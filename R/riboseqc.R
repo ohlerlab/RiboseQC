@@ -3775,6 +3775,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
                 strand(covv_min)<-"-"
                 
                 all_ps[[rl]]<-sort(c(covv_pl,covv_min))
+                rm(covv_min,covv_pl,plx,mnx,ply,mny,reads_y,reads_x,rl)
                 
             }
             
@@ -3813,6 +3814,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
                 strand(covv_min)<-"-"
                 
                 uniq_ps[[rl]]<-sort(c(covv_pl,covv_min))
+                rm(covv_min,covv_pl,plx,mnx,ply,mny,reads_y,reads_x,rl)
                 
                 
             }
@@ -3852,6 +3854,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
                 strand(covv_min)<-"-"
                 
                 uniq_mm_ps[[rl]]<-sort(c(covv_pl,covv_min))
+                rm(covv_min,covv_pl,plx,mnx,ply,mny,reads_y,reads_x,rl)
                 
             }
             
@@ -4051,10 +4054,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
                             ps_spl<-get_ps_fromspliceplus(multi,cutoff=ct)
                             
                         }
-                        mcols(ps_unspl)<-NULL
-                        mcols(firstok)<-NULL
-                        mcols(lastok)<-NULL
-                        mcols(ps_spl)<-NULL
+                        mcols(ps_spl)<-mcols(multi)
                         
                         seqlevels(firstok)<-seqllll
                         seqlevels(lastok)<-seqllll
@@ -4068,8 +4068,12 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
                         
                         ps_plus<-c(ps_unspl,firstok,lastok,ps_spl)
                         
-                        ps_plus_uniq<-ps_plus[mcols(ok_reads)$mapq>50]
-                        ps_plus_uniq_mm<-ps_plus[mcols(ok_reads)$mapq>50 & nchar(mcols(ok_reads)$MD)>3]
+                        ps_plus_uniq<-ps_plus[mcols(ps_plus)$mapq>50]
+                        ps_plus_uniq_mm<-ps_plus[mcols(ps_plus)$mapq>50 & nchar(mcols(ps_plus)$MD)>3]
+                        
+                        mcols(ps_plus)<-NULL
+                        mcols(ps_plus_uniq)<-NULL
+                        mcols(ps_plus_uniq_mm)<-NULL
                         
                     }
                     ok_reads<-neg[mcols(neg)$len_adj%in%rl]
@@ -4107,10 +4111,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
                         if(length(multi)>0){
                             ps_spl<-get_ps_fromsplicemin(multi,cutoff=ct)
                         }
-                        mcols(ps_unspl)<-NULL
-                        mcols(firstok)<-NULL
-                        mcols(lastok)<-NULL
-                        mcols(ps_spl)<-NULL
+                        mcols(ps_spl)<-mcols(multi)
                         
                         seqlevels(firstok)<-seqllll
                         seqlevels(lastok)<-seqllll
@@ -4123,9 +4124,13 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
                         seqlengths(ps_spl)<-seqleee
                         
                         ps_neg<-c(ps_unspl,firstok,lastok,ps_spl)
-                        ps_neg_uniq<-ps_neg[mcols(ok_reads)$mapq>50]
+                        #HERE PROBLEM WITH MAPPING QUALITY
+                        ps_neg_uniq<-ps_neg[mcols(ps_neg)$mapq>50]
                         
-                        ps_neg_uniq_mm<-ps_neg[mcols(ok_reads)$mapq>50 & nchar(mcols(ok_reads)$MD)>3]
+                        ps_neg_uniq_mm<-ps_neg[mcols(ps_neg)$mapq>50 & nchar(mcols(ps_neg)$MD)>3]
+                        mcols(ps_neg)<-NULL
+                        mcols(ps_neg_uniq)<-NULL
+                        mcols(ps_neg_uniq_mm)<-NULL
                         
                     }
                     
@@ -4242,6 +4247,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
         cat(paste("Calculating P-sites positions and junctions ...", date(),"\n"))
         
         res_4<-reduceByYield(X=opts,YIELD=yiel,MAP=mapp,REDUCE=reduc)
+        
         save(res_4,file = paste(dira,"res_4",sep = "/"))
         
         cat(paste("Calculating P-sites positions and junctions --- Done!", date(),"\n"))
