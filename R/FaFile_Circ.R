@@ -1,44 +1,75 @@
-library(testthat)
-library(GenomicFeatures)
-library(Rsamtools)
+#' @import Rsamtools
+NULL
 
+################################################################################
+#' A simple extension to the FaFile class that
+#' allows one to include a list of circular
+#' ranges, e.g. chrM
+#'
+#' @field circularRanges A character vector describing which seqnames have circular ranges
+#' @importFrom Rsamtools FaFile
+#' @examples
+#' mytempfile=tempfile()
+#' writeXStringSet(setNames(DNAStringSet(c('AAAAAAAAGG','AAAAAAAAGG')),
+#'  c('chrM','chr2')),filepath=mytempfile)
+#' Rsamtools::indexFa(mytempfile)
+#' cREF<-FaFile_Circ(Rsamtools::FaFile(mytempfile),circularRanges='chrM')
+#' cREF
+#' @export FaFile_Circ
+#' @exportClass FaFile_Circ
 
-
-
-
-#extending the class::
-
-# setMethod('getSeq',signature=c(e1 = 'Fafile', e2 = 'GRanges'),function(x,gr){
-# 	message('foo')
-# 	getSeq(x,gr)
-# })
-
-
-#Below is beofre I realized it was a refclass
-# FaFile_Circ<-setClass("FaFile_Circ", 
-# 	contains="FaFile",
-# 	slots=representation(circularRanges='character'),
-# 	prototype=list(circularRanges=DEFAULT_CIRC_SEQS)
-# 	)
-
-# FaFile_Circ <- function(seqinfo,...){
-# 	fafile <- FaFile(...)
-# }
-
-# FaFile_Circ(REF)
-
-
-FaFile_Circ<-setRefClass("FaFile_Circ", 
+FaFile_Circ<-setRefClass("FaFile_Circ",
 	contains="FaFile",
 	fields=representation(circularRanges='character'),
 	prototype=list(circularRanges=DEFAULT_CIRC_SEQS)
 )
 
+
+#' Yields a seqinfo object for the FaFile_Circ with it's circular ranges slot
+#' set appropriately
+#'
+#'
+#' @param x FaFile_Circ; the object to get the seqinfo for
+#'
+#' @return A Seqinfo object
+#'
+#' @seealso \code{\link{create_html_report}}
+#' @examples
+#'
+#' mytempfile=tempfile()
+#' writeXStringSet(setNames(DNAStringSet(c('AAAAAAAAGG','AAAAAAAAGG')),
+#'  c('chrM','chr2')),
+#'  filepath=mytempfile)
+#' Rsamtools::indexFa(mytempfile)
+#' cREF<-FaFile_Circ(Rsamtools::FaFile(mytempfile),circularRanges='chrM')
+#' seqinfo(cREF)
+#' @export
+
 setMethod(seqinfo,'FaFile_Circ',function (x){
-    gr <- scanFaIndex(x)
-    Seqinfo(as.character(seqnames(gr)), width(gr), as.character(seqnames(gr)) %in% x$circularRanges )
+    gr <- scanFaIndex(x$path)
+    Seqinfo(as.character(seqnames(gr)), width(gr),
+            isCircular = as.character(seqnames(gr)) %in% x$circularRanges )
 })
 
+
+#' Yields the sequence for a particular range on a circular Fasta File
+#' note that
+#'
+#'
+#' @param x FaFile_Circ; the object to get the seqinfo for
+#'
+#' @return A Seqinfo object
+#'
+#' @seealso \code{\link{create_html_report}}
+#' @examples
+#'
+#' mytempfile=tempfile()
+#' writeXStringSet(setNames(DNAStringSet(c('AAAAAAAAGG','AAAAAAAAGG')),
+#'  c('chrM','chr2')),filepath=mytempfile)
+#' Rsamtools::indexFa(mytempfile)
+#' cREF<-FaFile_Circ(Rsamtools::FaFile(mytempfile),circularRanges='chrM')
+#' seqinfo(cREF)
+#' @export
 
 
 setMethod('getSeq','FaFile_Circ', function (x, ...){
@@ -48,52 +79,72 @@ setMethod('getSeq','FaFile_Circ', function (x, ...){
 	}
     .local <- function (x, param, ...){
         if (missing(param)) {
-            scanFa(x, ...)
+            scanFa(x$path, ...)
         }
         else {
+################################################################################
+
             if (is(param, "GRanges")) {
-            	seqinfo(param) <- seqinfo(x)
+            	  stopifnot(all(seqlevels(param) %in% seqinfo(x)@seqnames))
+                seqinfo(param) <- seqinfo(x)[seqlevels(param)]
                 idx <- as.logical(strand(param) == "-")
-				chrends <- seqlengths(param)[as.character(param@seqnames)]
+				        chrends <- seqlengths(param)[as.character(param@seqnames)]
               	is_wrapping <- end(param) > chrends
-              	is_wrapping <- purrr::map_lgl(is_wrapping,isTRUE)
-              	circs_wrap <- isCircular(param)[as.character(seqnames(param[is_wrapping]))] 
-              	if(!all( purrr::map_lgl(circs_wrap,isTRUE) )) {
-              		stop('Out of bounds ranges detected which are not on circular chromosomes')
+              	is_wrapping <- vapply(is_wrapping,isTRUE,TRUE)
+              	wrapchrs<-as.character(seqnames(param[is_wrapping]))
+              	circs_wrap <- isCircular(param)[wrapchrs]
+
+              	if(!all( vapply(circs_wrap,isTRUE,TRUE) )) {
+              		stop('Out of bounds ranges detected which are ',
+              		     'not on circular chromosomes')
               	}
               	#
-              	if(any(purrr::map_lgl(is_wrapping,isTRUE))) {
+              	if(any(vapply(is_wrapping,isTRUE,TRUE))) {
 					wrapped_grs <- restrict(param[is_wrapping],chrends+1)
 					#get ends for the wrapped ranges
-					chrends_wrap <- seqlengths(wrapped_grs)[as.character(wrapped_grs@seqnames)]
+					wrappedchrs<-as.character(wrapped_grs@seqnames)
+					chrends_wrap <- seqlengths(wrapped_grs)[wrappedchrs]
 					#shift these wrapped ranges back to 1
 					wrapped_grs <- shift(wrapped_grs,-chrends_wrap)
 					#make sure they don't wrap twice
-					if(any(end(wrapped_grs) > chrends_wrap)) stop("Ranges wrapping twice isn't implemented yet...")			
+					if(any(end(wrapped_grs) > chrends_wrap)) stop("Ranges wrapping twice',
+					                                       ' isn't implemented yet...")
 					#also get the within bounds ranges
 					nonwrapped_grs <- restrict(param,end=chrends)
 					#scan seperately
-					dna <- scanFa(x, nonwrapped_grs,...)
-					wrap_dna <- scanFa(x, wrapped_grs,...)
+					dna <- scanFa(x$path, nonwrapped_grs,...)
+					wrap_dna <- scanFa(x$path, wrapped_grs,...)
 
 					#append the positive wraps to the end of the '+' rnages
-					if(any(is_wrapping[!idx])) dna[is_wrapping & (!idx)] <- xscat( dna[is_wrapping & (!idx)], wrap_dna[!idx[is_wrapping]] ) 
-
+					if(any(is_wrapping[!idx])){
+					  isposwrap<- is_wrapping & (!idx)
+					  posthatwrap<-!idx[is_wrapping]
+					  dna[isposwrap] <- xscat( dna[isposwrap],
+					                           wrap_dna[posthatwrap]
+					                           )
+        }
 					#reverse our negative ranges nad append their wraps to the start
 					if(any(idx)){
 						dna[idx] <- reverseComplement(dna[idx])
+						isnegwrap<-is_wrapping & (idx)
 						if(any(is_wrapping[idx])){
-							wrap_dna[idx[is_wrapping]] <- reverseComplement(wrap_dna[idx[is_wrapping]])
-							dna[is_wrapping & (idx)] <- xscat( wrap_dna[idx[is_wrapping]], dna[is_wrapping & (idx)] ) 
+              negsthatwrap<-idx[is_wrapping]
+						  wrap_dna[negsthatwrap] <- reverseComplement(
+						    wrap_dna[negsthatwrap]
+						  )
+							dna[isnegwrap] <- xscat(
+							  wrap_dna[negsthatwrap],
+							  dna[isnegwrap]
+							 )
 						}
 					}
 				}else{
-					dna <- scanFa(x, param, ...)
+					dna <- scanFa(x$path, param, ...)
 					idx <- as.logical(strand(param) == "-")
                 	if (any(idx)) dna[idx] <- reverseComplement(dna[idx])
 				}
             }else{
-            	dna <- scanFa(x, param, ...)
+            	dna <- scanFa(x$path, param, ...)
             }
             dna
         }
@@ -103,63 +154,4 @@ setMethod('getSeq','FaFile_Circ', function (x, ...){
 
 
 
-testthat::test_that("Test the getSeq methods with out FaFile_circ works properly",{
-	
 
-	#First veryify this functionality is missing
-
-	# REF<-Rsamtools::FaFile('pipeline/my_hg19.fa')
-	REF<-'test.fa'
-	writeXStringSet(setNames(DNAStringSet('AAAAAAAAGG'),'chrM'),filepath=REF)
-	indexFa(REF)
-	seqinfo(FaFile(REF))
-
-	#showMethod doesn't actually show code (just the package it's in)
-
-	#selectMethodd does though
-	#selectMethod('seqinfo',signature='FaFile')
-
-	cREF <- FaFile_Circ(FaFile(REF))
-	cREF <- FaFile_Circ(FaFile(REF),circularRanges='chrM')
-
-	grs <- GRanges(c('chrM:4-6:+','chrM:8-11:+','chrM:8-12:-'))
-
-
-	#So indeed even if I change the seqinfo function - I have to change.scan fa
-	getSeq(cREF,grs)
-
-	selectMethod('getSeq','FaFile')
-	showMethods(Rsamtools::scanFa,c('FaFile','GRanges'))
-	selectMethod(Rsamtools::scanFa,c('FaFile','GRanges'))
-	#this gets me to this C pointer... so I need to stop here
-
-
-	expect_equal(getSeq(cREF,grs[1]),setNames(DNAStringSet('AAA'),'chrM'))
-	expect_warning(getSeq(cREF,grs[1]),regexp=NA)
-
-	isCircular(grs@seqinfo)<-TRUE
-	seqlengths(grs@seqinfo)<-10
-
-	writeXStringSet(setNames(DNAStringSet(c('AAAAAAAAGG','AAAAAAAAGG')),c('chrM','chr2')),filepath='test.fa')
-	cREF<-FaFile_Circ(Rsamtools::FaFile('test.fa'))
-	Rsamtools::indexFa('test.fa')
-	expect_equal(as.character(getSeq(cREF)),setNames(c('AAAAAAAAGG','AAAAAAAAGG'),c('chrM','chr2')))
-
-	grs <- GRanges(c('chrM:4-6:+','chrM:8-11:+','chrM:8-12:-','chr2:8-12'))
-	isCircular(grs@seqinfo)['chrM']<-TRUE
-	seqlengths(grs@seqinfo)[]<-c(10)
-	expect_error(getSeq(cREF,grs),'not on circ')
-	expect_equal(as.character(getSeq(cREF,(grs[1:3]))),setNames(c('AAA','AGGA','TTCCT'),c('chrM','chrM','chrM')))
-
-
-	testcirctrs <- GRangesList(list(GRanges(c('chrM:4-6:+','chrM:8-11:+')),GRanges(c('chrM:8-11:-','chrM:4-6:-'))))
-	isCircular(seqinfo(testcirctrs))<-TRUE
-	seqlengths(testcirctrs)<-10
-
-	#this doesn't work, but at least the seqinfo method is being accessed
-	expect_error(extractTranscriptSeqs(FaFile(REF),testcirctrs),'truncated')
-
-	#Check we can retrieve the transcript sequences properly
-	expect_equal(extractTranscriptSeqs(cREF,testcirctrs),DNAStringSet(c('AAAAGGA','TCCTTTT')))
-
-})

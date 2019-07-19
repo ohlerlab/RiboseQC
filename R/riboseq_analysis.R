@@ -1,3 +1,6 @@
+#' @import Rsamtools
+NULL
+
 
 #' Perform a RiboseQC analysis
 #'
@@ -67,11 +70,6 @@
 #' @import Biostrings
 #' @import GenomicFeatures
 #' @import BiocGenerics
-#' @examples
-#' RiboseQC_analysis(annotation_file = annotation_file,
-#'   bam_files = bam_file,
-#'   fast_mode = TRUE,
-#'   create_report = FALSE )
 #' @export
 
 RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlength_choice_method="max_coverage",genome_seq=NULL,
@@ -83,7 +81,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 		}
 	}
 
-	
+
 
 	if(sum(duplicated(dest_names))>0){
 		stop(paste("duplicated 'dest_names' parameter (possibly same bam file). Please specify different 'dest_names'.",date(),"\n"))
@@ -128,18 +126,25 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 
 	if(!is.null(offsets_df)) stopifnot(c("read_length","cutoff") %in% colnames(offsets_df))
 
-	if(!is.null(genome_seq)){
+  fastainput <- !is.null(genome_seq)
+	if(fastainput){
 		stopifnot(file.exists(genome_seq))
-		genome_seq<-Rsamtools::FaFile(genome_seq)
+	  genome_seq<-Rsamtools::FaFile(genome_seq)
+	  Rsamtools::indexFa(genome_seq)
+		genome_seq<-FaFile_Circ(genome_seq)
+
 	}
-	
+
+
 
 	list_annotations<-list()
 
 	for(annots in 1:length(annotation_file)){
-		cat(paste("Loading annotation files in ",annotation_file[annots]," ... ", date(),"\n",sep = ""))
 
-		load_annotation(annotation_file[annots])
+
+	  cat(paste("Loading annotation files in ",annotation_file[annots]," ... ", date(),"\n",sep = ""))
+
+		load_annotation(annotation_file[annots],GTF_only=fastainput)
 		lst<-list(GTF_annotation)
 		names(lst)<-c("GTF_annotation")
 		list_annotations[[annots]]<-lst
@@ -149,7 +154,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 	cat(paste("Loading annotation files --- Done! ", date(),"\n",sep = ""))
 
 	GTF_annotation<-list_annotations[[1]]$GTF_annotation
-	
+
 
 
 	for(bammo in 1:length(bam_files)){
@@ -247,9 +252,9 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 		cat(paste("Extracting read lengths from ",bam_file," ... ", date(),"\n",sep=""))
 		maxmin <- reduceByYield(X=opts, YIELD=yiel, MAP=mapp, REDUCE=reduc)
 		cat(paste("Extracting read lengths --- Done! ", date(),"\n",sep=""))
-		
+
 		cat(paste("Extracting read lengths --- Done! ", date(),"\n",sep=""))
-		
+
 		readlengths<-seq(maxmin[[2]],maxmin[[1]])
 
 
@@ -919,11 +924,10 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 		if(!is.null(offsets_df)){
 			if(is.data.frame(offsets_df)){
 				res_rls$nucl$final_choice<-offsets_df%>%mutate(read_length=as.character(read_length))%>%DataFrame
-			}
-		}else{
+			}else{
 			stopifnot(names(res_rls)%in%names(offsets_df))
-			for(comp in names(res_rls)) res_rls[[comp]]$final_choice<-offsets_df[[comp]] 
-		}
+			for(comp in names(res_rls)) res_rls[[comp]]$final_choice<-offsets_df[[comp]]
+		}}
 
 		rl_cutoffs_comp<-lapply(res_rls, function(x){x$final_choice})
 
@@ -1904,9 +1908,9 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 
 		names(profiles_P_sites)<-c("P_sites_bins","P_sites_subcodon","Codon_counts","P_sites_percodon","P_sites_percodon_ratio",
 										"A_sites_percodon","A_sites_percodon_ratio","E_sites_percodon","E_sites_percodon_ratio")
-		
+
 		save(profiles_P_sites,file = paste(dira,"profiles_P_sites",sep = "/"))
-		
+
 		#save(list = c("ps_signals_tiles","ps_signals_tiles_all","ps_signals_win","ps_signals_win_all"),file = "ps_results_preprjan15")
 		cat(paste("Building aggregate P-sites profiles --- Done!", date(),"\n"))
 

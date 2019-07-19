@@ -1,5 +1,5 @@
 Package: RiboseQC
-Title: RiboseQC, a comprehensive Ribo-seq analysis tool
+Title: RiboseQC, a Comprehensive Ribo-Seq Analysis Tool
 Version: 0.99.0
 Author: "Lorenzo Calviello", "Dominique Sydow", "Dermot Harnett"
 Authors@R: c(person("Lorenzo", "Calviello", email = "calviello.l.bio@gmail.com", role = c("aut")),
@@ -7,13 +7,12 @@ Authors@R: c(person("Lorenzo", "Calviello", email = "calviello.l.bio@gmail.com",
     person("Dermot", "Harnett", email = "Dermot.Harnett@mdc-berlin.de", role = c("ctb","cre")),
     person("Uwe", "Ohler", email = "Uwe.Ohler@mdc-berlin.de", role = c("rev","fnd")))
 Maintainer: Dermot Harnett <dermot.harnett@mdc-berlin.de>
-Description: RiboseQC is a powerful analysis tool for the analysis of Ribo-seq data, which is able to provide read-length specific analysis of both cytoplasmic and organellar ribosome, and provides interactive visualization of results in a dynamic html report
-Depends: rmarkdown, rtracklayer, GenomicAlignments, BSgenome, GenomicFiles, devtools, reshape2, ggplot2, knitr, DT, gridExtra, ggpubr, viridis, Biostrings, GenomicFeatures, BiocGenerics, jsonlite
+Description: A powerful analysis tool for the analysis of Ribo-seq data, which is able to provide read-length specific analysis of both cytoplasmic and organellar ribosome, and provides interactive visualization of results in a dynamic html report
+Depends: Rsamtools,rmarkdown, rtracklayer, GenomicAlignments, BSgenome, GenomicFiles, devtools, reshape2, ggplot2, knitr, DT, gridExtra, ggpubr, viridis, Biostrings, GenomicFeatures, BiocGenerics, jsonlite
 License: GPL-3 or above
 Encoding: UTF-8
 LazyData: FALSE
-Name: RiboseQC
-biocViews: RiboSeq, GenomeAnnotation, Transcriptomics, Software, Coverage, RNASeq,
+biocViews: RiboSeq, Sequencing, QualityControl, DataImport, GenomeAnnotation, Transcriptomics, Software, Coverage, RNASeq,
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
 Suggests: 

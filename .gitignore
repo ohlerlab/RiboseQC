@@ -32,3 +32,9 @@ unsrturl.bst
 .seed
 .settings
 .tm_properties
+vignettes/tmp*
+vignettes/test*
+vignettes/root*
+vignettes/shoot*
+..Rcheck*
+Rcheck*

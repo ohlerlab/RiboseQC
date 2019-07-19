@@ -2,10 +2,18 @@
 ^\.Rproj\.user$
 devnotes_dermot.txt
 .DS_Store
-.git
-.RiboseQC.html
+.git/*
+^./RiboseQC.html$
 vignettes/*test*
 vignettes/*root*
 vignettes/*shoot*
 vignettes/*shoot*
+vignettes/*shoot*
+.DS_Store
+.RData
+.Rhistory
+.gitignore
+..Rcheck
+.Rproj.user
+.git
 

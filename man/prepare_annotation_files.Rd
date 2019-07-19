@@ -7,7 +7,8 @@
 prepare_annotation_files(annotation_directory, twobit_file, gtf_file,
   scientific_name = "Homo.sapiens", annotation_name = "genc25",
   export_bed_tables_TxDb = TRUE, forge_BSgenome = TRUE,
-  genome_seq = NULL, create_TxDb = TRUE)
+  genome_seq = NULL, circ_chroms = DEFAULT_CIRC_SEQS,
+  create_TxDb = TRUE)
 }
 \arguments{
 \item{annotation_directory}{The target directory which will contain the output files}

@@ -20,7 +20,10 @@
 # along with this software. If not, see
 # <http://www.gnu.org/licenses/>.
 
-
+#' @import GenomicRanges
+#' @import GenomicFeatures
+#' @import GenomicFiles
+NULL
 
 ######################################################################################################
 # Methods for RiboseQC report
@@ -75,9 +78,10 @@
 #' \code{\link{plot_codon_usage_positional_rmd}}, \code{\link{plot_codon_usage_positional}},
 #' \code{\link{plot_codon_usage_bulk_rmd}}, \code{\link{plot_codon_usage_bulk}}
 #' @examples
+#' \dontrun{
 #' sampnames = c("root","shoot")
-#' message('foo')
 #' create_html_report(input_files=paste(sampnames,"_results_RiboseQC",sep = ""), input_sample_names=sampnames,output_file =  'test_root_shoots.html',extended = FALSE)
+#' }
 #' @export
 
 create_html_report <- function(input_files, input_sample_names, output_file,extended=FALSE){
@@ -2270,15 +2274,19 @@ get_ps_fromsplicemin<-function(x,cutoff){
 #' load_annotation('test_arabidopsis.gtf.gz_Rannot')
 #' @export
 
-load_annotation<-function(path){
-    GTF_annotation<-get(load(path))
-    #genome_sequence<-get(library(GTF_annotation$genome_package,character.only = TRUE))
+load_annotation<-function(path,GTF_only=FALSE){
 
-    # library(GTF_annotation$genome_package,character.only = TRUE)
-    # genome_sequence<-get(GTF_annotation$genome_package)
+    GTF_annotation<-get(load(path))
+    if(!GTF_only){
+      genome_sequence<-get(library(GTF_annotation$genome_package,character.only = TRUE))
+      library(GTF_annotation$genome_package,character.only = TRUE)
+      genome_sequence<-get(GTF_annotation$genome_package)
+
+      assign('genome_seq',genome_sequence,envir = parent.frame())
+    }
 
     GTF_annotation<<-GTF_annotation
-    # genome_seq<<-genome_sequence
+
 }
 
 #' Calculate offsets from 5'end profiles
@@ -2467,7 +2475,7 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 #' @export
 
 prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,scientific_name="Homo.sapiens",
-                                   annotation_name="genc25",export_bed_tables_TxDb=TRUE,forge_BSgenome=TRUE,genome_seq=NULL,create_TxDb=TRUE){
+                                   annotation_name="genc25",export_bed_tables_TxDb=TRUE,forge_BSgenome=TRUE,genome_seq=NULL,circ_chroms=DEFAULT_CIRC_SEQS,create_TxDb=TRUE){
 
 
     DEFAULT_CIRC_SEQS <- unique(c("chrM","MT","MtDNA","mit","Mito","mitochondrion",
@@ -2501,7 +2509,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
 
 
         twobit_file<-normalizePath(twobit_file)
-    
+
         for (f in c(twobit_file)){
             if(file.access(f, 0)==-1) {
                 stop("
@@ -2511,8 +2519,8 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         }
 
         seqinfotwob<-seqinfo(TwoBitFile(twobit_file))
-        circss<-seqnames(seqinfotwob)[which(seqnames(seqinfotwob)%in%DEFAULT_CIRC_SEQS)]
-        seqinfotwob@is_circular[which(seqnames(seqinfotwob)%in%DEFAULT_CIRC_SEQS)]<-TRUE
+        circss<-seqnames(seqinfotwob)[which(seqnames(seqinfotwob)%in%circ_chroms)]
+        seqinfotwob@is_circular[which(seqnames(seqinfotwob)%in%circ_chroms)]<-TRUE
 
 
         circseed<-circss
@@ -2573,11 +2581,10 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
             genome_seq <- Rsamtools::FaFile(genome_seq)
         }
         if(!is(genome_seq,'FaFile_Circ')){
-            genome_seq <- FaFile_Circ(genome_seq,circularRanges=circss)
+            genome_seq <- FaFile_Circ(genome_seq,circularRanges=circ_chroms)
         }
         seqinfo_genome<-seqinfo(genome_seq)
-        seqinfo_genome@is_circular[which(seqnames(seqinfo_genome)%in%DEFAULT_CIRC_SEQS)]<-TRUE
-
+        seqinfo_genome@is_circular[which(seqnames(seqinfo_genome)%in%circ_chroms)]<-TRUE
     }
 
     #Create the TxDb from GTF and BSGenome info
@@ -2593,7 +2600,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
 
         genes<-genes(annotation)
         exons_ge<-exonsBy(annotation,by="gene")
-        exons_ge<-reduce(exons_ge)
+        exons_ge<-GenomicRanges::reduce(exons_ge)
 
         cds_gen<-cdsBy(annotation,"gene")
         cds_ge<-reduce(cds_gen)
