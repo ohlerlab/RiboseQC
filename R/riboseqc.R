@@ -2274,14 +2274,15 @@ get_ps_fromsplicemin<-function(x,cutoff){
 #' load_annotation('test_arabidopsis.gtf.gz_Rannot')
 #' @export
 
-load_annotation<-function(path,GTF_only=FALSE){
+load_annotation<-function(path){
 
     GTF_annotation<-get(load(path))
-    if(!GTF_only){
+	haspackage <- isTRUE(is.character(GTF_annotation$genome_package))
+    if(haspackage){
       genome_sequence<-get(library(GTF_annotation$genome_package,character.only = TRUE))
       library(GTF_annotation$genome_package,character.only = TRUE)
       genome_sequence<-get(GTF_annotation$genome_package)
-
+	  message(paste0('assigning genome package ',GTF_annotation$genome_package,' to the global workspace as genome_seq'))
       assign('genome_seq',genome_sequence,envir = parent.frame())
     }
 
