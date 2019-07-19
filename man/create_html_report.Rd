@@ -5,7 +5,7 @@
 \title{Create the RiboseQC analysis report in html}
 \usage{
 create_html_report(input_files, input_sample_names, output_file,
-  extended = F)
+  extended = FALSE)
 }
 \arguments{
 \item{input_files}{Character vector with full paths to data files

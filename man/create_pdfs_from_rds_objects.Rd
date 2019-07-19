@@ -13,12 +13,12 @@ create_pdfs_from_rds_objects(output_rds_path)
 This function creates PDF files from RDS object files.
 }
 \description{
-This function generates figures as PDF files from RDS object files - 
+This function generates figures as PDF files from RDS object files -
 it's essentially a workaround for  difficulty integrating pdfs into
 html reports.
 }
 \examples{
- 
+
 create_pdfs_from_rds_objects(paste('test_root_shoots.html',"_plots/rds/",sep=""))
 }
 \seealso{

@@ -4,11 +4,12 @@
 \alias{RiboseQC_analysis}
 \title{Perform a RiboseQC analysis}
 \usage{
-RiboseQC_analysis(annotation_file, bam_files, read_subset = T,
-  readlength_choice_method = "max_coverage", chunk_size = 5000000L,
-  write_tmp_files = T, dest_names = NA, rescue_all_rls = FALSE,
-  fast_mode = T, create_report = T, sample_names = NA,
-  report_file = NA, extended_report = F, pdf_plots = T)
+RiboseQC_analysis(annotation_file, bam_files, read_subset = TRUE,
+  readlength_choice_method = "max_coverage", genome_seq = NULL,
+  chunk_size = 5000000L, write_tmp_files = TRUE, dest_names = NA,
+  rescue_all_rls = FALSE, fast_mode = TRUE, create_report = TRUE,
+  sample_names = NA, report_file = NA, extended_report = FALSE,
+  pdf_plots = TRUE, offsets_df = NULL)
 }
 \arguments{
 \item{annotation_file}{Full path to the annotation file (*Rannot). Or, a vector with paths to one annotation file per bam file.}
