@@ -3,7 +3,7 @@
 devnotes_dermot.txt
 .DS_Store
 .git/*
-.RiboseQC.html
+^./RiboseQC.html$
 vignettes/*test*
 vignettes/*root*
 vignettes/*shoot*

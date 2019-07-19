@@ -31,7 +31,7 @@ As a first step, let's load the package:
 ```{r load_lib}
 library("RiboseQC")
 tmp_dir <- tempdir()
-file.path()
+tmp_dir <- '/var/folders/5t/j5mzk77n11b5w4q_54rlq97m0000gn/T//RtmpizQSbx'
 ```
 
 
@@ -41,8 +41,9 @@ Let's now download annotation for *Homo sapiens*: a subset of the GENCODE 25 ann
 
 ```{r create_dirs_hum}
 
-download.file("https://drive.google.com/uc?export=download&id=1n6UA5cSz6djx0dY_7sI57177T-kyZhhT",destfile = file.path(tmp_dir,"test_human.2bit"))
-download.file("https://drive.google.com/uc?export=download&id=19Am9-iMEyB-AcIsVRdIqrF-BVdQYrcaI",destfile = file.path(tmp_dir,"test_human.gtf"))
+# download.file("https://drive.google.com/uc?export=download&id=1n6UA5cSz6djx0dY_7sI57177T-kyZhhT",destfile = file.path(tmp_dir,"test_human.2bit"))
+# download.file("https://drive.google.com/uc?export=download&id=19Am9-iMEyB-AcIsVRdIqrF-BVdQYrcaI",destfile = file.path(tmp_dir,"test_human.gtf"))
+tmp_dir='/Users/dharnet/projects/Riboseqc_exampledata/'
 
 ```
 
@@ -56,20 +57,20 @@ Moreover, such function reads a genome file in *.2bit* to forge a *BSgenome* pac
 ```{r create_annot_hum}
 
 prepare_annotation_files(annotation_directory = tmp_dir,
-                         twobit_file = file.path(tmp_dir,"test_human.2bit"),
+                         # twobit_file = file.path(tmp_dir,"test_human.2bit"),
+                         genome_seq = file.path(tmp_dir,"test_human.fa"),
                          gtf_file = file.path(tmp_dir,"test_human.gtf"),scientific_name = "Human.test",
                          annotation_name = "genc25_22M",
                          export_bed_tables_TxDb = FALSE,
-                         forge_BSgenome = TRUE,
+                         forge_BSgenome = FALSE,
                          create_TxDb = TRUE)
-
 ```
 
 
 We can now read such information using the *load_annotation* function:
 
 ```{r load_hum}
-load_annotation("test_human.gtf_Rannot")
+load_annotation(file.path(tmp_dir,"test_human.gtf_Rannot"))
 ```
 
 Two objects have now been created: a *genome_seq* object links to the *BSgenome* package we just created and loaded (containing genome sequences), and a *GTF_annotation* object containing important information present in our *.gtf* file.
@@ -137,7 +138,7 @@ Let's now download a subset of a Ribo-seq dataset in HEK293 cells [2].
 
 
 ```{r human_report_1}
-if(!file.exists('test_human_hek.bam')) download.file("https://drive.google.com/uc?export=download&id=11PP5y2QH7si81rbEBJsOB-Lt3l_JowRW",destfile = file.path(tmp_dir,"test_human_hek.bam"))
+if(!file.exists(file.path(tmp_dir,'test_human_hek.bam'))) download.file("https://drive.google.com/uc?export=download&id=11PP5y2QH7si81rbEBJsOB-Lt3l_JowRW",destfile = file.path(tmp_dir,"test_human_hek.bam"))
 ```
 
 We now perform different sets of calculations on our data (including read-length and organelle-specific metagene analyses), using the annotation we previously created. Several files (including automatically generated P_sites positions, and other output from the analysis pipeline) will be automatically created. 
@@ -153,7 +154,7 @@ For example, the profile of P-site positions along the CDS can be visualized usi
 
 ```{r human_report_3,warning=FALSE, results='asis', fig.width=12, fig.height=10, dpi=120}
 
-readRDS("test_human_hek.html_plots/rds/sample1_nucl_4_profiles_P_sites_metagene_subcodon_all")[[1]]
+readRDS(file.path(tmp_dir,"test_human_hek.html_plots/rds/sample1_nucl_4_profiles_P_sites_metagene_subcodon_all"))[[1]]
 
 ```
 
@@ -172,6 +173,7 @@ download.file("https://drive.google.com/uc?export=download&id=1yffqKkfohGx9y7XRZ
 
 prepare_annotation_files(annotation_directory = tmp_dir,
                          twobit_file = file.path(tmp_dir,"test_yeast.2bit"),
+                         # genome_seq = file.path(tmp_dir,"test_yeast.2bit"),
                          gtf_file = file.path(tmp_dir,"test_yeast.gtf"),scientific_name = "yeast.test",
                          annotation_name = "yeast_custom",
                          export_bed_tables_TxDb = TRUE,
@@ -182,7 +184,7 @@ prepare_annotation_files(annotation_directory = tmp_dir,
 As before, we can explore different sequences and regions extracted from annotation.
 
 ```{r yeast_2}
-load_annotation("test_yeast.gtf_Rannot")
+load_annotation(file.path(tmp_dir,"test_yeast.gtf_Rannot"))
 
 genome_seq[["II"]]
 genome_seq[["Mito"]]
@@ -199,9 +201,9 @@ download.file("https://drive.google.com/uc?export=download&id=18gQF2SxxsGQqVfhUw
 
 download.file("https://drive.google.com/uc?export=download&id=1HBb58mOt1vmf58yqz-wkZzfxZhBl_tmO",destfile = file.path(tmp_dir,"test_yeast_TCP_SSU.bam"))
 
-bam_filepath_y<-c("test_yeast_TCP_input.bam","test_yeast_TCP_RS.bam","test_yeast_TCP_SSU.bam")
+bam_filepath_y<-file.path(tmp_dir,c("test_yeast_TCP_input.bam","test_yeast_TCP_RS.bam","test_yeast_TCP_SSU.bam"))
 
-RiboseQC_analysis(annotation_file=file.path(tmp_dir,"test_yeast.gtf_Rannot"),bam_files = bam_filepath_y,fast_mode = T,report_file = file.path(tmp_dir,"test_yeast_TCP.html"),sample_names = c("input","RS","SSU"),dest_names = file.path(tmp_dir,c("input","RS","SSU")),write_tmp_files = F)
+RiboseQC_analysis(annotation_file=file.path(tmp_dir,"test_yeast.gtf_Rannot"),bam_files = bam_filepath_y,fast_mode = TRUE,report_file = file.path(tmp_dir,"test_yeast_TCP.html"),sample_names = c("input","RS","SSU"),dest_names = file.path(tmp_dir,c("input","RS","SSU")),write_tmp_files = F)
 ```
 
 The report allows to compare different samples side-by-side using tabs for different samples.
@@ -209,9 +211,9 @@ For example, the 5'end profiles of different read lengths around start and stop 
 
 
 ```{r yeast_4, warning=FALSE, results='asis', fig.width=12, fig.height=10, dpi=120}
-as_ggplot(readRDS("test_yeast_TCP.html_plots/rds/SSU_nucl_4_profiles_fivepr_metagene_subcodon_log2")[[1]])
+as_ggplot(readRDS(file.path(tmp_dir,"test_yeast_TCP.html_plots/rds/SSU_nucl_4_profiles_fivepr_metagene_subcodon_log2"))[[1]])
 
-as_ggplot(readRDS("test_yeast_TCP.html_plots/rds/RS_nucl_4_profiles_fivepr_metagene_subcodon_log2")[[1]])
+as_ggplot(readRDS(file.path(tmp_dir,"test_yeast_TCP.html_plots/rds/RS_nucl_4_profiles_fivepr_metagene_subcodon_log2"))[[1]])
 ```
 
 
@@ -225,28 +227,40 @@ We now create the annotation files for *Arabidopsis thaliana*. We will use a cus
 download.file("https://drive.google.com/uc?export=download&id=1gTxlR66fRX0GsHsWtJB7piLelM8jhZGu",destfile = file.path(tmp_dir,"test_arabidopsis.2bit"))
 
 download.file("https://drive.google.com/uc?export=download&id=1jYbdvaGfVnMx38X1P85Ounyq9jGwRVgP",destfile = file.path(tmp_dir,"test_arabidopsis.gtf.gz"))
+list.files(tmp_dir)
 
 prepare_annotation_files(annotation_directory = tmp_dir,
                          twobit_file = file.path(tmp_dir,"test_arabidopsis.2bit"),
+                         # genome_seq = file.path(tmp_dir,"test_arabidopsis.fa"),
                          gtf_file = file.path(tmp_dir,"test_arabidopsis.gtf.gz"),scientific_name = "arabidopsis.test",
                          annotation_name = "araport11_custom",export_bed_tables_TxDb = TRUE,
                          forge_BSgenome = TRUE,
-                         create_TxDb = TRUE)
+                         create_TxDb = TRUE,genome_seq = '../test_arabidopsis.fa')
 ```
 
 We will now download two sample datasets from a Ribo-seq experiments in Arabidopsis roots and shoots [5].
 
 ```{r arab_2}
 
-annotation="test_arabidopsis.gtf.gz_Rannot"
+annotation=file.path(tmp_dir,"test_arabidopsis.gtf.gz_Rannot")
+annotation%>%file.exists
 
 
 download.file("https://drive.google.com/uc?export=download&id=144PIK15iJrDSshMWsGbl9zQvT27Z1fzt",destfile = file.path(tmp_dir,"test_arabidopsis_root.bam"))
 download.file("https://drive.google.com/uc?export=download&id=1VVdMi0ho0LiRCld6-3vzibtg_CyPSTj3",destfile = file.path(tmp_dir,"test_arabidopsis_shoot.bam"))
 
-bam_filepath=file.path(tmp_dir,c("test_arabidopsis_root.bam","test_arabidopsis_shoot.bam"))
+load_annotation(annotation)
 
-RiboseQC_analysis(annotation_file=file.path(annotation,bam_files = bam_filepath,fast_mode = TRUE,report_file = file.path(tmp_dir,"test_root_shoots.html"),dest_names = c("root","shoots"),sample_names = c("root","shoots"),write_tmp_files = FALSE)
+tmp_dir2="/var/folders/5t/j5mzk77n11b5w4q_54rlq97m0000gn/T//RtmpOFmFiU"
+
+bam_filepath=file.path(tmp_dir,c("test_arabidopsis_root.bam","test_arabidopsis_shoot.bam"))
+RiboseQC_analysis(annotation_file=annotation,bam_files = bam_filepath,fast_mode = TRUE,report_file = file.path(tmp_dir,"test_root_shoots.html"),dest_names = c("root","shoots"),sample_names = c("root","shoots"),
+                  # genome_seq=here::here('test_arabidopsis'),
+                  write_tmp_files = FALSE
+                  )
+# 
+# RiboseQC_analysis(annotation_file=annotation,bam_files = bam_filepath,fast_mode = TRUE,report_file = file.path(tmp_dir,"test_root_shoots.html"),dest_names = c("root2","shoots2"),sample_names = c("root","shoots"),write_tmp_files = FALSE,genome_seq=here::here('test_arabidopsis.fa'))
+
 ```
 
 Despite the lack of a dedicated treatment to purify chloroplast ribosomes in these Ribo-seq experiments (e.g. using chloramphenicol), it is possible to detect footprints from distinct organelles, enriched in the shoots sample rather than roots one.
@@ -254,13 +268,14 @@ Despite the lack of a dedicated treatment to purify chloroplast ribosomes in the
 For instance, we can visualize the amount of footprints mapping to different organelles and biotypes in the two samples:
 
 ```{r arab_3}
-readRDS("test_root_shoots.html_plots/rds/all_samples_1_readlocdist")[[1]]
+readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/all_samples_1_readlocdist"))[[1]]
 ```
 
 or visualize z-scored positional codon usage values, calculated using A-site positions for chloroplast ribosomes in the shoots sample:
 
 ```{r arab_4, warning=FALSE, results='asis', fig.width=12, fig.height=16, dpi=150}
-as_ggplot(readRDS("./test_root_shoots.html_plots/rds/shoots_ChrC_7_codonusage_positional_A-sites_per_codon_all_zscore")[[1]])
+
+as_ggplot(readRDS(file.path(tmp_dir,"./test_root_shoots.html_plots/rds/shoots_ChrC_7_codonusage_positional_A-sites_per_codon_all_zscore"))[[1]])
 ```
 
 Much more information is available in the html reports, including read length distributions per biotype and compartment, statistics on codon usage, and analysis of the highest mapping positions in the genome.

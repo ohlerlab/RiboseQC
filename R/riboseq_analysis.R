@@ -1,3 +1,6 @@
+#' @import Rsamtools
+NULL
+
 
 #' Perform a RiboseQC analysis
 #'
@@ -67,11 +70,6 @@
 #' @import Biostrings
 #' @import GenomicFeatures
 #' @import BiocGenerics
-#' @examples
-#' RiboseQC_analysis(annotation_file = annotation_file,
-#'   bam_files = bam_file,
-#'   fast_mode = TRUE,
-#'   create_report = FALSE )
 #' @export
 
 RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlength_choice_method="max_coverage",genome_seq=NULL,
@@ -927,7 +925,6 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=TRUE,readlengt
 			if(is.data.frame(offsets_df)){
 				res_rls$nucl$final_choice<-offsets_df%>%mutate(read_length=as.character(read_length))%>%DataFrame
 			}else{
-			 browser()
 			stopifnot(names(res_rls)%in%names(offsets_df))
 			for(comp in names(res_rls)) res_rls[[comp]]$final_choice<-offsets_df[[comp]]
 		}}

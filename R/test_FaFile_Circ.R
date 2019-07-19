@@ -1,7 +1,8 @@
+library(testthat)
 
 
 testthat::test_that("Test the getSeq methods with out FaFile_circ works properly",{
-  library()
+  #library(RiboseQC)
 
   #First veryify this functionality is missing
 
