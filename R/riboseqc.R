@@ -2367,11 +2367,12 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 
 
 
+
 #' Prepare comprehensive sets of annotated genomic features
 #'
 #' This function processes a gtf file and a twobit file (created using faToTwoBit from ucsc tools: http://hgdownload.soe.ucsc.edu/admin/exe/ ) to create a comprehensive set of genomic regions of interest in genomic and transcriptomic space (e.g. introns, UTRs, start/stop codons).
 #'    In addition, by linking genome sequence and annotation, it extracts additional info, such as gene and transcript biotypes, genetic codes for different organelles, or chromosomes and transcripts lengths.
-#' @keywords Ribo-seQC
+#' @keywords SaTAnn, RiboseQC
 #' @author Lorenzo Calviello, \email{calviello.l.bio@@gmail.com}
 #' @param annotation_directory The target directory which will contain the output files
 #' @param twobit_file Full path to the genome file in twobit format
@@ -2787,6 +2788,17 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         GTF_annotation<-list(transcripts_db,txs_gene,ifs,unq_stst,cds_tx,intron_names_tx,cds_gen,exons_tx,nsns,unq_intr,genes,threeutrs,fiveutrs,ncisof,ncrnas,introns,intergenicRegions,trann,cds_txscoords,translations,pkgnm,stop_inannot)
         names(GTF_annotation)<-c("txs","txs_gene","seqinfo","start_stop_codons","cds_txs","introns_txs","cds_genes","exons_txs","exons_bins","junctions","genes","threeutrs","fiveutrs","ncIsof","ncRNAs","introns","intergenicRegions","trann","cds_txs_coords","genetic_codes","genome_package","stop_in_gtf")
         
+        txs_all<-unique(GTF_annotation$trann$transcript_id)
+        txs_exss<-unique(names(GTF_annotation$exons_txs))
+        
+        txs_notok<-txs_all[!txs_all%in%txs_exss]
+        if(length(txs_notok)>0){
+            set.seed(666)
+            cat(paste("Warning: ",length(txs_notok)," txs with incorrect/unspecified exon boundaries - e.g. trans-splicing events, examples: "
+                      ,paste(txs_notok[sample(1:length(txs_notok),size = min(3,length(txs_notok)),replace = F)],collapse=", ")," - ",date(),"\n",sep = ""))
+        }
+        
+        
         #Save as a RData object
         save(GTF_annotation,file=paste(annotation_directory,"/",basename(gtf_file),"_Rannot",sep=""))
         cat(paste("Rannot object created!   ",date(),"\n",sep = ""))
@@ -2797,15 +2809,18 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
             cat(paste("Exporting annotation tables ... ",date(),"\n",sep = ""))
             for(bed_file in c("fiveutrs","threeutrs","ncIsof","ncRNAs","introns","cds_txs_coords")){
                 bf<-GTF_annotation[[bed_file]]
-                bf_t<-data.frame(chromosome=seqnames(bf),start=start(bf),end=end(bf),name=".",score=width(bf),strand=strand(bf))
-                meccole<-mcols(bf)
-                for(mecc in names(meccole)){
-                    if(is(meccole[,mecc],"CharacterList") | is(meccole[,mecc],"NumericList") | is(meccole[,mecc],"IntegerList")){
-                        meccole[,mecc]<-paste(meccole[,mecc],collapse=";")
+                bf_t<-bf
+                if(length(bf)>0){
+                    bf_t<-data.frame(chromosome=seqnames(bf),start=start(bf),end=end(bf),name=".",score=width(bf),strand=strand(bf))
+                    meccole<-mcols(bf)
+                    for(mecc in names(meccole)){
+                        if(is(meccole[,mecc],"CharacterList") | is(meccole[,mecc],"NumericList") | is(meccole[,mecc],"IntegerList")){
+                            meccole[,mecc]<-paste(meccole[,mecc],collapse=";")
+                        }
                     }
+                    bf_t<-cbind.data.frame(bf_t,meccole)
                 }
-                bf_t<-cbind.data.frame(bf_t,meccole)
-                write.table(bf_t,file = paste(annotation_directory,"/",bed_file,"_similbed.bed",sep=""),sep="\t",quote = FALSE,row.names = FALSE)
+                write.table(bf_t,file = paste(annotation_directory,"/",bed_file,"_similbed.bed",sep=""),sep="\t",quote = FALSE,row.names = FALSE,col.names = F)
                 
             }
             
@@ -2823,7 +2838,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         
     }
     
-}
+    }
 
 
 #' Perform a Ribo-seQC analysis
@@ -3104,13 +3119,11 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
             cntsss_all <- y[["counts_all_genes"]]
             cntsss_all$reads <- cntsss_all$reads+x[["counts_all_genes"]]$reads
             
-            
             cntsss_unq <- y[["counts_cds_genes_unq"]]
             cntsss_unq$reads <- cntsss_unq$reads+x[["counts_cds_genes_unq"]]$reads
             
             cntsss_all_unq <- y[["counts_all_genes_unq"]]
             cntsss_all_unq$reads <- cntsss_all_unq$reads+x[["counts_all_genes_unq"]]$reads
-            
             
             reads_summary <- mapply(FUN = function(x,y){DataFrame(as.matrix(x)+as.matrix(y))}, x[["reads_summary"]], y[["reads_summary"]], SIMPLIFY = FALSE)
             reads_summary_unq <- mapply(FUN = function(x,y){DataFrame(as.matrix(x)+as.matrix(y))}, x[["reads_summary_unq"]], y[["reads_summary_unq"]], SIMPLIFY = FALSE)
@@ -3513,14 +3526,11 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
                 }
             }
             
-            
-            
             fivs<-GRanges(seqnames = seqnames(GTF_annotation$cds_txs_coords),ranges = IRanges(start=1,end = start(GTF_annotation$cds_txs_coords)),strand="*")
             fivs<-fivs[as.character(seqnames(fivs))%in%ok_txs]
             fivs_gen<-unlist(pmapFromTranscripts(fivs,transcripts = GTF_annotation$exons_txs[as.character(seqnames(fivs))],ignore.strand=F))
             fivs_gen<-fivs_gen[fivs_gen$hit]
             fivs_gen<-split(fivs_gen,names(fivs_gen))
-            
             
             threes<-GRanges(seqnames = seqnames(GTF_annotation$cds_txs_coords),ranges = IRanges(start=end(GTF_annotation$cds_txs_coords),end = GTF_annotation$cds_txs_coords$lentx),strand="*")
             threes<-threes[as.character(seqnames(threes))%in%ok_txs]
@@ -3529,7 +3539,6 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
             threes_gen<-split(threes_gen,names(threes_gen))
             
             cds_gen<-GTF_annotation$cds_txs[ok_txs]
-            
             
             tile_cds<-tile_cds[as.character(seqnames(tile_cds))%in%ok_txs]
             ok_txs<-unique(as.character(seqnames(tile_cds)))
@@ -3885,6 +3894,14 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
         #operations on the chunk (here count reads and whatnot)
         
         mapp<-function(x){
+            
+            if(strandedness=="inverse"){
+                x<-invertStrand(x)
+                strandedness<-F
+            }
+            
+            mcols(x)$MD[which(is.na(mcols(x)$MD))]<-"NO"
+            
             x_I<-x[grep("I",cigar(x))]
             
             if(length(x_I)>0){
