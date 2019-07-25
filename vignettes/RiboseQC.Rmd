@@ -30,8 +30,7 @@ As a first step, let's load the package:
 
 ```{r load_lib}
 library("RiboseQC")
-tmp_dir <- tempdir()
-tmp_dir <-'/var/folders/5t/j5mzk77n11b5w4q_54rlq97m0000gn/T//RtmpLY1Rhl'
+if(!exists('tmp_dir')) tmp_dir <-  tempdir()
 download.file <- function(file,destfile){
   if(!file.exists(destfile)) utils::download.file(file,  destfile = destfile) 
 }
@@ -65,7 +64,7 @@ genome_seq<-FaFile_Circ(FaFile(file.path(tmp_dir,"test_human.fa")))
 annot_file <- file.path(tmp_dir,"test_human.gtf_Rannot")
 
 if(! file.exists(annot_file)){
-  prepare_annotation_files(annotation_directory = tmp_dir,
+  annot_file <- prepare_annotation_files(annotation_directory = tmp_dir,
                          # twobit_file = file.path(tmp_dir,"test_human.2bit"),
                          genome_seq = file.path(tmp_dir,"test_human.fa"),
                          gtf_file = file.path(tmp_dir,"test_human.gtf"),
@@ -262,7 +261,6 @@ We will now download two sample datasets from a Ribo-seq experiments in Arabidop
 
 annotation=file.path(tmp_dir,"test_arabidopsis.gtf.gz_Rannot")
 annotation%>%file.exists
-
 
 download.file("https://drive.google.com/uc?export=download&id=144PIK15iJrDSshMWsGbl9zQvT27Z1fzt",destfile = file.path(tmp_dir,"test_arabidopsis_root.bam"))
 download.file("https://drive.google.com/uc?export=download&id=1VVdMi0ho0LiRCld6-3vzibtg_CyPSTj3",destfile = file.path(tmp_dir,"test_arabidopsis_shoot.bam"))
