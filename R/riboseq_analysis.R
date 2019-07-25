@@ -75,7 +75,8 @@ NULL
 #' @import Biostrings
 #' @import GenomicFeatures
 #' @import BiocGenerics
-#' @export
+#' @import GenomicRanges
+#' @export 
 
 RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, readlength_choice_method = "max_coverage", 
     genome_seq = NULL, stranded = TRUE, normalize_cov = TRUE, chunk_size = 5000000L, 
@@ -2430,6 +2431,7 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
         
         res_all <- list(read_stats, profiles_fivepr, selection_cutoffs, P_sites_stats, 
             profiles_P_sites, sequence_analysis)
+        
         names(res_all) <- c("read_stats", "profiles_fivepr", "selection_cutoffs", 
             "P_sites_stats", "profiles_P_sites", "sequence_analysis")
         if (length(merged_all_ps) > 0) {
@@ -2505,18 +2507,28 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
         cat(paste("Exporting files --- Done!", date(), "\n\n"))
     }
     
-    if (create_report) {
-        cat(paste("Creating html report in ", report_file, " ... ", date(), "\n", 
-            sep = ""))
-        
-        create_html_report(input_files = paste(dest_names, "_results_RiboseQC", sep = ""), 
-            input_sample_names = sample_names, output_file = report_file, extended = extended_report)
-        cat(paste("Creating html report --- Done!", date(), "\n\n"))
-        if (pdf_plots) {
-            create_pdfs_from_rds_objects(output_rds_path = paste(report_file, "_plots/rds/", 
-                sep = ""))
-        }
-        
+    foo <- function(create_report, report_file, dest_names, sample_names, extended_report, pdf_plots) {
+      
+      if (create_report) {
+          cat(paste("Creating html report in ", report_file, " ... ", date(), "\n", 
+              sep = ""))
+          
+          create_html_report(input_files = paste(dest_names, "_results_RiboseQC", sep = ""), 
+              input_sample_names = sample_names, output_file = report_file, extended = extended_report)
+          cat(paste("Creating html report --- Done!", date(), "\n\n"))
+          
+          if (pdf_plots) {
+              create_pdfs_from_rds_objects(output_rds_path = paste(report_file, "_plots/rds/", 
+                  sep = ""))
+          }
+          
+      }
+    
     }
     
 }
+
+
+
+
+

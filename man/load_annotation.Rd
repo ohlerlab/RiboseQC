@@ -4,7 +4,7 @@
 \alias{load_annotation}
 \title{Load genomic features and genome sequence}
 \usage{
-load_annotation(path, GTF_only = FALSE)
+load_annotation(path)
 }
 \arguments{
 \item{path}{Full path to the *Rannot R file in the annotation directory used in the \code{prepare_annotation_files function}}

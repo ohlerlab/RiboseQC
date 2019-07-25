@@ -38,14 +38,14 @@ For the report, a RMarkdown file is rendered as html document, saved as \code{ou
 Additionally, all figures in the report are saved as PDF figures
 in an extra folder in the same directory as the report html file. \cr \cr
 Example: \cr
-\code{output_file <- "\\mydir\\myreport.html"} will generate
+\code{output_file <- '\\mydir\\myreport.html'} will generate
 the html report \code{\\mydir\\myreport.html} and
 the folder \code{\\mydir\\myreport_plots\\} for the RDS object files to be stored in.
 }
 \examples{
 \dontrun{
-sampnames = c("root","shoot")
-create_html_report(input_files=paste(sampnames,"_results_RiboseQC",sep = ""), input_sample_names=sampnames,output_file =  'test_root_shoots.html',extended = FALSE)
+sampnames = c('root','shoot')
+create_html_report(input_files=paste(sampnames,'_results_RiboseQC',sep = ''), input_sample_names=sampnames,output_file =  'test_root_shoots.html',extended = FALSE)
 }
 }
 \seealso{

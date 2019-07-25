@@ -29,7 +29,7 @@ These plots are displayed in the RiboseQC report in section 4.2.1.
 }
 \examples{
 data(res_all)
-plot_frame_dist_boxplot_rmd(res_all$selection_cutoffs$analysis_frame_cutoff, 'shoot', paste0('myfigpath', "rds/"))
+plot_frame_dist_boxplot_rmd(res_all$selection_cutoffs$analysis_frame_cutoff, 'shoot', paste0('myfigpath', 'rds/'))
 }
 \seealso{
 \code{\link{create_html_report}}

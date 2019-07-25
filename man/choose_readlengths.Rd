@@ -9,7 +9,7 @@ choose_readlengths(summary_data, choice = "max_coverage", nt_signals)
 \arguments{
 \item{summary_data}{output data from the \code{calc_cutoffs_from_profiles} function}
 
-\item{choice}{Method used to select readlengths, defaults to "max_coverage"}
+\item{choice}{Method used to select readlengths, defaults to 'max_coverage'}
 
 \item{nt_signals}{Profiles of 5'ends around start codons}
 }
@@ -21,15 +21,15 @@ the set of chosen read lengths with cutoffs, and \code{data}, the complete stats
 This function selects a subset of readlenghts to be used in the P-sites calculation step
 }
 \details{
-Three different methods are available to choose readlengths: the "max_coverage" method
+Three different methods are available to choose readlengths: the 'max_coverage' method
 selects all read lenghts with more in-frame signal compared to out-of-frame signal, on all codons;
-the "max_inframe" method starts with the most accurate read length and
+the 'max_inframe' method starts with the most accurate read length and
 progressively selects read lengths which add in-frame signals in codons not covered by previous read lengths;
-the "all" method selects all available read lengths
+the 'all' method selects all available read lengths
 }
 \examples{
 data(res_all)
-choose_readlengths(res_all$results_cutoffs,choice="max_coverage",nt_signals=res_all$profiles_fivepr[["five_prime_subcodon"]])
+choose_readlengths(res_all$results_cutoffs,choice='max_coverage',nt_signals=res_all$profiles_fivepr[['five_prime_subcodon']])
 }
 \seealso{
 \code{\link{calc_cutoffs_from_profiles}}

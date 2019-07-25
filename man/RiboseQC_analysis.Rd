@@ -2,14 +2,15 @@
 % Please edit documentation in R/riboseq_analysis.R
 \name{RiboseQC_analysis}
 \alias{RiboseQC_analysis}
-\title{Perform a RiboseQC analysis}
+\title{Perform a Ribo-seQC analysis}
 \usage{
 RiboseQC_analysis(annotation_file, bam_files, read_subset = TRUE,
   readlength_choice_method = "max_coverage", genome_seq = NULL,
-  chunk_size = 5000000L, write_tmp_files = TRUE, dest_names = NA,
-  rescue_all_rls = FALSE, fast_mode = TRUE, create_report = TRUE,
-  sample_names = NA, report_file = NA, extended_report = FALSE,
-  pdf_plots = TRUE, offsets_df = NULL)
+  stranded = TRUE, normalize_cov = TRUE, chunk_size = 5000000L,
+  write_tmp_files = TRUE, dest_names = NA, rescue_all_rls = FALSE,
+  fast_mode = TRUE, create_report = TRUE, sample_names = NA,
+  report_file = NA, extended_report = FALSE, pdf_plots = TRUE,
+  offsets_df = NULL)
 }
 \arguments{
 \item{annotation_file}{Full path to the annotation file (*Rannot). Or, a vector with paths to one annotation file per bam file.}
@@ -18,7 +19,13 @@ RiboseQC_analysis(annotation_file, bam_files, read_subset = TRUE,
 
 \item{read_subset}{Select readlengths up to 99 percent of the reads, defaults to \code{TRUE}. Must be of length 1 or same length as bam_files.}
 
-\item{readlength_choice_method}{Method used to subset relevant read lengths (see \code{choose_readlengths} function); defaults to "max_coverage". Must be of length 1 or same length as bam_files.}
+\item{readlength_choice_method}{Method used to subset relevant read lengths (see \code{choose_readlengths} function); defaults to 'max_coverage'. Must be of length 1 or same length as bam_files.}
+
+\item{genome_seq}{An FaFile object, to be used instead of a BSgenome package}
+
+\item{stranded}{are the analyzed libraries strand-specific? TRUE, FALSE or 'inverse'. Defaults to \code{TRUE}}
+
+\item{normalize_cov}{export normalized (sum to 1 million) bedgraph files for coverage tracks? Defaults to \code{TRUE}}
 
 \item{chunk_size}{the number of alignments to read at each iteration, defaults to 5000000, increase when more RAM is available. Must be between 10000 and 100000000}
 
@@ -32,18 +39,20 @@ RiboseQC_analysis(annotation_file, bam_files, read_subset = TRUE,
 
 \item{create_report}{Create an html report showing the RiboseQC analysis results. Defaults to \code{TRUE}}
 
-\item{sample_names}{character vector containing the names for each sample analyzed (for the html report). Defaults to "sample1", "sample2" ...}
+\item{sample_names}{character vector containing the names for each sample analyzed (for the html report). Defaults to 'sample1', 'sample2' ...}
 
-\item{report_file}{desired filename for for the html report file. Defaults to the first entry of \code{bam_files} followed by ".html"}
+\item{report_file}{desired filename for for the html report file. Defaults to the first entry of \code{bam_files} followed by '.html'}
 
 \item{extended_report}{creates a large html report including codon occupancy for each read length. Defaults to \code{FALSE}}
 
 \item{pdf_plots}{creates a pdf file for each produced plot. Defaults to \code{TRUE}}
+
+\item{offsets_df}{optionally input an offsets_df created externally, note that this does not yet fully integrate with stats such as 'proportion in phase' it will however alter the psites which are outputted. Must have cols 'read_length','cutoff'}
 }
 \value{
-the function saves a "results_RiboseQC_all" R file appended to the bam_files path including the complete list of outputs described here.
-In addition, bigwig files for coverage value and P_sites position is appended to the bam_files path, including also a summary of P_sites selection statistics,
-a smaller "results_RiboseQC" R file used for creating a dynamic html report, and a "for_SaTAnn" R object that can be used in the SaTAnn pipeline.
+the function saves a 'results_RiboseQC_all' R file appended to the bam_files path including the complete list of outputs described here.
+In addition, bedgraph files for coverage value and P_sites position is appended to the bam_files path, including also a summary of P_sites selection statistics,
+a smaller 'results_RiboseQC' R file used for creating a dynamic html report, and a 'for_SaTAnn' R object that can be used in the SaTAnn pipeline.
 }
 \description{
 This function loads annotation created by the prepare_annotation_files function, and analyzes a BAM file.
@@ -85,4 +94,4 @@ number of reads mapping (also in percentage of total n of reads), and genomic fe
 \author{
 Lorenzo Calviello, \email{calviello.l.bio@gmail.com}
 }
-\keyword{RiboseQC}
+\keyword{Ribo-seQC}

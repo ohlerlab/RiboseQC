@@ -28,7 +28,7 @@ These plots are displayed in the RiboseQC report in section 7.
 }
 \examples{
 data(res_all)
-plot_codon_usage_positional_rmd(res_all, 'shoot', paste0('myfigpath', "rds/"))
+plot_codon_usage_positional_rmd(res_all, 'shoot', paste0('myfigpath', 'rds/'))
 }
 \seealso{
 \code{\link{create_html_report}}

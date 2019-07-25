@@ -34,7 +34,7 @@ is examplatory calculated
 }
 \examples{
 data(res_all)
-plot_codon_usage_bulk_rmd(res_all, 'shoot', paste0('myfigpath', "rds/"))
+plot_codon_usage_bulk_rmd(res_all, 'shoot', paste0('myfigpath', 'rds/'))
 }
 \seealso{
 \code{\link{create_html_report}}

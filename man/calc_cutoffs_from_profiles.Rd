@@ -25,17 +25,17 @@ This function calculates cutoffs and frame resolution for Ribo-seq reads,
 \details{
 Three methods are used and combined in the final choice:
  the position of maximum coverage around start codon is calculated for each transcript, and
- the most frequent one is stored in the "*_tab" objects. Such frequency values are also
+ the most frequent one is stored in the '*_tab' objects. Such frequency values are also
  subjected to k-means clustering (centers=3) and the first value belonging to the highest cluster
- is selected, output as "*km_tab" objects. Analysis of aggregate plots, instead of frequencies, is performed
- again using kmeans (centers=3) using the same analysis above and stored in the "*km_meta" objects,
- and by simply calculating the maximum value in the profile, stored in the "*meta" objects.
- for each method, all reads ("absolute_") or only in-frame positions ("in_frame_") are considered. The final choice takes the most
+ is selected, output as '*km_tab' objects. Analysis of aggregate plots, instead of frequencies, is performed
+ again using kmeans (centers=3) using the same analysis above and stored in the '*km_meta' objects,
+ and by simply calculating the maximum value in the profile, stored in the '*meta' objects.
+ for each method, all reads ('absolute_') or only in-frame positions ('in_frame_') are considered. The final choice takes the most
  frequent cutoff chosen in all methods applied to in-frame positions.
 }
 \examples{
 data(profiles_fivepr)
-calc_cutoffs_from_profiles(profiles_fivepr[["five_prime_subcodon"]][[1]][[1]],length_max = 100)
+calc_cutoffs_from_profiles(profiles_fivepr[['five_prime_subcodon']][[1]][[1]],length_max = 100)
 }
 \seealso{
 \code{\link{RiboseQC_analysis}}

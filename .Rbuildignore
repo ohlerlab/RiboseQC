@@ -16,4 +16,4 @@ vignettes/*shoot*
 ..Rcheck
 .Rproj.user
 .git
-
+TODOS.R

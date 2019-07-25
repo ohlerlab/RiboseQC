@@ -26,7 +26,7 @@ These plots are displayed in the RiboseQC report in section 8.
 }
 \examples{
 data(res_all)
-plot_codon_usage_bulk_rmd(res_all, 'shoot', paste0('myfigpath', "rds/"))
+plot_codon_usage_bulk_rmd(res_all, 'shoot', paste0('myfigpath', 'rds/'))
 }
 \seealso{
 \code{\link{create_html_report}}, \code{\link{get_metagene_data}}, \code{\link{plot_metagene_hm}}

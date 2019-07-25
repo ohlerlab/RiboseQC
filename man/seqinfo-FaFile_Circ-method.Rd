@@ -22,8 +22,8 @@ set appropriately
 
 mytempfile=tempfile()
 writeXStringSet(setNames(DNAStringSet(c('AAAAAAAAGG','AAAAAAAAGG')),
- c('chrM','chr2')),
- filepath=mytempfile)
+  c('chrM','chr2')),
+  filepath=mytempfile)
 Rsamtools::indexFa(mytempfile)
 cREF<-FaFile_Circ(Rsamtools::FaFile(mytempfile),circularRanges='chrM')
 seqinfo(cREF)
