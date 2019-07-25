@@ -104,11 +104,13 @@ create_html_report <- function(input_files, input_sample_names, output_file,exte
     dir.create(paste0(output_fig_path, "pdf/"), recursive=TRUE, showWarnings=FALSE)
     sink(file = paste(output_file,"_report_text_output.txt",sep = ""))
     # render RMarkdown file > html report
+    knitclean<-knitr::knit_meta(class=NULL, clean = TRUE)
     suppressWarnings(render(rmd_path,
            params = list(input_files = input_files,
                          input_sample_names = input_sample_names,
                          output_fig_path = output_fig_path),
            output_file = output_file))
+    gici<-gc()
     sink()
 }
 
@@ -191,7 +193,7 @@ create_pdfs_from_rds_objects <- function(output_rds_path){
 
 generate_rdata_list <- function(input_files){
     rdata_list <- list()
-    for (i in 1:length(input_files)){
+    for (i in seq_len(length(input_files))){
         load(input_files[i])
         rdata_list[[names(input_files)[i]]] <- res_all
     }
@@ -764,8 +766,8 @@ get_metagene_data <- function(data, profile_type, res, comp){
         # get read length data and format
         x <- signal[[rl]]
         x.m <- suppressMessages(melt(x))
-        x.m$pos <- 1:length(x)
-        x.m$frame <- paste0("frame ", rep(c(3,1,2),67)[1:length(x)])
+        x.m$pos <- seq_len(length(x))
+        x.m$frame <- paste0("frame ", rep(c(3,1,2),67)[seq_along(x)])
 
         # add read length data to list
         data_bar[[rl]] <- x.m
@@ -782,7 +784,7 @@ get_metagene_data <- function(data, profile_type, res, comp){
     rl_ok_single <- c(as.character(sort(as.integer(rl_ok_single), decreasing = FALSE)))
     data_none <- do.call(signal[rl_ok_single], what=rbind)
     rownames(data_none) <- rl_ok_single
-    colnames(data_none) <- 1:dim(data_none)[2]
+    colnames(data_none) <- seq_len(dim(data_none))[2]
     data_log2 <- log2(data_none+1)
     #modified to direct scaling
     #data_zscore <- t(scale(t(data_none), center=TRUE, scale=TRUE)) # scale centers (true) and scales (true) the columns of a numeric matrix, we want to scale per read length > transpose data_none to have rl as column
@@ -797,7 +799,7 @@ get_metagene_data <- function(data, profile_type, res, comp){
     rl_ok_all <- rl_ok[1]
     data_none <- do.call(signal[rl_ok_all], what=rbind)
     rownames(data_none) <- names(signal[rl_ok_all])
-    colnames(data_none) <- 1:dim(data_none)[2]
+    colnames(data_none) <- seq_len(dim(data_none))[2]
     data_log2 <- log2(data_none+1)
     #it needs the transpose as it's a 1-row matrix
     data_zscore <- t(scale(t(data_none), center=TRUE, scale=TRUE))
@@ -1346,7 +1348,7 @@ plot_frame_dist_boxplot <- function(analysis_frame_cutoff, comp, sample="", outp
 
 get_rl_and_cutoffs <- function(rdata_list) {
     datasets <- NULL
-    for (i in c(1:length(rdata_list))) {
+    for (i in c(seq_along(rdata_list))) {
         res_all <- rdata_list[[names(rdata_list)[i]]]
 
         sample <- names(rdata_list)[[i]]
@@ -1382,7 +1384,7 @@ get_rl_and_cutoffs <- function(rdata_list) {
 
 get_default_rl_selection <- function(rdata_list){
     datasets <- NULL
-    for (i in 1:length(rdata_list)){
+    for (i in seq_along(rdata_list)){
         res_all <- rdata_list[[names(rdata_list)[i]]]
         sample <- names(rdata_list)[[i]]
         comps <- names(res_all$selection_cutoffs$results_choice)
@@ -1418,7 +1420,7 @@ get_default_rl_selection <- function(rdata_list){
 
 get_top50_mapping <- function(rdata_list) {
     datasets <- list()
-    for (i in c(1:length(rdata_list))){
+    for (i in c(seq_along(rdata_list))){
         res_all <- rdata_list[[names(rdata_list)[i]]]
         data <- as.data.frame(res_all$sequence_analysis)
         data <- data[,c("score", "pct", "seqnames", "region", "gene_biotype", "gene", "seq")]
@@ -1446,10 +1448,10 @@ get_top50_mapping <- function(rdata_list) {
 
 get_top50_cds_genes <- function(rdata_list) {
     datasets <- list()
-    for (i in c(1:length(rdata_list))){
+    for (i in c(seq_along(rdata_list))){
         res_all <- rdata_list[[names(rdata_list)[i]]]
         rc_cds <- as.data.frame(res_all$read_stats$counts_cds_genes)
-        rc_cds <- rc_cds[with(rc_cds, order(-reads, chromosome)), ][1:50,]
+        rc_cds <- rc_cds[with(rc_cds, order(-reads, chromosome)), ][seq_len(50),]
         datasets[[names(rdata_list)[i]]] <- rc_cds
     }
     return(datasets)
@@ -1471,10 +1473,10 @@ get_top50_cds_genes <- function(rdata_list) {
 
 get_top50_all_genes <- function(rdata_list) {
     datasets <- list()
-    for (i in c(1:length(rdata_list))){
+    for (i in c(seq_along(rdata_list))){
         res_all <- rdata_list[[names(rdata_list)[i]]]
         rc_all <- as.data.frame(res_all$read_stats$counts_all_genes)
-        rc_all <- rc_all[with(rc_all, order(-reads, chromosome)), ][1:100,]
+        rc_all <- rc_all[with(rc_all, order(-reads, chromosome)), ][seq_len(100),]
         datasets[[names(rdata_list)[i]]] <- rc_all
     }
     return(datasets)
@@ -1660,7 +1662,7 @@ plot_codon_usage_positional_rmd <- function(data, sample="", output_rds_path="")
             cat("\n\n")
 
             # per codon count, read count, or codon-read ratio
-            for(i in 1:length(data_types)){
+            for(i in seq_along(data_types)){
                 data_type <- data_types[i]
                 cat("\n\n")
                 cat("##### ", names(data_type), " {.tabset} \n\n")
@@ -1873,7 +1875,7 @@ plot_codon_usage_bulk_rmd <- function(data, sample="", output_rds_path="") {
             cat("#### ", rl, " {.tabset} \n\n")
             cat("\n\n")
 
-            for(i in 1:length(data_types)){
+            for(i in seq_along(data_types)){
                 data_type <- data_types[i]
                 cat("\n\n")
                 cat("##### ", names(data_type), " {.tabset} \n\n")
@@ -2055,7 +2057,7 @@ choose_readlengths<-function(summary_data,choice="max_coverage",nt_signals){
         gains_sign_all<-c()
         gains_cod<-c()
         gains_sign<-c()
-        for(cnt in 1:length(rownames(data))){
+        for(cnt in seq_along(rownames(data))){
             if(cnt>length(rownames(data))){break}
             rl<-rownames(data)[cnt]
             cutf<-data$cutoff[cnt]
@@ -2063,7 +2065,7 @@ choose_readlengths<-function(summary_data,choice="max_coverage",nt_signals){
             #sig<-do.call(args = sig[c("5-UTR_1","5-UTR_2","CDS_1","CDS_2","3-UTR_1")],what = cbind.data.frame)
             #sig<-sig[,-c(1,2)]
             cdss<-grep(colnames(sig),pattern = "CDS")
-            sig_ctf<-cbind(matrix(0,ncol = cutf,nrow = nrow(sig)),sig[,1:(length(sig[1,])-cutf)])[,cdss]
+            sig_ctf<-cbind(matrix(0,ncol = cutf,nrow = nrow(sig)),sig[,seq_len(length(sig[1,])-cutf)])[,cdss]
             sig_ctf<-as.matrix(sig_ctf)
             sig_ctf_masked<-sig_ctf
             sig_ctf_masked[mat_fr>0]<-NA
@@ -2198,10 +2200,10 @@ get_ps_fromspliceplus<-function(x,cutoff){
         rangok<-rangok[mores]
         cms<-cumsum(width(rangmore))
         shft<-c()
-        for(i in 1:length(rangok)){shft<-c(shft,cutoff-cms[[i]][rangok[i]-1])}
+        for(i in seq_along(rangok)){shft<-c(shft,cutoff-cms[[i]][rangok[i]-1])}
         stt<-start(rangmore)
         stok<-c()
-        for(i in 1:length(shft)){stok<-c(stok,stt[[i]][rangok[i]]+shft[i])}
+        for(i in seq_along(shft)){stok<-c(stok,stt[[i]][rangok[i]]+shft[i])}
         psmores<-GRanges(IRanges(start=stok,width = 1),seqnames = seqnames(x[mores]),strand=strand(x[mores]),seqlengths=seqlengths(x[mores]))
 
     }
@@ -2242,11 +2244,11 @@ get_ps_fromsplicemin<-function(x,cutoff){
         rangok<-rangok[mores]
         cms<-cumsum(width(rangmore))
         shft<-c()
-        for(i in 1:length(rangok)){shft<-c(shft,cutoff-cms[[i]][rangok[i]-1])}
+        for(i in seq_along(rangok)){shft<-c(shft,cutoff-cms[[i]][rangok[i]-1])}
         #start?
         stt<-end(rangmore)
         stok<-c()
-        for(i in 1:length(shft)){stok<-c(stok,stt[[i]][rangok[i]]-shft[i])}
+        for(i in seq_along(shft)){stok<-c(stok,stt[[i]][rangok[i]]-shft[i])}
         psmores<-GRanges(IRanges(start=stok,width = 1),seqnames = seqnames(x[mores]),strand=strand(x[mores]),seqlengths=seqlengths(x[mores]))
 
     }
@@ -2256,7 +2258,7 @@ get_ps_fromsplicemin<-function(x,cutoff){
 
     if(rangok!=1){
 
-        ps<-shift(resize(GRanges(rang[rangok],seqnames=seqnames(x),strand=strand(x),seqlengths=seqlengths(x)),width=1,fix="start"),shift=-(cutoff-sum(rang[1:(rangok-1)]@width)))
+        ps<-shift(resize(GRanges(rang[rangok],seqnames=seqnames(x),strand=strand(x),seqlengths=seqlengths(x)),width=1,fix="start"),shift=-(cutoff-sum(rang[seq_len(rangok-1)]@width)))
     }
     return(ps)
 }
@@ -2277,16 +2279,21 @@ get_ps_fromsplicemin<-function(x,cutoff){
 load_annotation<-function(path){
 
     GTF_annotation<-get(load(path))
-	haspackage <- isTRUE(is.character(GTF_annotation$genome_package))
+	  haspackage <- isTRUE(is.character(GTF_annotation$genome))
     if(haspackage){
-      genome_sequence<-get(library(GTF_annotation$genome_package,character.only = TRUE))
-      library(GTF_annotation$genome_package,character.only = TRUE)
-      genome_sequence<-get(GTF_annotation$genome_package)
-	  message(paste0('assigning genome package ',GTF_annotation$genome_package,' to the global workspace as genome_seq'))
+      genome_sequence<-get(library(GTF_annotation$genome,character.only = TRUE))
+      library(GTF_annotation$genome,character.only = TRUE)
+      genome_sequence<-get(GTF_annotation$genome)
+	    message(paste0('assigning genome package ',GTF_annotation$genome,' to the global workspace as genome_seq'))
+      assign('genome_seq',genome_sequence,envir = parent.frame())
+    }else{
+      genome_sequence<-GTF_annotation$genome
+      message(paste0('assigning FaFile_Circ object ',GTF_annotation$genome$path,' to the global workspace as genome_seq'))
       assign('genome_seq',genome_sequence,envir = parent.frame())
     }
 
-    GTF_annotation<<-GTF_annotation
+	  message(paste0('assigning FaFile_Circ object GTF_annotation to parent workspace'))
+    assign('GTF_annotation',GTF_annotation,envir = parent.frame())
 
 }
 
@@ -2340,7 +2347,7 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
     fra<-as.numeric(names(which.max(tbfra)))-1
     frameans<-colMeans(frames)
     frameans<-(frameans/sum(frameans))*100
-    names(frameans)<-1:3
+    names(frameans)<-seq_len(3)
     fra2<-as.numeric(names(which.max(frameans)))-1
 
     infra<-seq(fra,-24,by=-3)
@@ -2458,7 +2465,7 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 #' \code{trann}: DataFrame object including (when available) the mapping between gene_id, gene_name, gene_biotypes, transcript_id and transcript_biotypes.\cr
 #' \code{cds_txs_coords}: transcript-level coordinates of ORF boundaries, for each annotated coding transcript. Additional columns are the same as as for the \code{start_stop_codons} object.\cr
 #' \code{genetic_codes}: an object containing the list of genetic code ids used for each chromosome/organelle. see GENETIC_CODE_TABLE for more info.\cr
-#' \code{genome_package}: the name of the forged BSgenome package. Loaded with \code{load_annotation} function.\cr
+#' \code{genome}: the name of the forged BSgenome package, or an FaFile_Circ object. Loaded with \code{load_annotation} function.\cr
 #' \code{stop_in_gtf}: stop codon, as defined in the annotation.\cr
 #' @return a TxDb file and a *Rannot files are created in the specified \code{annotation_directory}.
 #' In addition, a BSgenome object is forged, installed, and linked to the *Rannot object
@@ -2482,7 +2489,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
     DEFAULT_CIRC_SEQS <- unique(c("chrM","MT","MtDNA","mit","Mito","mitochondrion",
                                   "dmel_mitochondrion_genome","Pltd","ChrC","Pt","chloroplast",
                                   "Chloro","2micron","2-micron","2uM",
-                                  "Mt", "NC_001879.2", "NC_006581.1","ChrM"))
+                                  "Mt", "NC_001879.2", "NC_006581.1","ChrM","mitochondrion_genome"))
     #adjust variable names (some chars not permitted)
     annotation_name<-gsub(annotation_name,pattern = "_",replacement = "")
     annotation_name<-gsub(annotation_name,pattern = "-",replacement = "")
@@ -2551,6 +2558,9 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         seed_dest<-paste(annotation_directory,"/",basename(twobit_file),"_",scientific_name,"_seed",sep = "")
 
 
+        if(length(circseed)==0){
+            writeLines(text = seed_text,con = seed_dest)
+        }
 
         if(length(circseed)==1){
             seed_text<-paste(seed_text,"\n",
@@ -2573,11 +2583,12 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
 
         cat(paste("Installing the BSgenome package ... ",date(),"\n",sep = ""))
 
-        install(paste(annotation_directory,pkgnm,sep="/"),upgrade = F)
+        install(paste(annotation_directory,pkgnm,sep="/"),upgrade = FALSE)
         cat(paste("Installing the BSgenome package --- Done! ",date(),"\n",sep = ""))
 
         seqinfo_genome <- seqinfotwob
     }else{
+        indexFa(genome_seq)
         if(!is(genome_seq,'FaFile')){
             genome_seq <- Rsamtools::FaFile(genome_seq)
         }
@@ -2587,7 +2598,6 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         seqinfo_genome<-seqinfo(genome_seq)
         seqinfo_genome@is_circular[which(seqnames(seqinfo_genome)%in%circ_chroms)]<-TRUE
     }
-
     #Create the TxDb from GTF and BSGenome info
 
     if(create_TxDb){
@@ -2657,7 +2667,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         chunks<-seq(1,length(cds_tx),by = 20000)
         if(chunks[length(chunks)]<length(cds_tx)){chunks<-c(chunks,length(cds_tx))}
         mapp<-GRangesList()
-        for(i in 1:(length(chunks)-1)){
+        for(i in seq_len(length(chunks)-1)){
             if(i!=(length(chunks)-1)){
                 mapp<-suppressWarnings(c(mapp,pmapToTranscripts(cds_tx[chunks[i]:(chunks[i+1]-1)],transcripts = exsss_cds[chunks[i]:(chunks[i+1]-1)])))
             }
@@ -2717,7 +2727,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
 
 
         mat_genes<-match(unq_intr$tx_name,trann$transcript_id)
-        g<-unlist(apply(cbind(1:length(mat_genes),Y = elementNROWS(mat_genes)),FUN =function(x) rep(x[1],x[2]),MARGIN = 1))
+        g<-unlist(apply(cbind(seq_along(mat_genes),Y = elementNROWS(mat_genes)),FUN =function(x) rep(x[1],x[2]),MARGIN = 1))
         g2<-split(trann[unlist(mat_genes),"gene_id"],g)
         unq_intr$gene_id<-CharacterList(lapply(g2,unique))
 
@@ -2782,7 +2792,8 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         #stop codon is the 1st nt, e.g. U of the UAA
         #To-do: update with regards to different organelles, and different annotations
         sto_cc<-shift(sto_cc,-2)
-        if(is.na(stop_inannot)){sto_cc<-shift(sto_cc,3)}
+
+        if(is.na(stop_inannot)){sto_cc<-resize(trim(shift(sto_cc,3)),width = 1,fix = "end")}
 
         sto_cc<-unlist(pmapFromTranscripts(sto_cc,exons_tx[seqnames(sto_cc)],ignore.strand=FALSE))
         sto_cc<-sto_cc[sto_cc$hit]
@@ -2870,13 +2881,14 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
 
 
         #put in a list
-        GTF_annotation<-list(transcripts_db,txs_gene,ifs,unq_stst,cds_tx,intron_names_tx,cds_gen,exons_tx,nsns,unq_intr,genes,threeutrs,fiveutrs,ncisof,ncrnas,introns,intergenicRegions,trann,cds_txscoords,translations,pkgnm,stop_inannot)
-        names(GTF_annotation)<-c("txs","txs_gene","seqinfo","start_stop_codons","cds_txs","introns_txs","cds_genes","exons_txs","exons_bins","junctions","genes","threeutrs","fiveutrs","ncIsof","ncRNAs","introns","intergenicRegions","trann","cds_txs_coords","genetic_codes","genome_package","stop_in_gtf")
+        pkgnm_or_faob<- if(is(genome_seq,'FaFile') ) {genome_seq} else {pkgnm}
+        GTF_annotation<-list(transcripts_db,txs_gene,ifs,unq_stst,cds_tx,intron_names_tx,cds_gen,exons_tx,nsns,unq_intr,genes,threeutrs,fiveutrs,ncisof,ncrnas,introns,intergenicRegions,trann,cds_txscoords,translations,pkgnm_or_faob,stop_inannot)
+        names(GTF_annotation)<-c("txs","txs_gene","seqinfo","start_stop_codons","cds_txs","introns_txs","cds_genes","exons_txs","exons_bins","junctions","genes","threeutrs","fiveutrs","ncIsof","ncRNAs","introns","intergenicRegions","trann","cds_txs_coords","genetic_codes","genome","stop_in_gtf")
 
         #Save as a RData object
         save(GTF_annotation,file=paste(annotation_directory,"/",basename(gtf_file),"_Rannot",sep=""))
         cat(paste("Rannot object created!   ",date(),"\n",sep = ""))
-
+        GTF_annotation
 
         #create tables and bed files (with colnames, so with header)
         if(export_bed_tables_TxDb==TRUE){
@@ -2910,6 +2922,4 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
     }
 
 }
-
-
 

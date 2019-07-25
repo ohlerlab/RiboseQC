@@ -31,7 +31,11 @@ As a first step, let's load the package:
 ```{r load_lib}
 library("RiboseQC")
 tmp_dir <- tempdir()
-tmp_dir <- '/var/folders/5t/j5mzk77n11b5w4q_54rlq97m0000gn/T//RtmpizQSbx'
+tmp_dir <-'/var/folders/5t/j5mzk77n11b5w4q_54rlq97m0000gn/T//RtmpLY1Rhl'
+download.file <- function(file,destfile){
+  if(!file.exists(destfile)) utils::download.file(file,  destfile = destfile) 
+}
+
 ```
 
 
@@ -41,44 +45,55 @@ Let's now download annotation for *Homo sapiens*: a subset of the GENCODE 25 ann
 
 ```{r create_dirs_hum}
 
-# download.file("https://drive.google.com/uc?export=download&id=1n6UA5cSz6djx0dY_7sI57177T-kyZhhT",destfile = file.path(tmp_dir,"test_human.2bit"))
-# download.file("https://drive.google.com/uc?export=download&id=19Am9-iMEyB-AcIsVRdIqrF-BVdQYrcaI",destfile = file.path(tmp_dir,"test_human.gtf"))
-tmp_dir='/Users/dharnet/projects/Riboseqc_exampledata/'
+download.file("https://drive.google.com/uc?export=download&id=19Am9-iMEyB-AcIsVRdIqrF-BVdQYrcaI",destfile = file.path(tmp_dir,"test_human.gtf"))
+
+download.file('https://drive.google.com/uc?export=download&id=1Too_Hrsdd_rDTh2LA4KEccBwnL4ESimR',destfile = file.path(tmp_dir,"test_human.fa"))
 
 ```
 
 
 To parse the rich information present in our *.gtf* file we use the *prepare_annotation_files* function. Such a function creates a *TxDb*  and a compressed *Rdata* file containing several regions of interest and additional information.
-Moreover, such function reads a genome file in *.2bit* to forge a *BSgenome* package for fast and efficient query of genomic sequences. A *.2bit* file can be obtained from a *.fasta* file using the *faToTwoBit* software from UCSC: https://genome.ucsc.edu/goldenpath/help/twoBit.html - http://hgdownload.soe.ucsc.edu/admin/exe/ )
+Moreover, such function reads a genome file in *.2bit* format to forge a *BSgenome* package for fast and efficient query of genomic sequences (or uses an indexed fasta file). A *.2bit* file can be obtained from a *.fasta* file using the *faToTwoBit* software from UCSC: https://genome.ucsc.edu/goldenpath/help/twoBit.html - http://hgdownload.soe.ucsc.edu/admin/exe/ )
 
 
 
 
 ```{r create_annot_hum}
 
-prepare_annotation_files(annotation_directory = tmp_dir,
+genome_seq<-FaFile_Circ(FaFile(file.path(tmp_dir,"test_human.fa")))
+
+annot_file <- file.path(tmp_dir,"test_human.gtf_Rannot")
+
+if(! file.exists(annot_file)){
+  prepare_annotation_files(annotation_directory = tmp_dir,
                          # twobit_file = file.path(tmp_dir,"test_human.2bit"),
                          genome_seq = file.path(tmp_dir,"test_human.fa"),
-                         gtf_file = file.path(tmp_dir,"test_human.gtf"),scientific_name = "Human.test",
+                         gtf_file = file.path(tmp_dir,"test_human.gtf"),
+                         scientific_name = "Human.test",
                          annotation_name = "genc25_22M",
                          export_bed_tables_TxDb = FALSE,
                          forge_BSgenome = FALSE,
                          create_TxDb = TRUE)
+}
+
 ```
 
 
 We can now read such information using the *load_annotation* function:
 
 ```{r load_hum}
+
 load_annotation(file.path(tmp_dir,"test_human.gtf_Rannot"))
+genome_seq$circularRanges
+
 ```
 
 Two objects have now been created: a *genome_seq* object links to the *BSgenome* package we just created and loaded (containing genome sequences), and a *GTF_annotation* object containing important information present in our *.gtf* file.
 For instance, we can access genomic sequences using commands as:
 
 ```{r gen_hum}
-genome_seq[["chr22"]]
-genome_seq[["chrM"]]
+getSeq(genome_seq,GRanges("chr22:1-100"))
+getSeq(genome_seq,GRanges("chrM:1-100"))
 ```
 
 Transcript annotation and CDS annotations can be accessed as follows:
@@ -128,7 +143,7 @@ Annotation and genome sequences are linked together in the annotation creation s
 The BSgenome package corresponding to the .gtf file used is reported in the *GTF_annotation* object:
 
 ```{r gtf_hum_general_7}
-GTF_annotation$genome_package
+GTF_annotation$genome
 ```
 
 
@@ -145,7 +160,8 @@ We now perform different sets of calculations on our data (including read-length
 Furthermore, an html dynamic report which illustrated the analysis results is created:
 
 ```{r human_report_2}
-RiboseQC_analysis(annotation_file=file.path(tmp_dir,"test_human.gtf_Rannot"),bam_files = file.path(tmp_dir,"test_human_hek.bam"),report_file = file.path(tmp_dir,"test_human_hek.html"),write_tmp_files = F)
+
+RiboseQC_analysis(annotation_file=annot_file,bam_files = file.path(tmp_dir,"test_human_hek.bam"),report_file = file.path(tmp_dir,"test_human_hek.html"),write_tmp_files = F)
 ```
 
 The html report can be opened by different browsers such as firefox, chrome etc...
@@ -186,8 +202,9 @@ As before, we can explore different sequences and regions extracted from annotat
 ```{r yeast_2}
 load_annotation(file.path(tmp_dir,"test_yeast.gtf_Rannot"))
 
-genome_seq[["II"]]
-genome_seq[["Mito"]]
+getSeq(genome_seq,GRanges("II:1-100"))
+getSeq(genome_seq,GRanges("Mito:1-100"))
+
 GTF_annotation$cds_txs
 GTF_annotation$trann
 ```
@@ -232,7 +249,8 @@ list.files(tmp_dir)
 prepare_annotation_files(annotation_directory = tmp_dir,
                          twobit_file = file.path(tmp_dir,"test_arabidopsis.2bit"),
                          # genome_seq = file.path(tmp_dir,"test_arabidopsis.fa"),
-                         gtf_file = file.path(tmp_dir,"test_arabidopsis.gtf.gz"),scientific_name = "arabidopsis.test",
+                         gtf_file = file.path(tmp_dir,"test_arabidopsis.gtf.gz"),
+                         scientific_name = "arabidopsis.test",
                          annotation_name = "araport11_custom",export_bed_tables_TxDb = TRUE,
                          forge_BSgenome = TRUE,
                          create_TxDb = TRUE,genome_seq = '../test_arabidopsis.fa')
@@ -251,10 +269,10 @@ download.file("https://drive.google.com/uc?export=download&id=1VVdMi0ho0LiRCld6-
 
 load_annotation(annotation)
 
-tmp_dir2="/var/folders/5t/j5mzk77n11b5w4q_54rlq97m0000gn/T//RtmpOFmFiU"
+#tmp_dir2="/var/folders/5t/j5mzk77n11b5w4q_54rlq97m0000gn/T//RtmpOFmFiU"
 
 bam_filepath=file.path(tmp_dir,c("test_arabidopsis_root.bam","test_arabidopsis_shoot.bam"))
-RiboseQC_analysis(annotation_file=annotation,bam_files = bam_filepath,fast_mode = TRUE,report_file = file.path(tmp_dir,"test_root_shoots.html"),dest_names = c("root","shoots"),sample_names = c("root","shoots"),
+RiboseQC_analysis(annotation_file=annotation,bam_files = bam_filepath,fast_mode = TRUE,report_file = file.path(tmp_dir,"test_root_shoots.html"),dest_names = file.path(tmp_dir,c("root","shoots")),sample_names = c("root","shoots"),
                   # genome_seq=here::here('test_arabidopsis'),
                   write_tmp_files = FALSE
                   )
