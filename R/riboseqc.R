@@ -2030,7 +2030,7 @@ choose_readlengths<-function(summary_data,choice="max_coverage",nt_signals){
                 fr1<-fr1[!is.na(fr1)]
                 fr2<-fr2[!is.na(fr2)]
                 fr3<-fr3[!is.na(fr3)]
-                codongain<-c(sum(fr1>0),sum(fr2>0),sum(fr3>0))
+                codongain<-c(sum(fr1),sum(fr2),sum(fr3))
                 codongain<-codongain/sum(codongain)
                 codongain
                 
@@ -2045,7 +2045,7 @@ choose_readlengths<-function(summary_data,choice="max_coverage",nt_signals){
                 fr1<-fr1[!is.na(fr1)]
                 fr2<-fr2[!is.na(fr2)]
                 fr3<-fr3[!is.na(fr3)]
-                codongain<-c(sum(fr1>0),sum(fr2>0),sum(fr3>0))
+                codongain<-c(sum(fr1),sum(fr2),sum(fr3))
                 codongain<-codongain/sum(codongain)
                 codongain
                 #signalgain<-c(sum(fr1),sum(fr2),sum(fr3))
@@ -2356,7 +2356,10 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
     cutoffs<-c(cutoff,cutoff_fra,cutoff_km,cutoff_km_fra,km_meta,km_meta_fra,cutoff_meta,cutoff_meta_fra)
     names(cutoffs)<-c("absolute_tab","in_frame_tab","absolute_km_tab","in_frame_km_tab","absolute_km_meta","in_frame_km_meta","absolute_meta","in_frame_meta")
     cutt<-cutoffs[!is.na(cutoffs)]
-    final_cutoff<-as.numeric(names(sort(table(cutt[grep(names(cutt),pattern = "frame")]),decreasing = T)[1]))
+    
+    fintabba<-sort(table(cutt[grep(names(cutt),pattern = "frame")]),decreasing = T)
+    final_cutoff<-max(as.numeric(names(fintabba[fintabba==max(fintabba)])))
+    
     frames_res<-c(sort(tbfra,decreasing = T)[1],as.numeric(frameans[which.max(frameans)]))
     names(frames_res)<-c("max_frame_in_pctORF","mean_pct_max_frame")
     
