@@ -8,8 +8,9 @@ testthat::test_that("prepare_annotation_files works as expected",{
   arab_fasta <- file.path(tmp_dir,basename(arab_fasta))
   
   arab_gtf <- system.file(package='RiboseQC',"ext_data","simp_arab.gtf.gz")
-  
-  annotation <- prepare_annotation_files(annotation_directory = tmp_dir,
+ 
+   
+  annotation <- prepare_annotation_files(annotation_directory = tempdir(),
                                          genome_seq = arab_fasta,
                                          gtf_file = arab_gtf,
                                          scientific_name = "arabidopsis.test",

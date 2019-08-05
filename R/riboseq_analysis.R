@@ -250,6 +250,8 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
     genome_seq <- list_annotations[[1]]$genome_seq
     
     
+    resfilelist <- c()
+    
     for (bammo in seq_along(bam_files)) {
         
         chunk_size <- as.integer(chunk_size)
@@ -2499,21 +2501,22 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
                 colSums(as.matrix(x))
             })
         }
-        
-        save(res_all, file = paste(dest_name, "_results_RiboseQC", sep = ""))
+        resfile <- paste(dest_name, "_results_RiboseQC", sep = "")
+        message(paste0('Writing results to ',resfile))
+        save(res_all, file = resfile)
         rm(res_all, read_stats, profiles_fivepr, selection_cutoffs, P_sites_stats, 
             profiles_P_sites, sequence_analysis)
         gici <- gc()
         cat(paste("Exporting files --- Done!", date(), "\n\n"))
+        
+        resfilelist <- c(resfilelist,resfile)
     }
     
-    foo <- function(create_report, report_file, dest_names, sample_names, extended_report, pdf_plots) {
-      
       if (create_report) {
           cat(paste("Creating html report in ", report_file, " ... ", date(), "\n", 
               sep = ""))
           
-          create_html_report(input_files = paste(dest_names, "_results_RiboseQC", sep = ""), 
+          create_html_report(input_files = resfile, 
               input_sample_names = sample_names, output_file = report_file, extended = extended_report)
           cat(paste("Creating html report --- Done!", date(), "\n\n"))
           
@@ -2524,7 +2527,7 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
           
       }
     
-    }
+    return(resfilelist)
     
 }
 

@@ -37,6 +37,7 @@ NULL
 #'
 #' @param output_file String; full path to html report file.
 #' @param extended creates a large html report including codon occupancy for each read length. Defaults to \code{FALSE}
+#' @param knitreport Knit the report or  run as  an r script? Useful for debugging Defaults to \code{TRUE}
 #' @return The function saves the html report file with the file path \code{output_file} and
 #' a folder containing all figures shown in the html report as RDS object files (located in the same directory as the html report).
 #'
@@ -73,7 +74,7 @@ NULL
 #' }
 #' @export
 
-create_html_report <- function(input_files, input_sample_names, output_file, extended = FALSE) {
+create_html_report <- function(input_files, input_sample_names, output_file, extended = FALSE, knitreport = TRUE) {
     # get input and output file paths
     input_files <- paste(normalizePath(dirname(input_files)), basename(input_files), 
         sep = "/")
@@ -97,8 +98,16 @@ create_html_report <- function(input_files, input_sample_names, output_file, ext
     sink(file = paste(output_file, "_report_text_output.txt", sep = ""))
     # render RMarkdown file > html report
     knitclean <- knitr::knit_meta(class = NULL, clean = TRUE)
-    suppressWarnings(render(rmd_path, params = list(input_files = input_files, input_sample_names = input_sample_names, 
-        output_fig_path = output_fig_path), output_file = output_file))
+    
+    if(knitreport){
+        suppressWarnings(render(rmd_path, params = list(input_files = input_files, input_sample_names = input_sample_names, 
+            output_fig_path = output_fig_path), output_file = output_file))
+    }else{
+        with(
+            list(input_files = input_files, input_sample_names = input_sample_names,output_fig_path = output_fig_path),
+            source(knitr::purl(rmd_path))
+        )
+    }
     gici <- gc()
     sink()
 }
@@ -1505,6 +1514,11 @@ get_codon_usage_data <- function(data, data_type, comp, rl) {
 #' @param output_rds_path String; full path to output folder for RDS object files created by this function.
 #' Defaults to NOT save RDS; to save RDS, provide path to destination folder.
 #'
+#'@param scals String, 'zscore' or one of the other possible data scaling methods, defaults too all
+#'@param comps The compartment e.g. 'nucl' or 'ChromC' to plot - defaults to all
+#'@param rls Read lengths to plot - defaults too all and each individual
+#'@param data_types The specific type of plot to construct - P sites, A sites, per codon, etc. defaults to using all
+#'
 #' @return This function returns iteratively all positional codon usage plots
 #' for the html report and saves the same plots as RDS object file.
 #'
@@ -1514,17 +1528,17 @@ get_codon_usage_data <- function(data, data_type, comp, rl) {
 #' plot_codon_usage_positional_rmd(res_all, 'shoot', paste0('myfigpath', 'rds/'))
 #' @export
 
-plot_codon_usage_positional_rmd <- function(data, sample = "", output_rds_path = "") {
+plot_codon_usage_positional_rmd <- function(data, sample = "", output_rds_path = "", scals = NULL, comps= NULL, rls = NULL, data_types = NULL ) {
     # different data types for codon usage available: codon count, read count,
     # codon-read ratio
-    data_types <- c(`Codon counts` = "Codon_counts", `A-sites counts` = "A_sites_percodon", 
+    if(is.null(data_types)) data_types <- c(`Codon counts` = "Codon_counts", `A-sites counts` = "A_sites_percodon", 
         `P-sites counts` = "P_sites_percodon", `E-sites counts` = "E_sites_percodon", 
         `A-sites per codon` = "A_sites_percodon_ratio", `P-sites per codon` = "P_sites_percodon_ratio", 
         `E-sites per codon` = "E_sites_percodon_ratio")
     
     # assumption that list structure is exactly the same for Codon_counts,
     # P_sites_percodon, P_sites_percodon_ratio
-    comps <- names(data[["profiles_P_sites"]][["Codon_counts"]])
+    if(is.null(comps)) comps <- names(data[["profiles_P_sites"]][["Codon_counts"]])
     
     # per compartment
     for (comp in comps) {
@@ -1532,9 +1546,10 @@ plot_codon_usage_positional_rmd <- function(data, sample = "", output_rds_path =
         cat("\n\n")
         cat("### ", comp, " {.tabset} \n\n")
         cat("\n\n")
-        rls <- as.vector(lapply(data[["profiles_P_sites"]][["Codon_counts"]], function(x) names(x))[[comp]])
+        if(is.null(rls)) rls <- as.vector(lapply(data[["profiles_P_sites"]][["Codon_counts"]], function(x) names(x))[[comp]])
         
         # per read length
+        
         for (rl in rls) {
             cat("\n\n")
             cat("#### ", rl, " {.tabset} \n\n")
@@ -1551,7 +1566,9 @@ plot_codon_usage_positional_rmd <- function(data, sample = "", output_rds_path =
                 codon_usage_data <- get_codon_usage_data(data, data_type, comp, rl)
                 
                 # per scaling method
-                scals <- names(codon_usage_data$data_positional)
+                if(is.null(scals)){
+                    scals <- names(codon_usage_data$data_positional) 
+                }
                 for (scal in scals) {
                   cat("\n\n")
                   cat("###### ", scal, " {.tabset} \n\n")

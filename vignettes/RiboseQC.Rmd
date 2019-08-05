@@ -164,29 +164,64 @@ load_annotation(annotation)
 #tmp_dir2="/var/folders/5t/j5mzk77n11b5w4q_54rlq97m0000gn/T//RtmpOFmFiU"
 
 bam_filepath=c(
-  system.file(package='RiboseQC',"ext_data","simp_arab_root.bam"),
-  system.file(package='RiboseQC',"ext_data","simp_arab_shoot.bam"))
+  system.file(package='RiboseQC',"ext_data","simp_arab_root.bam",mustWork = T),
+  system.file(package='RiboseQC',"ext_data","simp_arab_shoot.bam",mustWork = T)
+)
+```
 
-RiboseQC_analysis(
-  annotation_file=annotation,bam_files = bam_filepath,
+The full analysis is run like so (this takes some time)
+
+```{r run_analysis,eval = FALSE}
+
+resfile <- RiboseQC_analysis(
+  annotation_file=annotation,
+  bam_files = bam_filepath,
   fast_mode = TRUE,
-  report_file = file.path(tmp_dir,"test_root_shoots.html"),
+#  report_file = file.path(tmp_dir,"test_root_shoots.html"),
   dest_names = file.path(tmp_dir,c("root","shoots")),
   sample_names = c("root","shoots"),
   genome_seq=arab_fasta,
-  write_tmp_files = FALSE
+  write_tmp_files = FALSE,
+  create_report = FALSE
 )
 
+```
+Instead we'll use pre-made results files:
+```{r load_results}
+resfiles=c(
+  system.file(package='RiboseQC',"ext_data","root_results_RiboseQC",mustWork = T),
+  system.file(package='RiboseQC',"ext_data","shoots_results_RiboseQC",mustWork = T)
+)
+```
+
+```{r make_report, eval = F}
+
+create_html_report(
+  input_files = resfiles,
+  output_file = file.path(tmp_dir,"test_root_shoots.html"),
+  input_sample_names = c('root','shoots'),
+  extended = FALSE,
+  knitreport = FALSE
+)
 
 ```
 
+
 The html report can be opened by different browsers such as firefox, chrome etc...
 Moreover, all the generated plots are available in *.pdf* format and as *RDS* files in the same folder.
+Plots can also be generated individually using the results files.
 For example, the profile of P-site positions along the CDS can be visualized using:
 
 ```{r report_3,warning=FALSE, results='asis', fig.width=12, fig.height=10, dpi=120}
-
-readRDS(file.path(tmp_dir,"simp_arab_root_shoots.html_plots/rds/sample1_nucl_4_profiles_P_sites_metagene_subcodon_all"))[[1]]
+res_all <- get(load(resfiles[1]))
+dir.create(rec=TRUE,file.path(tmp_dir,"test_root_shoots.html_plots/rds/"))
+invisible(plot_metagene_hm_rmd(
+  data = res_all,
+  profile_type = "profiles_P_sites",
+  sample = 'root',
+  output_rds_path = file.path(tmp_dir,"test_root_shoots.html_plots/rds/") 
+))
+readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/root_nucl_4_profiles_P_sites_metagene_subcodon_all"))[[1]]
 
 ```
 
@@ -196,14 +231,28 @@ Despite the lack of a dedicated treatment to purify chloroplast ribosomes in the
 For instance, we can visualize the amount of footprints mapping to different organelles and biotypes in the two samples:
 
 ```{r arab_3}
+res_object_list <- list(
+  root = get(load(resfiles[1])),
+  shoots = get(load(resfiles[2]))
+)
+rdsdir <- file.path(tmp_dir,"test_root_shoots.html_plots/rds/")
+dir.create( rdsdir , rec=TRUE)
+invisible(plot_read_biotype_dist_2(rdata_list = res_object_list, output_rds_path = rdsdir))
 readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/all_samples_1_readlocdist"))[[1]]
+
 ```
 
 or visualize z-scored positional codon usage values, calculated using A-site positions for chloroplast ribosomes in the shoots sample:
 
 ```{r arab_4, warning=FALSE, results='asis', fig.width=12, fig.height=16, dpi=150}
 
-as_ggplot(readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/shoots_ChrC_7_codonusage_positional_A-sites_per_codon_all_zscore"))[[1]])
+plot_codon_usage_positional_rmd(res_object_list[[2]], 'shoots',output_rds_path =  rdsdir, 
+                                          scal = 'zscore', 
+                                          comps = 'ChrC', 
+                                          data_types = 'A_sites_percodon', 
+                                          rls = 'all')
+
+
 ```
 
 The report allows to compare different samples side-by-side using tabs for different samples.
@@ -211,9 +260,12 @@ For example, the 5'end profiles of different read lengths around start and stop 
 
 
 ```{r yeast_4, warning=FALSE, results='asis', fig.width=12, fig.height=10, dpi=120}
+
+
+
 as_ggplot(readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/root_nucl_4_profiles_fivepr_metagene_subcodon_log2"))[[1]])
 
-as_ggplot(readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/shoot_nucl_4_profiles_fivepr_metagene_subcodon_log2"))[[1]])
+as_ggplot(readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/shoots_nucl_4_profiles_fivepr_metagene_subcodon_log2"))[[1]])
 ```
 
 

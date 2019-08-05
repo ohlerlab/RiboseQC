@@ -67,4 +67,5 @@ unsrturl.bst
 .project
 .seed
 .settings
-.tm_properties
+.tm_propertiesRiboseQC.Rcheck/
+RiboseQC.Rcheck

@@ -9,15 +9,15 @@ Authors@R: c(person("Lorenzo", "Calviello", email = "calviello.l.bio@gmail.com",
 Maintainer: Dermot Harnett <dermot.harnett@mdc-berlin.de>
 Description: A powerful analysis tool for the analysis of Ribo-seq data, which is able to provide read-length specific analysis of both cytoplasmic and organellar ribosome, and provides interactive visualization of results in a dynamic html report
 Imports: GenomicRanges,Rsamtools,rtracklayer, methods
+biocViews: RiboSeq, Sequencing, QualityControl, DataImport, GenomeAnnotation, Transcriptomics, Software, Coverage, RNASeq
 Depends: Rsamtools,rmarkdown, rtracklayer, GenomicAlignments, BSgenome, GenomicFiles, devtools, reshape2, ggplot2, knitr, DT, gridExtra, ggpubr, viridis, Biostrings, GenomicFeatures, BiocGenerics, jsonlite, methods
 License: GPL-3 or above
 Encoding: UTF-8
 LazyData: FALSE
-biocViews: RiboSeq, Sequencing, QualityControl, DataImport, GenomeAnnotation, Transcriptomics, Software, Coverage, RNASeq,
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
 Suggests: 
-    testthat,BSgenome.Athaliana.TAIR.TAIR10
+    testthat
 Collate: 
     'FaFile_Circ.R'
     'riboseqc.R'
