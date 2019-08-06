@@ -165,7 +165,7 @@ load_annotation(annotation)
 
 bam_filepath=c(
   system.file(package='RiboseQC',"ext_data","simp_arab_root.bam",mustWork = T),
-  system.file(package='RiboseQC',"ext_data","simp_arab_shoot.bam",mustWork = T)
+  system.file(package='RiboseQC',"ext_data","simp_arab_shoots.bam",mustWork = T)
 )
 ```
 
