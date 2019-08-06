@@ -261,6 +261,14 @@ For example, the 5'end profiles of different read lengths around start and stop 
 
 ```{r yeast_4, warning=FALSE, results='asis', fig.width=12, fig.height=10, dpi=120}
 
+invisible(plot_metagene_hm_rmd(
+  data = res_all,
+  profile_type = "profiles_P_sites",
+  sample = 'shoots',
+  output_rds_path = file.path(tmp_dir,"test_root_shoots.html_plots/rds/") 
+))
+
+readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/root_nucl_4_profiles_P_sites_metagene_subcodon_all"))[[1]]
 
 
 as_ggplot(readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/root_nucl_4_profiles_fivepr_metagene_subcodon_log2"))[[1]])

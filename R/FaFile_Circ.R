@@ -8,6 +8,7 @@ NULL
 #'
 #' @field circularRanges A character vector describing which seqnames have circular ranges
 #' @importFrom Rsamtools FaFile
+#' @importFrom GenomicFeatures DEFAULT_CIRC_SEQS
 #' @examples
 #' mytempfile=tempfile()
 #' writeXStringSet(setNames(DNAStringSet(c('AAAAAAAAGG','AAAAAAAAGG')),
@@ -19,9 +20,9 @@ NULL
 #' @exportClass FaFile_Circ
 
 FaFile_Circ<-setRefClass("FaFile_Circ",
-                                     contains="FaFile",
-                                     fields=representation(circularRanges='character'),
-                                     prototype=list(circularRanges=DEFAULT_CIRC_SEQS)
+      contains="FaFile",
+      fields=representation(circularRanges="character"),
+      inheritPackage=TRUE
 )
 
 
