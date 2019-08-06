@@ -1,3 +1,9 @@
+library(tidyverse)
+library(magrittr)
+library(rtracklayer)
+library(GenomicFeatures)
+library(Rsamtools)
+library(RiboseQC)
 #split chrs into compartments
 #using the counts from the riboseqc_analysis function
 data(res_all)
@@ -52,6 +58,6 @@ readGAlignments('../ex/test_arabidopsis_root.bam',param = ScanBamParam(what='map
 
 readGAlignments('../ex/test_arabidopsis_shoot.bam',param = ScanBamParam(what='mapq'))%>%
   subsetByOverlaps(filtarabanno)%>%
-  export('inst/ext_data/simp_arab_shoot.bam')
+  export('inst/ext_data/simp_arab_shoots.bam')
 
 
