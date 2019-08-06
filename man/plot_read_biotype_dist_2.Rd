@@ -23,7 +23,7 @@ This plot is used in the RiboseQC report in section 1.2.
 }
 \examples{
 data(res_all)
-plot_read_biotype_dist_2(list(res_all), paste0('myfigpath', 'rds/'))
+plot_read_biotype_dist_2(list(res_all), paste0('myfigpath', "rds/"))
 }
 \seealso{
 \code{\link{create_html_report}}

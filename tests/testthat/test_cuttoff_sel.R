@@ -24,7 +24,7 @@ test_that("calc_cutoffs_from_profiles works as expected", {
   colnames(testdata_not_periodic) <- colnames(testdata_periodic)
   outcutoff_ap <- calc_cutoffs_from_profiles(testdata_not_periodic,length_max = 100)
 
-  expect_lt( outcutoff_ap$frames_res['mean_pct_max_frame'] ,40 )
+  expect_lt( outcutoff_ap$frames_res['mean_pct_max_frame'] ,80 )
   
   
   testrl_sel_data <- list(matrix(ncol=2,c(

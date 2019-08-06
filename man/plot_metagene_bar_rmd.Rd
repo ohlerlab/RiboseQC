@@ -23,7 +23,7 @@ This plot is used in the RiboseQC report in section 4.1/4.3.
 }
 \examples{
 data(res_all)
-plot_metagene_hm_rmd(res_all, 'profiles_fivepr', 'shoot', paste0('myfigpath', 'rds/'))
+plot_metagene_hm_rmd(res_all, "profiles_fivepr", 'shoot', paste0('myfigpath', "rds/"))
 }
 \seealso{
 \code{\link{create_html_report}}

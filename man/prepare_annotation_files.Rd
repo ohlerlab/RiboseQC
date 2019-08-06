@@ -4,11 +4,11 @@
 \alias{prepare_annotation_files}
 \title{Prepare comprehensive sets of annotated genomic features}
 \usage{
-prepare_annotation_files(annotation_directory, twobit_file = NULL,
-  gtf_file, scientific_name = "Homo.sapiens",
-  annotation_name = "genc25", export_bed_tables_TxDb = TRUE,
-  forge_BSgenome = TRUE, genome_seq = NULL,
-  circ_chroms = DEFAULT_CIRC_SEQS, create_TxDb = TRUE)
+prepare_annotation_files(annotation_directory, twobit_file, gtf_file,
+  scientific_name = "Homo.sapiens", annotation_name = "genc25",
+  export_bed_tables_TxDb = TRUE, forge_BSgenome = TRUE,
+  genome_seq = NULL, circ_chroms = DEFAULT_CIRC_SEQS,
+  create_TxDb = TRUE)
 }
 \arguments{
 \item{annotation_directory}{The target directory which will contain the output files}
@@ -17,7 +17,7 @@ prepare_annotation_files(annotation_directory, twobit_file = NULL,
 
 \item{gtf_file}{Full path to the annotation file in GTF format}
 
-\item{scientific_name}{A name to give to the organism studied; must be two words separated by a '.', defaults to Homo.sapiens}
+\item{scientific_name}{A name to give to the organism studied; must be two words separated by a ".", defaults to Homo.sapiens}
 
 \item{annotation_name}{A name to give to annotation used; defaults to genc25}
 
@@ -38,8 +38,8 @@ This function processes a gtf file and a twobit file (created using faToTwoBit f
 \details{
 This function uses the \code{makeTxDbFromGFF} function to  create a TxDb object and extract
 genomic regions and other info to a *Rannot R file; the \code{mapToTranscripts} and \code{mapFromTranscripts} functions are used to
-map features to genomic or transcript-level coordinates. GTF file mist contain 'exon' and 'CDS' lines,
-where each line contains 'transcript_id' and 'gene_id' values. Additional values such as 'gene_biotype' or 'gene_name' are also extracted.
+map features to genomic or transcript-level coordinates. GTF file mist contain "exon" and "CDS" lines,
+where each line contains "transcript_id" and "gene_id" values. Additional values such as "gene_biotype" or "gene_name" are also extracted.
 Regarding sequences, the twobit file, together with input scientific and annotation names, is used to forge and install a
 BSgenome package using the \code{forgeBSgenomeDataPkg} function.\cr\cr
 The resulting GTF_annotation object (obtained after runnning \code{load_annotation}) contains:\cr\cr
@@ -69,14 +69,14 @@ the most upstream/downstream start/stop codons and the start/stop codons residin
 \code{stop_in_gtf}: stop codon, as defined in the annotation.\cr
 }
 \examples{
-gtf_file <- system.file('extdata', 'example.gtf',
-package = 'RiboseQC',mustWork = TRUE)
-twobit_file <- system.file('extdata', 'example.2bit',
-                           package = 'RiboseQC',mustWork = TRUE)
+gtf_file <- system.file("extdata", "example.gtf",
+package = "RiboseQC",mustWork = TRUE)
+twobit_file <- system.file("extdata", "example.2bit",
+                           package = "RiboseQC",mustWork = TRUE)
 output_dir <- tempdir()
 prepare_annotation_files(output_dir,twobit_file,gtf_file,
-                   scientific_name = 'Arabidopsis.thaliana',
-                   annotation_name = 'tair10.42' )
+                   scientific_name = "Arabidopsis.thaliana",
+                   annotation_name = "tair10.42" )
 
 }
 \seealso{

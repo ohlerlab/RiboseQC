@@ -212,15 +212,17 @@ Moreover, all the generated plots are available in *.pdf* format and as *RDS* fi
 Plots can also be generated individually using the results files.
 For example, the profile of P-site positions along the CDS can be visualized using:
 
-```{r report_3,warning=FALSE, results='asis', fig.width=12, fig.height=10, dpi=120}
+```{r report_3,warning=FALSE, results='asis', fig.width=12, fig.height=10, dpi=120, eval = TRUE}
 res_all <- get(load(resfiles[1]))
 dir.create(rec=TRUE,file.path(tmp_dir,"test_root_shoots.html_plots/rds/"))
+
 invisible(plot_metagene_hm_rmd(
   data = res_all,
   profile_type = "profiles_P_sites",
   sample = 'root',
   output_rds_path = file.path(tmp_dir,"test_root_shoots.html_plots/rds/") 
 ))
+
 readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/root_nucl_4_profiles_P_sites_metagene_subcodon_all"))[[1]]
 
 ```
@@ -230,7 +232,7 @@ Despite the lack of a dedicated treatment to purify chloroplast ribosomes in the
 
 For instance, we can visualize the amount of footprints mapping to different organelles and biotypes in the two samples:
 
-```{r arab_3}
+```{r arab_3, eval = TRUE}
 res_object_list <- list(
   root = get(load(resfiles[1])),
   shoots = get(load(resfiles[2]))
@@ -244,13 +246,9 @@ readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/all_samples_1_readloc
 
 or visualize z-scored positional codon usage values, calculated using A-site positions for chloroplast ribosomes in the shoots sample:
 
-```{r arab_4, warning=FALSE, results='asis', fig.width=12, fig.height=16, dpi=150}
+```{r arab_4, warning=FALSE, results='asis', fig.width=12, fig.height=16, dpi=150, eval = FALSE}
 
-plot_codon_usage_positional_rmd(res_object_list[[2]], 'shoots',output_rds_path =  rdsdir, 
-                                          scal = 'zscore', 
-                                          comps = 'ChrC', 
-                                          data_types = 'A_sites_percodon', 
-                                          rls = 'all')
+plot_codon_usage_positional_rmd(res_object_list[[2]], 'shoots',output_rds_path =  rdsdir)
 
 
 ```
@@ -259,7 +257,7 @@ The report allows to compare different samples side-by-side using tabs for diffe
 For example, the 5'end profiles of different read lengths around start and stop codons can be visualized for different experiments. For the single plots:
 
 
-```{r yeast_4, warning=FALSE, results='asis', fig.width=12, fig.height=10, dpi=120}
+```{r yeast_4, warning=FALSE, results='asis', fig.width=12, fig.height=10, dpi=120,eval= FALSE}
 
 invisible(plot_metagene_hm_rmd(
   data = res_all,
@@ -270,10 +268,25 @@ invisible(plot_metagene_hm_rmd(
 
 readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/root_nucl_4_profiles_P_sites_metagene_subcodon_all"))[[1]]
 
+invisible(plot_metagene_hm_rmd(
+  data = res_all,
+  profile_type = "profiles_fivepr",
+  sample = 'root',
+  output_rds_path = file.path(tmp_dir,"test_root_shoots.html_plots/rds/") 
+))
+
 
 as_ggplot(readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/root_nucl_4_profiles_fivepr_metagene_subcodon_log2"))[[1]])
 
+invisible(plot_metagene_hm_rmd(
+  data = res_all,
+  profile_type = "profiles_fivepr",
+  sample = 'shoots',
+  output_rds_path = file.path(tmp_dir,"test_root_shoots.html_plots/rds/") 
+))
+
 as_ggplot(readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/shoots_nucl_4_profiles_fivepr_metagene_subcodon_log2"))[[1]])
+
 ```
 
 

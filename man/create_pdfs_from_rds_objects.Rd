@@ -19,7 +19,7 @@ html reports.
 }
 \examples{
 
-create_pdfs_from_rds_objects(paste('test_root_shoots.html','_plots/rds/',sep=''))
+create_pdfs_from_rds_objects(paste('test_root_shoots.html',"_plots/rds/",sep=""))
 }
 \seealso{
 \code{\link{create_html_report}}

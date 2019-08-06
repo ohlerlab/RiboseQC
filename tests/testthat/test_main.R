@@ -3,6 +3,7 @@
 testthat::test_that("prepare_annotation_files works as expected",{
   
   arab_fasta <- system.file(package='RiboseQC',"ext_data","simp_arab.fa.gz")
+  tmp_dir = tempdir()
   file.copy(arab_fasta,tmp_dir)
   system(paste0('gunzip ',file.path(tmp_dir,basename(arab_fasta))))
   arab_fasta <- file.path(tmp_dir,basename(arab_fasta))
