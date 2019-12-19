@@ -2607,13 +2607,13 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         cat(paste("Creating the TxDb object --- Done! ",date(),"\n",sep = ""))
         cat(paste("Extracting genomic regions ... ",date(),"\n",sep = ""))
 
+
         genes<-genes(annotation)
         exons_ge<-exonsBy(annotation,by="gene")
         exons_ge<-GenomicRanges::reduce(exons_ge)
 
         cds_gen<-cdsBy(annotation,"gene")
         cds_ge<-reduce(cds_gen)
-
 
         #define regions not overlapping CDS ( or exons when defining introns)
 
@@ -2645,6 +2645,9 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         intergenicRegions<-intergenicRegions[strand(intergenicRegions)=="*"]
 
         cds_tx<-cdsBy(annotation,"tx",use.names=TRUE)
+
+        #filter out abnormally short cds (I"m looking at you maize annotation)
+        cds_tx <- cds_tx[sum(width(cds_tx))>=3]
         txs_gene<-transcriptsBy(annotation,by="gene")
         genes_red<-reduce(sort(genes(annotation)))
 
@@ -2768,6 +2771,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         }
         tocheck<-as.character(runValue(seqnames(cds_tx)))
         tocheck<-cds_tx[!tocheck%in%circs]
+        width(tocheck)%>%sum%>%.[.<3]
         seqcds<-extractTranscriptSeqs(genome,transcripts = tocheck)
         cd<-unique(translations$genetic_code[!rownames(translations)%in%circs])
         trsl<-suppressWarnings(translate(seqcds,genetic.code = getGeneticCode(cd),if.fuzzy.codon = "solve"))

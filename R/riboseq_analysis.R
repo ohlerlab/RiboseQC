@@ -372,11 +372,6 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
             for (rl in rls) {
                 reads_x <- GRanges()
                 reads_y <- GRanges()
-                seqlevels(reads_x) <- seql
-                seqlevels(reads_y) <- seql
-                
-                seqlengths(reads_x) <- seqle
-                seqlengths(reads_y) <- seqle
                 
                 if (sum(rl %in% names(x[["reads_pos1"]])) > 0) {
                   reads_x <- x[["reads_pos1"]][[rl]]
@@ -384,6 +379,16 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
                 if (sum(rl %in% names(y[["reads_pos1"]])) > 0) {
                   reads_y <- y[["reads_pos1"]][[rl]]
                 }
+
+                #This needs to go after the above                
+                seqlevels(reads_x) <- seql
+                seqlevels(reads_y) <- seql
+                
+                seqlengths(reads_x) <- seqle
+                seqlengths(reads_y) <- seqle
+                
+                
+#                reads_y <- 
                 plx <- reads_x[strand(reads_x) == "+"]
                 mnx <- reads_x[strand(reads_x) == "-"]
                 ply <- reads_y[strand(reads_y) == "+"]
@@ -396,7 +401,6 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
                 if (length(ply) > 0) {
                   covv_pl <- covv_pl + coverage(ply, weight = ply$score)
                 }
-                
                 covv_pl <- GRanges(covv_pl)
                 covv_pl <- covv_pl[covv_pl$score > 0]
                 
@@ -2185,11 +2189,21 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
                   
                   gcall <- paste(gco, names(gco), sep = ";")
                   
+                  #remove 'Ns' our counts
+                  non_n_rows <- grep(x=rownames(psit_counts),v=TRUE,patt='N',inv=T)
+                  psit_counts <- psit_counts[non_n_rows,]
+                  asit_counts <- asit_counts[non_n_rows,]
+                  esit_counts <- esit_counts[non_n_rows,]
+                  ratio_psit_cod <- ratio_psit_cod[non_n_rows,]
+                  ratio_asit_cod <- ratio_asit_cod[non_n_rows,]
+                  ratio_esit_cod <- ratio_esit_cod[non_n_rows,]
+                  cod_counts <- cod_counts[non_n_rows,]
+
                   rownames(psit_counts) <- gcall[match(rownames(psit_counts), gco)]
                   rownames(asit_counts) <- gcall[match(rownames(asit_counts), gco)]
                   rownames(esit_counts) <- gcall[match(rownames(esit_counts), gco)]
-                  
                   rownames(cod_counts) <- gcall[match(rownames(cod_counts), gco)]
+                  
                   rownames(ratio_psit_cod) <- gcall[match(rownames(ratio_psit_cod), 
                     gco)]
                   rownames(ratio_asit_cod) <- gcall[match(rownames(ratio_asit_cod), 
