@@ -2291,7 +2291,7 @@ load_annotation<-function(path){
       assign('genome_seq',genome_sequence,envir = parent.frame())
     }
 
-	  message(paste0('assigning FaFile_Circ object GTF_annotation to parent workspace'))
+	  message(paste0('assigning GTF_annotation object GTF_annotation to parent workspace'))
     assign('GTF_annotation',GTF_annotation,envir = parent.frame())
 
 }
@@ -2420,11 +2420,12 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 }
 
 
-
 #' Prepare comprehensive sets of annotated genomic features
 #'
-#' This function processes a gtf file and a twobit file (created using faToTwoBit from ucsc tools: http://hgdownload.soe.ucsc.edu/admin/exe/ ) to create a comprehensive set of genomic regions of interest in genomic and transcriptomic space (e.g. introns, UTRs, start/stop codons).
-#'    In addition, by linking genome sequence and annotation, it extracts additional info, such as gene and transcript biotypes, genetic codes for different organelles, or chromosomes and transcripts lengths.
+#' This function processes a gtf file and a twobit file (created using faToTwoBit from ucsc tools: http://hgdownload.soe.ucsc.edu/admin/exe/ ) to create a com
+prehensive set of genomic regions of interest in genomic and transcriptomic space (e.g. introns, UTRs, start/stop codons).
+#'    In addition, by linking genome sequence and annotation, it extracts additional info, such as gene and transcript biotypes, genetic codes for different o
+rganelles, or chromosomes and transcripts lengths.
 #' @keywords RiboseQC
 #' @author Lorenzo Calviello, \email{calviello.l.bio@@gmail.com}
 #' @param annotation_directory The target directory which will contain the output files
@@ -2481,8 +2482,9 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 #'
 #' @export
 
-prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,scientific_name="Homo.sapiens",
-                                   annotation_name="genc25",export_bed_tables_TxDb=TRUE,forge_BSgenome=TRUE,genome_seq=NULL,circ_chroms=DEFAULT_CIRC_SEQS,create_TxDb=TRUE){
+
+prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_file,scientific_name="Homo.sapiens",
+                                   annotation_name="genc25",export_bed_tables_TxDb=TRUE,forge_BSgenome=FALSE,genome_seq=NULL,circ_chroms=DEFAULT_CIRC_SEQS,create_TxDb=TRUE){
 
 
     DEFAULT_CIRC_SEQS <- unique(c("chrM","MT","MtDNA","mit","Mito","mitochondrion",
@@ -2510,6 +2512,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
     #Forge a BSGenome package
 
     if(forge_BSgenome){
+        stopifnot(!is.null(twobit_file))
         scientific_name_spl<-strsplit(scientific_name,"[.]")[[1]]
         ok<-length(scientific_name_spl)==2
         if(!ok){stop("\"scientific_name\" must be two words separated by a \".\", like \"Homo.sapiens\"")}
@@ -2590,6 +2593,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         if(!is(genome_seq,'FaFile')){
             genome_seq <- Rsamtools::FaFile(genome_seq)
         }
+        Rsamtools::indexFa(genome_seq)
         if(!is(genome_seq,'FaFile_Circ')){
             genome_seq <- FaFile_Circ(genome_seq,circularRanges=circ_chroms)
         }
