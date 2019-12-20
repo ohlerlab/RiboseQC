@@ -24,17 +24,17 @@ given in the \code{input_sample_names} parameter of \code{create_html_report}).}
 Defaults to NOT save RDS; to save RDS, provide path to destination folder.}
 }
 \value{
-This function returns a plot that can be integrated in the html report and
+This function returns a plot that can be integrated in the html report and 
 that can be saved as RDS object file.
 }
 \description{
-This function plots the frame coverage of 5'-site profiles,
+This function plots the frame coverage of 5'-site profiles, 
 i.e. the fraction of reads (their 5' end) in frame 0, 1, and 2 (defined by start codon),
 as boxplots (per-frame distributions over all transcripts)
 for individual read lengths as well as for all read lengths summarized.
 }
 \details{
-This plot is used in the RiboseQC report in section 4.2.1.
+This plot is used in the Ribo-seQC report in section 4.2.1.
 }
 \seealso{
 \code{\link{create_html_report}}
@@ -42,4 +42,4 @@ This plot is used in the RiboseQC report in section 4.2.1.
 \author{
 Dominique Sydow, \email{dominique.sydow@posteo.de}
 }
-\keyword{RiboseQC}
+\keyword{Ribo-seQC}

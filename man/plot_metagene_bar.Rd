@@ -17,7 +17,7 @@ Defaults to NOT save RDS; to save RDS, provide path to destination folder.}
 Example: \cr
 \code{\strong{res_all$profiles_fivepr}$five_prime_subcodon$nucl$'30'} \cr or \cr
 \code{\strong{res_all$profiles_P_sites}$five_prime_subcodon$nucl$'30'} \cr \cr
-Shown in bold are fixed list names, remaining list names should be adapted to
+Shown in bold are fixed list names, remaining list names should be adapted to 
 the resolution type, specific originating compartment, and read length of interest.}
 }
 \value{
@@ -26,7 +26,7 @@ This function returns a plot that can be integrated in the html report and that 
 \description{
 This function plots a 5' or P-site profile as barplot
 (for a specific originating compartment, resolution type, and read length). \cr \cr
-This plot is used in the RiboseQC report in section 4.1/4.3.
+This plot is used in the Ribo-seQC report in section 4.1/4.3.
 }
 \seealso{
 \code{\link{create_html_report}}
@@ -34,4 +34,4 @@ This plot is used in the RiboseQC report in section 4.1/4.3.
 \author{
 Dominique Sydow, \email{dominique.sydow@posteo.de}
 }
-\keyword{RiboseQC}
+\keyword{Ribo-seQC}

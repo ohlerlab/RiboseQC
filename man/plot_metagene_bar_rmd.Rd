@@ -19,11 +19,7 @@ plot_metagene_bar_rmd(metagene_data, sample = "", output_rds_path = "")
 \description{
 This function plots a 5' or P-site profile as barplot
 (for a specific originating compartment, resolution type, and read length). \cr \cr
-This plot is used in the RiboseQC report in section 4.1/4.3.
-}
-\examples{
-data(res_all)
-plot_metagene_hm_rmd(res_all, "profiles_fivepr", 'shoot', paste0('myfigpath', "rds/"))
+This plot is used in the Ribo-seQC report in section 4.1/4.3.
 }
 \seealso{
 \code{\link{create_html_report}}
@@ -31,4 +27,4 @@ plot_metagene_hm_rmd(res_all, "profiles_fivepr", 'shoot', paste0('myfigpath', "r
 \author{
 Dominique Sydow, \email{dominique.sydow@posteo.de}
 }
-\keyword{RiboseQC}
+\keyword{Ribo-seQC}

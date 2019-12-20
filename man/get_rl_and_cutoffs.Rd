@@ -15,7 +15,7 @@ This function returns data.
 \description{
 This function retrieves data on selected read lengths (per originating compartment),
 e.g. their cutoff values, frame preference and codon gain. \cr \cr
-This data is used in the RiboseQC report in section 4.2.2 (displayed as table).
+This data is used in the Ribo-seQC report in section 4.2.2 (displayed as table).
 }
 \seealso{
 \code{\link{create_html_report}}
@@ -23,4 +23,4 @@ This data is used in the RiboseQC report in section 4.2.2 (displayed as table).
 \author{
 Dominique Sydow, \email{dominique.sydow@posteo.de}
 }
-\keyword{RiboseQC}
+\keyword{Ribo-seQC}

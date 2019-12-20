@@ -15,14 +15,10 @@ introduces a \code{GTF_annotation} object and a \code{genome_seq} object in the 
 \description{
 This function loads the annotation created by the \code{prepare_annotation_files function}
 }
-\examples{
-data(res_all)
-load_annotation('test_arabidopsis.gtf.gz_Rannot')
-}
 \seealso{
 \code{\link{prepare_annotation_files}}
 }
 \author{
 Lorenzo Calviello, \email{calviello.l.bio@gmail.com}
 }
-\keyword{RiboseQC}
+\keyword{Ribo-seQC}

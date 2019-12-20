@@ -20,4 +20,4 @@ This function calculates P-sites positions for spliced reads on the minus strand
 \author{
 Lorenzo Calviello, \email{calviello.l.bio@gmail.com}
 }
-\keyword{RiboseQC}
+\keyword{Ribo-seQC}

@@ -14,7 +14,7 @@ choose_readlengths(summary_data, choice = "max_coverage", nt_signals)
 \item{nt_signals}{Profiles of 5'ends around start codons}
 }
 \value{
-a list object containing different compartments. Each sub-list contains \code{final_choice},
+a list object containing different compartments. Each sub-list contains \code{final_choice}, 
 the set of chosen read lengths with cutoffs, and \code{data}, the complete stats for each selection method
 }
 \description{
@@ -27,14 +27,10 @@ the "max_inframe" method starts with the most accurate read length and
 progressively selects read lengths which add in-frame signals in codons not covered by previous read lengths;
 the "all" method selects all available read lengths
 }
-\examples{
-data(res_all)
-choose_readlengths(res_all$results_cutoffs,choice="max_coverage",nt_signals=res_all$profiles_fivepr[["five_prime_subcodon"]])
-}
 \seealso{
 \code{\link{calc_cutoffs_from_profiles}}
 }
 \author{
 Lorenzo Calviello, \email{calviello.l.bio@gmail.com}
 }
-\keyword{RiboseQC}
+\keyword{Ribo-seQC}

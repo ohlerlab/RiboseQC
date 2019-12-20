@@ -25,11 +25,7 @@ This function integrates plots in the html report.
 \description{
 This function generates iteratively all frame coverage boxplots
 (iteration over originating compartments). \cr \cr
-These plots are displayed in the RiboseQC report in section 4.2.1.
-}
-\examples{
-data(res_all)
-plot_frame_dist_boxplot_rmd(res_all$selection_cutoffs$analysis_frame_cutoff, 'shoot', paste0('myfigpath', "rds/"))
+These plots are displayed in the Ribo-seQC report in section 4.2.1.
 }
 \seealso{
 \code{\link{create_html_report}}
@@ -37,4 +33,4 @@ plot_frame_dist_boxplot_rmd(res_all$selection_cutoffs$analysis_frame_cutoff, 'sh
 \author{
 Dominique Sydow, \email{dominique.sydow@posteo.de}
 }
-\keyword{RiboseQC}
+\keyword{Ribo-seQC}

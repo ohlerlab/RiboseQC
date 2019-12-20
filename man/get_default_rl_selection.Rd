@@ -13,11 +13,11 @@ get_default_rl_selection(rdata_list)
 This function returns data.
 }
 \description{
-This function returns selected read lengths per originating compartment.
+This function returns selected read lengths per originating compartment. 
 These read lengths build the basis for all P-site based calculations such as
-metagene and codon usage analyses
+metagene and codon usage analyses 
 (e.g. \code{plot_metagene_hm} and \code{plot_codon_usage}) \cr \cr
-This data is used in the RiboseQC report in section 4.2.3 (displayed as table).
+This data is used in the Ribo-seQC report in section 4.2.3 (displayed as table).
 }
 \seealso{
 \code{\link{create_html_report}}
@@ -25,4 +25,4 @@ This data is used in the RiboseQC report in section 4.2.3 (displayed as table).
 \author{
 Dominique Sydow, \email{dominique.sydow@posteo.de}
 }
-\keyword{RiboseQC}
+\keyword{Ribo-seQC}

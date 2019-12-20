@@ -15,7 +15,7 @@ This function returns data to be displayed as table in the html report.
 \description{
 This function retrieves data on the top 50 positions (nucleotide resolution) are listed
 where most reads (their 5' end) map to, revealing possibly contaminating sequences. \cr \cr
-This data is used in the RiboseQC report in section 5 (displayed as table).
+This data is used in the Ribo-seQC report in section 5 (displayed as table).
 }
 \seealso{
 \code{\link{create_html_report}}
@@ -23,4 +23,4 @@ This data is used in the RiboseQC report in section 5 (displayed as table).
 \author{
 Dominique Sydow, \email{dominique.sydow@posteo.de}
 }
-\keyword{RiboseQC}
+\keyword{Ribo-seQC}

@@ -1,6 +1,6 @@
 ---
 title: "Ribo-seq quality control report"
-author: "Generated with RiboseQC"
+author: "Generated with Ribo-seQC"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 params:
   input_files: ""
@@ -161,9 +161,9 @@ for (i in c(1:length(rdata_list))){
 
 ## 4.2 Calculation of P-sites positions
 
-Read lengths, as well as their individual offsets, are selected according to the parameters specified in the RiboseQC run.
+Read lengths, as well as their individual offsets, are selected according to the parameters specified in the Ribo-seQC run.
 
-**Note**: Not all samples and originating organelles might be displayed here. Please check the parameters used in the RiboseQC run.
+**Note**: Not all samples and originating organelles might be displayed here. Please check the parameters used in the Ribo-seQC run.
 
 ### 4.2.1 Per frame coverage {.tabset}
 
@@ -229,7 +229,7 @@ for (i in c(1:length(datasets))) {
 
 ### 4.2.3 Choice of read lengths {.tabset}
 
-Based on the parameters indicated in the RiboseQC run, the following read lengths (with their offsets) were selected to infer P-sites positions.
+Based on the parameters indicated in the Ribo-seQC run, the following read lengths (with their offsets) were selected to infer P-sites positions.
 
 
 ```{r rl_sel_data, echo=FALSE, warning=FALSE, message=FALSE}
@@ -269,7 +269,7 @@ for (i in c(1:length(datasets))) {
 
 Read coverage in form of P-site profiles is here displayed, with the same visualization options available in Section 4.2.
 
-**Note**: Not all samples and originating organelles might be displayed here. Please check the parameters used in the RiboseQC run.
+**Note**: Not all samples and originating organelles might be displayed here. Please check the parameters used in the Ribo-seQC run.
 
 ```{r psite_profiles, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=12, fig.height=10, dpi=110}
 for (i in c(1:length(rdata_list))){
