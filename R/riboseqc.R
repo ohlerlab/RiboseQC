@@ -2051,7 +2051,7 @@ choose_readlengths<-function(summary_data,choice="max_coverage",nt_signals){
                 #signalgain<-c(sum(fr1),sum(fr2),sum(fr3))
                 
             }))
-            codon_gain<-codon_gain[!apply(codon_gain,1,FUN = function(y){sum(is.na(y))>0}),]
+            codon_gain<-codon_gain[!apply(codon_gain,1,FUN = function(y){sum(is.na(y))>0}),,drop=F]
             
             
             av_codoncov<-matrix(colMeans(codon_cov),ncol=3)
