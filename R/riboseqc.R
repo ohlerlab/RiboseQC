@@ -2435,6 +2435,7 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 #' @param export_bed_tables_TxDb Export coordinates and info about different genomic regions in the annotation_directory? It defaults to \code{TRUE}
 #' @param forge_BSgenome Forge and install a \code{BSgenome} package? It defaults to \code{TRUE}
 #' @param create_TxDb Create a \code{TxDb} object and a *Rannot object? It defaults to \code{TRUE}
+#' @param annot_file specify an exact file name for the rds file created by this function, defaults to annotation_directory/basename(gtf)_Rannot
 #' @details This function uses the \code{makeTxDbFromGFF} function to  create a TxDb object and extract
 #' genomic regions and other info to a *Rannot R file; the \code{mapToTranscripts} and \code{mapFromTranscripts} functions are used to
 #' map features to genomic or transcript-level coordinates. GTF file mist contain "exon" and "CDS" lines,
@@ -2483,7 +2484,7 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 
 
 prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_file,scientific_name="Homo.sapiens",
-                                   annotation_name="genc25",export_bed_tables_TxDb=TRUE,forge_BSgenome=FALSE,genome_seq=NULL,circ_chroms=DEFAULT_CIRC_SEQS,create_TxDb=TRUE){
+                                   annotation_name="genc25",export_bed_tables_TxDb=TRUE,forge_BSgenome=FALSE,genome_seq=NULL,circ_chroms=DEFAULT_CIRC_SEQS,create_TxDb=TRUE,annot_file=NULL){
 
 
     DEFAULT_CIRC_SEQS <- unique(c("chrM","MT","MtDNA","mit","Mito","mitochondrion",
@@ -2891,7 +2892,9 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
         names(GTF_annotation)<-c("txs","txs_gene","seqinfo","start_stop_codons","cds_txs","introns_txs","cds_genes","exons_txs","exons_bins","junctions","genes","threeutrs","fiveutrs","ncIsof","ncRNAs","introns","intergenicRegions","trann","cds_txs_coords","genetic_codes","genome","stop_in_gtf")
 
         #Save as a RData object
-        annot_file <- paste(annotation_directory,"/",basename(gtf_file),"_Rannot",sep="")
+        if(is.null(annot_file)){
+            annot_file <- paste(annotation_directory,"/",basename(gtf_file),"_Rannot",sep="")
+        }
         save(GTF_annotation,file=annot_file)
         cat(paste("Rannot object created!   ",date(),"\n",sep = ""))
         GTF_annotation
@@ -2926,6 +2929,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
         }
 
     }
+
     return(annot_file)
 }
 
