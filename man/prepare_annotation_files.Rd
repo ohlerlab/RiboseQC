@@ -6,7 +6,9 @@
 \usage{
 prepare_annotation_files(annotation_directory, twobit_file, gtf_file,
   scientific_name = "Homo.sapiens", annotation_name = "genc25",
-  export_bed_tables_TxDb = T, forge_BSgenome = T, create_TxDb = T)
+  export_bed_tables_TxDb = TRUE, forge_BSgenome = TRUE,
+  genome_seq = NULL, circ_chroms = DEFAULT_CIRC_SEQS,
+  create_TxDb = TRUE)
 }
 \arguments{
 \item{annotation_directory}{The target directory which will contain the output files}
@@ -63,7 +65,7 @@ the most upstream/downstream start/stop codons and the start/stop codons residin
 \code{trann}: DataFrame object including (when available) the mapping between gene_id, gene_name, gene_biotypes, transcript_id and transcript_biotypes.\cr
 \code{cds_txs_coords}: transcript-level coordinates of ORF boundaries, for each annotated coding transcript. Additional columns are the same as as for the \code{start_stop_codons} object.\cr
 \code{genetic_codes}: an object containing the list of genetic code ids used for each chromosome/organelle. see GENETIC_CODE_TABLE for more info.\cr
-\code{genome_package}: the name of the forged BSgenome package. Loaded with \code{load_annotation} function.\cr
+\code{genome}: the name of the forged BSgenome package, or an FaFile_Circ object. Loaded with \code{load_annotation} function.\cr
 \code{stop_in_gtf}: stop codon, as defined in the annotation.\cr
 }
 \seealso{

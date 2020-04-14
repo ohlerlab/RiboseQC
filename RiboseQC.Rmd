@@ -1,13 +1,18 @@
 ---
-title: "Ribo-seQC vignette"
+title: "RiboseQC vignette"
 author: "Lorenzo Calviello"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output:
-  html_document: 
+  rmarkdown::html_vignette:
+  html_document:
     toc: true
     toc_float:
       collapsed: false
     toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{RiboseQC vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup_vig, include=FALSE}
@@ -16,56 +21,73 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-Ribo-seQC is a package that performs quality control analysis of small RNA-seq data (in .bam format), with a focus on Ribo-seq [1] and related techniques. Thanks to syntax and functions present in packages like *GenomicFeatures*, *rtracklayer* or *BSgenome*, this package can perform comprehensive analyses of alignments on a variety of genomic regions.
+RiboseQC is a package that performs quality control analysis of small RNA-seq data (in .bam format), with a focus on Ribo-seq [1] and related techniques. Thanks to syntax and functions present in packages like *GenomicFeatures*, *rtracklayer* or *BSgenome*, this package can perform comprehensive analyses of alignments on a variety of genomic regions.
 This vignette illustrates the usage of the package using example data and annotation from three different experiments performed in three different organisms.
 
-**Warning**: While we encourage users to get familiar with each outlined step, executing all the code on your machine will generate a lot of data (~550 Mb) and it might take some time (5-10 minutes for each analysis and report creation). Please make sure to have enough disk space if you decide to execute code from all the sections.
+**Warning**: The following analysis is for purposes of demonstrating the package function only. It uses a toy data set composed of the 100 (or fewer) genes in each compartment in the arabidposis data featured in the manuscript - as such the plots appear noiser than in the paper. See the development version on the github for the full version, which downloads the full datasets and is as such unsuitable for a bioconductor package vignette.
 
 As a first step, let's load the package:
 
 ```{r load_lib}
-suppressPackageStartupMessages(library("RiboseQC"))
+library("RiboseQC")
+
+tmp_dir <-  tempdir()
+
+
 ```
 
 
 ## Exploring the annotation
 
-Let's now download annotation for *Homo sapiens*: a subset of the GENCODE 25 annotation (https://www.gencodegenes.org/human/release_25.html) and the corresponding genome sequences.
+We now create the annotation files for *Arabidopsis thaliana*. We will use a custom gtf file containing annotation of the Araport11 project (https://www.araport.org/), and non-coding RNA species from TAIR10.
 
-```{r create_dirs_hum}
 
-download.file("https://drive.google.com/uc?export=download&id=1n6UA5cSz6djx0dY_7sI57177T-kyZhhT",destfile = "test_human.2bit")
+```{r arab_1}
+arab_fasta <- system.file(package='RiboseQC',"ext_data","simp_arab.fa.gz")
+file.copy(arab_fasta,tmp_dir)
+system(paste0('gunzip ',file.path(tmp_dir,basename(arab_fasta))))
+arab_fasta <- file.path(tmp_dir,gsub(x=basename(arab_fasta),'.gz',''))
 
-download.file("https://drive.google.com/uc?export=download&id=19Am9-iMEyB-AcIsVRdIqrF-BVdQYrcaI",destfile = "test_human.gtf")
+stopifnot(is(getSeq(FaFile_Circ(FaFile(arab_fasta))),'DNAStringSet'))
+
+arab_gtf <- system.file(package='RiboseQC',"ext_data","simp_arab.gtf.gz")
+
+
 ```
 
 
 To parse the rich information present in our *.gtf* file we use the *prepare_annotation_files* function. Such a function creates a *TxDb*  and a compressed *Rdata* file containing several regions of interest and additional information.
-Moreover, such function reads a genome file in *.2bit* to forge a *BSgenome* package for fast and efficient query of genomic sequences. A *.2bit* file can be obtained from a *.fasta* file using the *faToTwoBit* software from UCSC: https://genome.ucsc.edu/goldenpath/help/twoBit.html - http://hgdownload.soe.ucsc.edu/admin/exe/ )
-
-
+The extended vignette makes use of *twobit* files - here we simply make use of a fasta file, which will be converted into a pointer FaFile_Circ object to allow sequence retrieval from circular sequences, and attached ot our annotation object.
 
 
 ```{r create_annot_hum}
-prepare_annotation_files(annotation_directory = ".",
-                         twobit_file = "test_human.2bit",
-                         gtf_file = "test_human.gtf",scientific_name = "Human.test",
-                         annotation_name = "genc25_22M",export_bed_tables_TxDb = F,forge_BSgenome = T,create_TxDb = T)
+
+annot_file <- prepare_annotation_files(annotation_directory = tmp_dir,
+                         genome_seq = arab_fasta,
+                         gtf_file = arab_gtf,
+                         scientific_name = "arabidopsis.test",
+                         annotation_name = "araport11_custom",export_bed_tables_TxDb = TRUE,
+                         forge_BSgenome = FALSE,
+                         create_TxDb = TRUE)
+
 ```
 
 
 We can now read such information using the *load_annotation* function:
 
 ```{r load_hum}
-load_annotation("test_human.gtf_Rannot")
+
+load_annotation(file.path(tmp_dir,"simp_arab.gtf.gz_Rannot"))
+genome_seq$circularRanges
+
 ```
 
 Two objects have now been created: a *genome_seq* object links to the *BSgenome* package we just created and loaded (containing genome sequences), and a *GTF_annotation* object containing important information present in our *.gtf* file.
 For instance, we can access genomic sequences using commands as:
 
 ```{r gen_hum}
-genome_seq[["chr22"]]
-genome_seq[["chrM"]]
+getSeq(genome_seq,GRanges("Chr1:1-100"))
+getSeq(genome_seq,GRanges("ChrM:1-100"))
 ```
 
 Transcript annotation and CDS annotations can be accessed as follows:
@@ -107,142 +129,168 @@ The genetic codes used for each chromosomes are accessed using:
 
 ```{r gtf_hum_general_6}
 GTF_annotation$genetic_codes
-getGeneticCode(GTF_annotation$genetic_codes["chr22","genetic_code"])
-getGeneticCode(GTF_annotation$genetic_codes["chrM","genetic_code"])
+getGeneticCode(GTF_annotation$genetic_codes["Chr2","genetic_code"])
+getGeneticCode(GTF_annotation$genetic_codes["ChrM","genetic_code"])
 ```
 
 Annotation and genome sequences are linked together in the annotation creation step.
-The BSgenome package corresponding to the .gtf file used is reported in the *GTF_annotation* object:
+The BSgenome package or FaFile_Circ object corresponding to the .gtf file used is reported in the *GTF_annotation* object:
 
 ```{r gtf_hum_general_7}
-GTF_annotation$genome_package
+GTF_annotation$genome
 ```
 
 
-## Create the html report (human)
+##
 
-Let's now download a subset of a Ribo-seq dataset in HEK293 cells [2].
+Let's now download a subset of a Ribo-seq dataset in arabidopsis roots cells.
 
 
-```{r human_report_1}
-download.file("https://drive.google.com/uc?export=download&id=11PP5y2QH7si81rbEBJsOB-Lt3l_JowRW",destfile = "test_human_hek.bam")
+```{r report_1}
+rootbam <-   system.file(package='RiboseQC',"ext_data","simp_arab_root.bam")
 ```
+
+We will now download two sample datasets from a Ribo-seq experiments in Arabidopsis roots and shoots [5].
 
 We now perform different sets of calculations on our data (including read-length and organelle-specific metagene analyses), using the annotation we previously created. Several files (including automatically generated P_sites positions, and other output from the analysis pipeline) will be automatically created. 
 Furthermore, an html dynamic report which illustrated the analysis results is created:
 
-```{r human_report_2}
-RiboseQC_analysis(annotation_file="test_human.gtf_Rannot",bam_files = "test_human_hek.bam",report_file = "test_human_hek.html",write_tmp_files = F)
+```{r report_2}
+
+annotation=file.path(tmp_dir,"simp_arab.gtf.gz_Rannot")
+
+load_annotation(annotation)
+
+#tmp_dir2="/var/folders/5t/j5mzk77n11b5w4q_54rlq97m0000gn/T//RtmpOFmFiU"
+
+bam_filepath=c(
+  system.file(package='RiboseQC',"ext_data","simp_arab_root.bam",mustWork = T),
+  system.file(package='RiboseQC',"ext_data","simp_arab_shoots.bam",mustWork = T)
+)
 ```
+
+The full analysis is run like so (this takes some time)
+
+```{r run_analysis,eval = FALSE}
+
+resfile <- RiboseQC_analysis(
+  annotation_file=annotation,
+  bam_files = bam_filepath,
+  fast_mode = TRUE,
+#  report_file = file.path(tmp_dir,"test_root_shoots.html"),
+  dest_names = file.path(tmp_dir,c("root","shoots")),
+  sample_names = c("root","shoots"),
+  genome_seq=arab_fasta,
+  write_tmp_files = FALSE,
+  create_report = FALSE
+)
+
+```
+Instead we'll use pre-made results files:
+```{r load_results}
+resfiles=c(
+  system.file(package='RiboseQC',"ext_data","root_results_RiboseQC",mustWork = T),
+  system.file(package='RiboseQC',"ext_data","shoots_results_RiboseQC",mustWork = T)
+)
+```
+
+```{r make_report, eval = F}
+
+create_html_report(
+  input_files = resfiles,
+  output_file = file.path(tmp_dir,"test_root_shoots.html"),
+  input_sample_names = c('root','shoots'),
+  extended = FALSE,
+  knitreport = FALSE
+)
+
+```
+
 
 The html report can be opened by different browsers such as firefox, chrome etc...
 Moreover, all the generated plots are available in *.pdf* format and as *RDS* files in the same folder.
+Plots can also be generated individually using the results files.
 For example, the profile of P-site positions along the CDS can be visualized using:
 
-```{r human_report_3,warning=FALSE, results='asis', fig.width=12, fig.height=10, dpi=120}
-readRDS("test_human_hek.html_plots/rds/sample1_nucl_4_profiles_P_sites_metagene_subcodon_all")[[1]]
+```{r report_3,warning=FALSE, results='asis', fig.width=12, fig.height=10, dpi=120, eval = TRUE}
+res_all <- get(load(resfiles[1]))
+dir.create(rec=TRUE,file.path(tmp_dir,"test_root_shoots.html_plots/rds/"))
+
+invisible(plot_metagene_hm_rmd(
+  data = res_all,
+  profile_type = "profiles_P_sites",
+  sample = 'root',
+  output_rds_path = file.path(tmp_dir,"test_root_shoots.html_plots/rds/") 
+))
+
+readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/root_nucl_4_profiles_P_sites_metagene_subcodon_all"))[[1]]
+
 ```
 
-Let's now use Ribo-seQC to analyze different samples at once.
 
+Despite the lack of a dedicated treatment to purify chloroplast ribosomes in these Ribo-seq experiments (e.g. using chloramphenicol), it is possible to detect footprints from distinct organelles, enriched in the shoots sample rather than roots one.
 
-## Analyze multiple samples (yeast)
+For instance, we can visualize the amount of footprints mapping to different organelles and biotypes in the two samples:
 
-Let's now create annotation for *Saccharomyces cerevisiae*. We will use a custom gtf file coming from the annotation in Ensembl 91, supplied with transcript boundaries from [3].
+```{r arab_3, eval = TRUE}
+res_object_list <- list(
+  root = get(load(resfiles[1])),
+  shoots = get(load(resfiles[2]))
+)
+rdsdir <- file.path(tmp_dir,"test_root_shoots.html_plots/rds/")
+dir.create( rdsdir , rec=TRUE)
+invisible(plot_read_biotype_dist_2(rdata_list = res_object_list, output_rds_path = rdsdir))
+readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/all_samples_1_readlocdist"))[[1]]
 
-```{r yeast_1}
-
-download.file("https://drive.google.com/uc?export=download&id=1ul_mqVimaavfhJs76R3TaOyTcUgwJvS2",destfile = "test_yeast.2bit")
-
-download.file("https://drive.google.com/uc?export=download&id=1yffqKkfohGx9y7XRZO05vhjYUXgjiKBF",destfile = "test_yeast.gtf")
-
-prepare_annotation_files(annotation_directory = ".",
-                         twobit_file = "test_yeast.2bit",
-                         gtf_file = "test_yeast.gtf",scientific_name = "yeast.test",
-                         annotation_name = "yeast_custom",export_bed_tables_TxDb = T,forge_BSgenome = T,create_TxDb = T)
 ```
 
-As before, we can explore different sequences and regions extracted from annotation.
+or visualize z-scored positional codon usage values, calculated using A-site positions for chloroplast ribosomes in the shoots sample:
 
-```{r yeast_2}
-load_annotation("test_yeast.gtf_Rannot")
+```{r arab_4, warning=FALSE, results='asis', fig.width=12, fig.height=16, dpi=150, eval = FALSE}
 
-genome_seq[["II"]]
-genome_seq[["Mito"]]
-GTF_annotation$cds_txs
-GTF_annotation$trann
-```
+plot_codon_usage_positional_rmd(res_object_list[[2]], 'shoots',output_rds_path =  rdsdir)
 
-We will now download three files corresponding to sample data from a TCP-seq experiment [4], where the three experiments aim at extracting RNA fragments covered by scanning ribosomes (SSU), elongating ribosomes (RS) and input material (input). Ribo-seQC analysis is followed by the creation of a report containing results for all the three experiments.
 
-```{r yeast_3}
-download.file("https://drive.google.com/uc?export=download&id=1Nwlf7u-hHC_fX0fUJuJu_dr2WxwGazVJ",destfile = "test_yeast_TCP_input.bam")
-
-download.file("https://drive.google.com/uc?export=download&id=18gQF2SxxsGQqVfhUw-wFo2dBt1mafiAB",destfile = "test_yeast_TCP_RS.bam")
-
-download.file("https://drive.google.com/uc?export=download&id=1HBb58mOt1vmf58yqz-wkZzfxZhBl_tmO",destfile = "test_yeast_TCP_SSU.bam")
-
-bam_filepath_y<-c("test_yeast_TCP_input.bam","test_yeast_TCP_RS.bam","test_yeast_TCP_SSU.bam")
-
-RiboseQC_analysis(annotation_file="test_yeast.gtf_Rannot",bam_files = bam_filepath_y,fast_mode = T,report_file = "test_yeast_TCP.html",sample_names = c("input","RS","SSU"),dest_names = c("input","RS","SSU"),write_tmp_files = F)
 ```
 
 The report allows to compare different samples side-by-side using tabs for different samples.
 For example, the 5'end profiles of different read lengths around start and stop codons can be visualized for different experiments. For the single plots:
 
 
-```{r yeast_4, warning=FALSE, results='asis', fig.width=12, fig.height=10, dpi=120}
-as_ggplot(readRDS("test_yeast_TCP.html_plots/rds/SSU_nucl_4_profiles_fivepr_metagene_subcodon_log2")[[1]])
+```{r yeast_4, warning=FALSE, results='asis', fig.width=12, fig.height=10, dpi=120,eval= FALSE}
 
-as_ggplot(readRDS("test_yeast_TCP.html_plots/rds/RS_nucl_4_profiles_fivepr_metagene_subcodon_log2")[[1]])
+invisible(plot_metagene_hm_rmd(
+  data = res_all,
+  profile_type = "profiles_P_sites",
+  sample = 'shoots',
+  output_rds_path = file.path(tmp_dir,"test_root_shoots.html_plots/rds/") 
+))
+
+readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/root_nucl_4_profiles_P_sites_metagene_subcodon_all"))[[1]]
+
+invisible(plot_metagene_hm_rmd(
+  data = res_all,
+  profile_type = "profiles_fivepr",
+  sample = 'root',
+  output_rds_path = file.path(tmp_dir,"test_root_shoots.html_plots/rds/") 
+))
+
+
+as_ggplot(readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/root_nucl_4_profiles_fivepr_metagene_subcodon_log2"))[[1]])
+
+invisible(plot_metagene_hm_rmd(
+  data = res_all,
+  profile_type = "profiles_fivepr",
+  sample = 'shoots',
+  output_rds_path = file.path(tmp_dir,"test_root_shoots.html_plots/rds/") 
+))
+
+as_ggplot(readRDS(file.path(tmp_dir,"test_root_shoots.html_plots/rds/shoots_nucl_4_profiles_fivepr_metagene_subcodon_log2"))[[1]])
+
 ```
 
 
-## Analyze multiple samples (Arabidopsis)
-
-We now create the annotation files for *Arabidopsis thaliana*. We will use a custom gtf file containing annotation of the Araport11 project (https://www.araport.org/), and non-coding RNA species from TAIR10.
-
-
-```{r arab_1}
-
-download.file("https://drive.google.com/uc?export=download&id=1gTxlR66fRX0GsHsWtJB7piLelM8jhZGu",destfile = "test_arabidopsis.2bit")
-
-download.file("https://drive.google.com/uc?export=download&id=1jYbdvaGfVnMx38X1P85Ounyq9jGwRVgP",destfile = "test_arabidopsis.gtf.gz")
-
-prepare_annotation_files(annotation_directory = ".",
-                         twobit_file = "test_arabidopsis.2bit",
-                         gtf_file = "test_arabidopsis.gtf.gz",scientific_name = "arabidopsis.test",
-                         annotation_name = "araport11_custom",export_bed_tables_TxDb = T,forge_BSgenome = T,create_TxDb = T)
-```
-
-We will now download two sample datasets from a Ribo-seq experiments in Arabidopsis roots and shoots [5].
-
-```{r arab_2}
-
-annotation="test_arabidopsis.gtf.gz_Rannot"
-
-
-download.file("https://drive.google.com/uc?export=download&id=144PIK15iJrDSshMWsGbl9zQvT27Z1fzt",destfile = "test_arabidopsis_root.bam")
-download.file("https://drive.google.com/uc?export=download&id=1VVdMi0ho0LiRCld6-3vzibtg_CyPSTj3",destfile = "test_arabidopsis_shoot.bam")
-
-bam_filepath=c("test_arabidopsis_root.bam","test_arabidopsis_shoot.bam")
-
-RiboseQC_analysis(annotation_file=annotation,bam_files = bam_filepath,fast_mode = T,report_file = "test_root_shoots.html",dest_names = c("root","shoots"),sample_names = c("root","shoots"),write_tmp_files = F)
-```
-
-Despite the lack of a dedicated treatment to purify chloroplast ribosomes in these Ribo-seq experiments (e.g. using chloramphenicol), it is possible to detect footprints from distinct organelles, enriched in the shoots sample rather than roots one.
-
-For instance, we can visualize the amount of footprints mapping to different organelles and biotypes in the two samples:
-
-```{r arab_3}
-readRDS("test_root_shoots.html_plots/rds/all_samples_1_readlocdist")[[1]]
-```
-
-or visualize z-scored positional codon usage values, calculated using A-site positions for chloroplast ribosomes in the shoots sample:
-
-```{r arab_4, warning=FALSE, results='asis', fig.width=12, fig.height=16, dpi=150}
-as_ggplot(readRDS("test_root_shoots.html_plots/rds/shoots_ChrC_7_codonusage_positional_A-sites_per_codon_all_zscore")[[1]])
-```
+For a more extended vignette, please see the package github .
 
 Much more information is available in the html reports, including read length distributions per biotype and compartment, statistics on codon usage, and analysis of the highest mapping positions in the genome.
 
