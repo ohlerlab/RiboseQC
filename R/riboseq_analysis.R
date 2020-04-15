@@ -28,7 +28,7 @@ NULL
 #' @param genome_seq An FaFile object, to be used instead of a BSgenome package
 #' @return the function saves a 'results_RiboseQC_all' R file appended to the bam_files path including the complete list of outputs described here.
 #' In addition, bedgraph files for coverage value and P_sites position is appended to the bam_files path, including also a summary of P_sites selection statistics,
-#' a smaller 'results_RiboseQC' R file used for creating a dynamic html report, and a 'for_SaTAnn' R object that can be used in the SaTAnn pipeline.
+#' a smaller 'results_RiboseQC' R file used for creating a dynamic html report, and a 'for_ORFquant' R object that can be used in the ORFquant pipeline.
 #' @details This function loads different genomic regions created in the \code{prepare_annotation_files} step,
 #' separating features on different recognized organelles. The bam files is then analyzed in chunks to minimize RAM usage.\cr
 #' The complete list of analysis and output is as follows:\cr\cr
@@ -220,9 +220,9 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
     }
     
     if (!is.null(offsets_df)) {
+	if('offset' %in% colnames(offsets_df)) offsets_df %<>% rename('cutoff':=offset)
         stopifnot(c("read_length", "cutoff") %in% colnames(offsets_df))
     }
-    
     fastainput <- is(genome_seq, "FaFile")
     
     if (fastainput) {
@@ -373,11 +373,6 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
             for (rl in rls) {
                 reads_x <- GRanges()
                 reads_y <- GRanges()
-                seqlevels(reads_x) <- seql
-                seqlevels(reads_y) <- seql
-                
-                seqlengths(reads_x) <- seqle
-                seqlengths(reads_y) <- seqle
                 
                 if (sum(rl %in% names(x[["reads_pos1"]])) > 0) {
                   reads_x <- x[["reads_pos1"]][[rl]]
@@ -385,6 +380,15 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
                 if (sum(rl %in% names(y[["reads_pos1"]])) > 0) {
                   reads_y <- y[["reads_pos1"]][[rl]]
                 }
+
+                #This needs to go after the above                
+                seqlevels(reads_x) <- seql
+                seqlevels(reads_y) <- seql
+                
+                seqlengths(reads_x) <- seqle
+                seqlengths(reads_y) <- seqle
+                
+                
                 plx <- reads_x[strand(reads_x) == "+"]
                 mnx <- reads_x[strand(reads_x) == "-"]
                 ply <- reads_y[strand(reads_y) == "+"]
@@ -397,7 +401,6 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
                 if (length(ply) > 0) {
                   covv_pl <- covv_pl + coverage(ply, weight = ply$score)
                 }
-                
                 covv_pl <- GRanges(covv_pl)
                 covv_pl <- covv_pl[covv_pl$score > 0]
                 
@@ -2186,11 +2189,21 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
                   
                   gcall <- paste(gco, names(gco), sep = ";")
                   
+                  #remove 'Ns' our counts
+                  non_n_rows <- grep(x=rownames(psit_counts),v=TRUE,patt='N',inv=T)
+                  psit_counts <- psit_counts[non_n_rows,]
+                  asit_counts <- asit_counts[non_n_rows,]
+                  esit_counts <- esit_counts[non_n_rows,]
+                  ratio_psit_cod <- ratio_psit_cod[non_n_rows,]
+                  ratio_asit_cod <- ratio_asit_cod[non_n_rows,]
+                  ratio_esit_cod <- ratio_esit_cod[non_n_rows,]
+                  cod_counts <- cod_counts[non_n_rows,]
+
                   rownames(psit_counts) <- gcall[match(rownames(psit_counts), gco)]
                   rownames(asit_counts) <- gcall[match(rownames(asit_counts), gco)]
                   rownames(esit_counts) <- gcall[match(rownames(esit_counts), gco)]
-                  
                   rownames(cod_counts) <- gcall[match(rownames(cod_counts), gco)]
+                  
                   rownames(ratio_psit_cod) <- gcall[match(rownames(ratio_psit_cod), 
                     gco)]
                   rownames(ratio_asit_cod) <- gcall[match(rownames(ratio_asit_cod), 
@@ -2371,8 +2384,8 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
         save(juns, file = paste(dest_name, "_junctions", sep = ""))
         
         
-        for_SaTAnn <- list(merged_all_ps, merged_uniq_ps, merged_uniq_mm_ps, juns)
-        names(for_SaTAnn) <- c("P_sites_all", "P_sites_uniq", "P_sites_uniq_mm", 
+        for_ORFquant <- list(merged_all_ps, merged_uniq_ps, merged_uniq_mm_ps, juns)
+        names(for_ORFquant) <- c("P_sites_all", "P_sites_uniq", "P_sites_uniq_mm", 
             "junctions")
         
         
@@ -2439,7 +2452,7 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
             "P_sites_stats", "profiles_P_sites", "sequence_analysis")
         if (length(merged_all_ps) > 0) {
             
-            save(for_SaTAnn, file = paste(dest_name, "_for_SaTAnn", sep = ""))
+            save(for_ORFquant, file = paste(dest_name, "_for_ORFquant", sep = ""))
         }
         finn <- lapply(res_all$selection_cutoffs$results_choice, function(x) {
             x$data

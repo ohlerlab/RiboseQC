@@ -2291,7 +2291,7 @@ load_annotation<-function(path){
       assign('genome_seq',genome_sequence,envir = parent.frame())
     }
 
-	  message(paste0('assigning FaFile_Circ object GTF_annotation to parent workspace'))
+	  message(paste0('assigning GTF_annotation object GTF_annotation to parent workspace'))
     assign('GTF_annotation',GTF_annotation,envir = parent.frame())
 
 }
@@ -2420,10 +2420,10 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 }
 
 
-
 #' Prepare comprehensive sets of annotated genomic features
 #'
-#' This function processes a gtf file and a twobit file (created using faToTwoBit from ucsc tools: http://hgdownload.soe.ucsc.edu/admin/exe/ ) to create a comprehensive set of genomic regions of interest in genomic and transcriptomic space (e.g. introns, UTRs, start/stop codons).
+#' This function processes a gtf file and a twobit file (created using faToTwoBit from ucsc tools: http://hgdownload.soe.ucsc.edu/admin/exe/ ) to create a com
+#' prehensive set of genomic regions of interest in genomic and transcriptomic space (e.g. introns, UTRs, start/stop codons).
 #'    In addition, by linking genome sequence and annotation, it extracts additional info, such as gene and transcript biotypes, genetic codes for different organelles, or chromosomes and transcripts lengths.
 #' @keywords RiboseQC
 #' @author Lorenzo Calviello, \email{calviello.l.bio@@gmail.com}
@@ -2435,6 +2435,7 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 #' @param export_bed_tables_TxDb Export coordinates and info about different genomic regions in the annotation_directory? It defaults to \code{TRUE}
 #' @param forge_BSgenome Forge and install a \code{BSgenome} package? It defaults to \code{TRUE}
 #' @param create_TxDb Create a \code{TxDb} object and a *Rannot object? It defaults to \code{TRUE}
+#' @param annot_file specify an exact file name for the rds file created by this function, defaults to annotation_directory/basename(gtf)_Rannot
 #' @details This function uses the \code{makeTxDbFromGFF} function to  create a TxDb object and extract
 #' genomic regions and other info to a *Rannot R file; the \code{mapToTranscripts} and \code{mapFromTranscripts} functions are used to
 #' map features to genomic or transcript-level coordinates. GTF file mist contain "exon" and "CDS" lines,
@@ -2481,8 +2482,9 @@ calc_cutoffs_from_profiles<-function(reads_profile,length_max){
 #'
 #' @export
 
-prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,scientific_name="Homo.sapiens",
-                                   annotation_name="genc25",export_bed_tables_TxDb=TRUE,forge_BSgenome=TRUE,genome_seq=NULL,circ_chroms=DEFAULT_CIRC_SEQS,create_TxDb=TRUE){
+
+prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_file,scientific_name="Homo.sapiens",
+                                   annotation_name="genc25",export_bed_tables_TxDb=TRUE,forge_BSgenome=FALSE,genome_seq=NULL,circ_chroms=DEFAULT_CIRC_SEQS,create_TxDb=TRUE,annot_file=NULL){
 
 
     DEFAULT_CIRC_SEQS <- unique(c("chrM","MT","MtDNA","mit","Mito","mitochondrion",
@@ -2510,6 +2512,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
     #Forge a BSGenome package
 
     if(forge_BSgenome){
+        stopifnot(!is.null(twobit_file))
         scientific_name_spl<-strsplit(scientific_name,"[.]")[[1]]
         ok<-length(scientific_name_spl)==2
         if(!ok){stop("\"scientific_name\" must be two words separated by a \".\", like \"Homo.sapiens\"")}
@@ -2590,6 +2593,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         if(!is(genome_seq,'FaFile')){
             genome_seq <- Rsamtools::FaFile(genome_seq)
         }
+        Rsamtools::indexFa(genome_seq)
         if(!is(genome_seq,'FaFile_Circ')){
             genome_seq <- FaFile_Circ(genome_seq,circularRanges=circ_chroms)
         }
@@ -2607,13 +2611,13 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         cat(paste("Creating the TxDb object --- Done! ",date(),"\n",sep = ""))
         cat(paste("Extracting genomic regions ... ",date(),"\n",sep = ""))
 
+
         genes<-genes(annotation)
         exons_ge<-exonsBy(annotation,by="gene")
         exons_ge<-GenomicRanges::reduce(exons_ge)
 
         cds_gen<-cdsBy(annotation,"gene")
         cds_ge<-reduce(cds_gen)
-
 
         #define regions not overlapping CDS ( or exons when defining introns)
 
@@ -2645,6 +2649,9 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         intergenicRegions<-intergenicRegions[strand(intergenicRegions)=="*"]
 
         cds_tx<-cdsBy(annotation,"tx",use.names=TRUE)
+
+        #filter out abnormally short cds (I"m looking at you maize annotation)
+        cds_tx <- cds_tx[sum(width(cds_tx))>=3]
         txs_gene<-transcriptsBy(annotation,by="gene")
         genes_red<-reduce(sort(genes(annotation)))
 
@@ -2768,6 +2775,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         }
         tocheck<-as.character(runValue(seqnames(cds_tx)))
         tocheck<-cds_tx[!tocheck%in%circs]
+        width(tocheck)%>%sum%>%.[.<3]
         seqcds<-extractTranscriptSeqs(genome,transcripts = tocheck)
         cd<-unique(translations$genetic_code[!rownames(translations)%in%circs])
         trsl<-suppressWarnings(translate(seqcds,genetic.code = getGeneticCode(cd),if.fuzzy.codon = "solve"))
@@ -2884,7 +2892,9 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         names(GTF_annotation)<-c("txs","txs_gene","seqinfo","start_stop_codons","cds_txs","introns_txs","cds_genes","exons_txs","exons_bins","junctions","genes","threeutrs","fiveutrs","ncIsof","ncRNAs","introns","intergenicRegions","trann","cds_txs_coords","genetic_codes","genome","stop_in_gtf")
 
         #Save as a RData object
-        annot_file <- paste(annotation_directory,"/",basename(gtf_file),"_Rannot",sep="")
+        if(is.null(annot_file)){
+            annot_file <- paste(annotation_directory,"/",basename(gtf_file),"_Rannot",sep="")
+        }
         save(GTF_annotation,file=annot_file)
         cat(paste("Rannot object created!   ",date(),"\n",sep = ""))
         GTF_annotation
@@ -2919,6 +2929,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         }
 
     }
+
     return(annot_file)
 }
 
