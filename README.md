@@ -20,7 +20,7 @@ To install Ribo-seQC:
 
 ```
 library("devtools")
-install_github(repo = "ohlerlab/Ribo-seQC")
+install_github(repo = "ohlerlab/RiboseQC")
 library("RiboseQC")
 
 ```
