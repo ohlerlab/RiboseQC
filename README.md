@@ -34,6 +34,9 @@ library("RiboseQC")
 
 ```
 
+RiboseQC also requires an up to date version of pandoc ( >= 2.9.1) in order to produce rmarkdown reports.
+
+
 Two simple steps are required to use Ribo-seQC on your data:
 ```
 ?prepare_annotation_files
