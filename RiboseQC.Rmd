@@ -33,10 +33,12 @@ suppressPackageStartupMessages(library("RiboseQC"))
 Let's now download annotation for *Homo sapiens*: a subset of the GENCODE 25 annotation (https://www.gencodegenes.org/human/release_25.html) and the corresponding genome sequences.
 
 ```{r create_dirs_hum}
+download_testfile = function(filename){
+    download.file(paste0("http://bimsbstatic.mdc-berlin.de/ohler/dharnet/riboseqc_testfiles/",filename),destfile = filename)
+}
+download_testfile(filename = "test_human.2bit")
 
-download.file("https://drive.google.com/uc?export=download&id=1n6UA5cSz6djx0dY_7sI57177T-kyZhhT",destfile = "test_human.2bit")
-
-download.file("https://drive.google.com/uc?export=download&id=19Am9-iMEyB-AcIsVRdIqrF-BVdQYrcaI",destfile = "test_human.gtf")
+download_testfile(filename = "test_human.gtf")
 ```
 
 
@@ -125,7 +127,7 @@ Let's now download a subset of a Ribo-seq dataset in HEK293 cells [2].
 
 
 ```{r human_report_1}
-download.file("https://drive.google.com/uc?export=download&id=11PP5y2QH7si81rbEBJsOB-Lt3l_JowRW",destfile = "test_human_hek.bam")
+download_testfile(filename = "test_human_hek.bam")
 ```
 
 We now perform different sets of calculations on our data (including read-length and organelle-specific metagene analyses), using the annotation we previously created. Several files (including automatically generated P_sites positions, and other output from the analysis pipeline) will be automatically created. 
@@ -152,9 +154,9 @@ Let's now create annotation for *Saccharomyces cerevisiae*. We will use a custom
 
 ```{r yeast_1}
 
-download.file("https://drive.google.com/uc?export=download&id=1ul_mqVimaavfhJs76R3TaOyTcUgwJvS2",destfile = "test_yeast.2bit")
+download_testfile('test_yeast.2bit')
+download_testfile('test_yeast.gtf')
 
-download.file("https://drive.google.com/uc?export=download&id=1yffqKkfohGx9y7XRZO05vhjYUXgjiKBF",destfile = "test_yeast.gtf")
 
 prepare_annotation_files(annotation_directory = ".",
                          twobit_file = "test_yeast.2bit",
@@ -176,11 +178,11 @@ GTF_annotation$trann
 We will now download three files corresponding to sample data from a TCP-seq experiment [4], where the three experiments aim at extracting RNA fragments covered by scanning ribosomes (SSU), elongating ribosomes (RS) and input material (input). Ribo-seQC analysis is followed by the creation of a report containing results for all the three experiments.
 
 ```{r yeast_3}
-download.file("https://drive.google.com/uc?export=download&id=1Nwlf7u-hHC_fX0fUJuJu_dr2WxwGazVJ",destfile = "test_yeast_TCP_input.bam")
+download_testfile(filename = "test_yeast_TCP_input.bam")
 
-download.file("https://drive.google.com/uc?export=download&id=18gQF2SxxsGQqVfhUw-wFo2dBt1mafiAB",destfile = "test_yeast_TCP_RS.bam")
+download_testfile(filename = "test_yeast_TCP_RS.bam")
 
-download.file("https://drive.google.com/uc?export=download&id=1HBb58mOt1vmf58yqz-wkZzfxZhBl_tmO",destfile = "test_yeast_TCP_SSU.bam")
+download_testfile(filename = "test_yeast_TCP_SSU.bam")
 
 bam_filepath_y<-c("test_yeast_TCP_input.bam","test_yeast_TCP_RS.bam","test_yeast_TCP_SSU.bam")
 
@@ -205,9 +207,8 @@ We now create the annotation files for *Arabidopsis thaliana*. We will use a cus
 
 ```{r arab_1}
 
-download.file("https://drive.google.com/uc?export=download&id=1gTxlR66fRX0GsHsWtJB7piLelM8jhZGu",destfile = "test_arabidopsis.2bit")
-
-download.file("https://drive.google.com/uc?export=download&id=1jYbdvaGfVnMx38X1P85Ounyq9jGwRVgP",destfile = "test_arabidopsis.gtf.gz")
+download_testfile("test_arabidopsis.2bit")
+download_testfile("test_arabidopsis.gtf.gz")
 
 prepare_annotation_files(annotation_directory = ".",
                          twobit_file = "test_arabidopsis.2bit",
@@ -222,8 +223,8 @@ We will now download two sample datasets from a Ribo-seq experiments in Arabidop
 annotation="test_arabidopsis.gtf.gz_Rannot"
 
 
-download.file("https://drive.google.com/uc?export=download&id=144PIK15iJrDSshMWsGbl9zQvT27Z1fzt",destfile = "test_arabidopsis_root.bam")
-download.file("https://drive.google.com/uc?export=download&id=1VVdMi0ho0LiRCld6-3vzibtg_CyPSTj3",destfile = "test_arabidopsis_shoot.bam")
+download_testfile(filename = "test_arabidopsis_root.bam")
+download_testfile(filename = "test_arabidopsis_shoot.bam")
 
 bam_filepath=c("test_arabidopsis_root.bam","test_arabidopsis_shoot.bam")
 
