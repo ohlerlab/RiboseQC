@@ -3004,6 +3004,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
     genome_seq<-list_annotations[[1]]$genome_seq
     
     
+    resfiles = c()
     for(bammo in 1:length(bam_files)){
         
         chunk_size<-as.integer(chunk_size)
@@ -4955,8 +4956,9 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
             fvp<-res_all$profiles_P_sites$P_sites_subcodon[[i]]
             res_all$profiles_P_sites$P_sites_subcodon[[i]]<-lapply(fvp,function(x){colSums(as.matrix(x))})
         }
-        
-        save(res_all, file=paste(dest_name,"_results_RiboseQC",sep = ""))
+        resfile = paste(dest_name,"_results_RiboseQC",sep = "")
+        resfiles = append(resfiles,resfile)
+        save(res_all, file=resfile)
         rm(res_all,res_1,res_2,res_3,res_4,res_5,res_6)
         gici<-gc()
         cat(paste("Exporting files --- Done!", date(),"\n\n"))
@@ -4970,6 +4972,6 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
         if(pdf_plots){create_pdfs_from_rds_objects(output_rds_path = paste(report_file,"_plots/rds/",sep=""))}
         
     }
-    
+    invisible(resfiles)
 }
 
