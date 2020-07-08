@@ -2987,7 +2987,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
     
     if(sum(!readlength_choice_method%in%c("max_coverage","max_inframe","all"))>0){stop(paste("'readlength_choice_method' must be one of 'max_coverage','max_inframe','all'.",date(),"\n"))}
 
-        parallel = F
+	parallel = F
 	if (!is.na(cores)) {
 		register(MulticoreParam(cores))
 		parallel = T
