@@ -2897,6 +2897,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
 #' @param pdf_plots creates a pdf file for each produced plot. Defaults to \code{TRUE}
 #' @param stranded are the analyzed libraries strand-specific? TRUE, FALSE or "inverse". Defaults to \code{TRUE}
 #' @param normalize_cov export normalized (sum to 1 million) bedgraph files for coverage tracks? Defaults to \code{TRUE}
+#' @param cores the number of cores to use to map over each input BAM file, ignored for Windows. Defaults to \code{NA}
 #' @return the function saves a "results_RiboseQC_all" R file appended to the bam_files path including the complete list of outputs described here.
 #' In addition, bedgraph files for coverage value and P_sites position is appended to the bam_files path, including also a summary of P_sites selection statistics, 
 #' a smaller "results_RiboseQC" R file used for creating a dynamic html report, and a "for_ORFquant" R object that can be used in the ORFquant pipeline.
@@ -2933,7 +2934,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
 #' @export
 
 RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_choice_method="max_coverage",
-                            chunk_size=5000000L,write_tmp_files=T,dest_names=NA,rescue_all_rls=FALSE,fast_mode=T,create_report=T,sample_names=NA,report_file=NA,extended_report=F,pdf_plots=T,stranded=T,normalize_cov=T){
+                            chunk_size=5000000L,write_tmp_files=T,dest_names=NA,rescue_all_rls=FALSE,fast_mode=T,create_report=T,sample_names=NA,report_file=NA,extended_report=F,pdf_plots=T,stranded=T,normalize_cov=T,cores=NA){
     
     if(length(dest_names)==1){
         if(is.na(dest_names)){
@@ -2985,6 +2986,12 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
     if(!length(sample_names)%in%c(length(bam_files))){stop(paste("length of 'sample_names' must be same as 'bam_files'.",date(),"\n"))}
     
     if(sum(!readlength_choice_method%in%c("max_coverage","max_inframe","all"))>0){stop(paste("'readlength_choice_method' must be one of 'max_coverage','max_inframe','all'.",date(),"\n"))}
+
+	parallel = F
+	if (!is.na(cores)) {
+		register(MulticoreParam(cores))
+		parallel = T
+	}
     
     list_annotations<-list()
     
@@ -3100,7 +3107,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
         }
         
         cat(paste("Extracting read lengths from ",bam_file," ... ", date(),"\n",sep=""))
-        maxmin <- reduceByYield(X=opts, YIELD=yiel, MAP=mapp, REDUCE=reduc)
+        maxmin <- reduceByYield(X=opts, YIELD=yiel, MAP=mapp, REDUCE=reduc, parallel=parallel)
         cat(paste("Extracting read lengths --- Done! ", date(),"\n",sep=""))
         readlengths<-seq(maxmin[[2]],maxmin[[1]])
         
@@ -3444,7 +3451,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
         
         cat(paste("Analyzing BAM file:",bam_file,"...", date(),"\n"))
         
-        res_1 <- reduceByYield(X=opts, YIELD=yiel, MAP=mapp, REDUCE=reduc)
+        res_1 <- reduceByYield(X=opts, YIELD=yiel, MAP=mapp, REDUCE=reduc, parallel=parallel)
         names(res_1) <- c("rld","rld_unq", "positions","positions_unq" ,"reads_pos1", "counts_cds_genes","counts_cds_genes_unq", "counts_all_genes","counts_all_genes_unq", "reads_summary", "reads_summary_unq")
         
         cds_cnts<-res_1$counts_cds_genes
@@ -4299,7 +4306,7 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
         }
         cat(paste("Calculating P-sites positions and junctions ...", date(),"\n"))
         
-        res_4<-reduceByYield(X=opts,YIELD=yiel,MAP=mapp,REDUCE=reduc)
+        res_4<-reduceByYield(X=opts,YIELD=yiel,MAP=mapp,REDUCE=reduc, parallel=parallel)
         
         save(res_4,file = paste(dira,"res_4",sep = "/"))
         
@@ -4974,4 +4981,3 @@ RiboseQC_analysis<-function(annotation_file,bam_files,read_subset=T,readlength_c
     }
     invisible(resfiles)
 }
-
