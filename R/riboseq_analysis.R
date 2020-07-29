@@ -219,9 +219,6 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
             date(), "\n"))
     }
     
-    if (!is.null(offsets_df)) 
-        stopifnot(c("read_length", "cutoff") %in% colnames(offsets_df))
-    
     fastainput <- is(genome_seq, "FaFile")
     
     if (fastainput) {
