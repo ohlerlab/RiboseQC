@@ -2527,7 +2527,7 @@ RiboseQC_analysis <- function(annotation_file, bam_files, read_subset = TRUE, re
           cat(paste("Creating html report in ", report_file, " ... ", date(), "\n", 
               sep = ""))
           
-          create_html_report(input_files = resfile, 
+          create_html_report(input_files = resfilelist, 
               input_sample_names = sample_names, output_file = report_file, extended = extended_report)
           cat(paste("Creating html report --- Done!", date(), "\n\n"))
           
