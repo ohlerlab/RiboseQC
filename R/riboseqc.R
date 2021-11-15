@@ -2687,9 +2687,21 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
 
         cat(paste("Extracting ids and biotypes ... ",date(),"\n",sep = ""))
 
-        trann<-unique(mcols(import.gff2(gtf_file,colnames=c("gene_id","gene_biotype","gene_type","gene_name","gene_symbol","transcript_id","transcript_biotype","transcript_type"))))
+
+         gtfdata <- import.gff2(gtf_file,colnames=c("gene_id","gene_biotype","gene_type","gene_name","gene_symbol","transcript_id","transcript_biotype","transcript_type","type"))
+         n_transcripts = length(unique(gtfdata$transcript_id))
+         stopifnot('transcript' %in% gtfdata$type)
+         gtfdata <- subset(gtfdata, type=='transcript')
+         gtfdata$type <- NULL
+         stopifnot(length(unique(gtfdata$transcript_id))==n_transcripts)
+
+         trann<-unique(mcols(gtfdata))
+
+
         trann<-trann[!is.na(trann$transcript_id),]
         trann<-data.frame(unique(trann),stringsAsFactors=FALSE)
+
+
 
         if(sum(!is.na(trann$transcript_biotype))==0 & sum(!is.na(trann$transcript_type))==0 ){
             trann$transcript_biotype<-"no_type"
