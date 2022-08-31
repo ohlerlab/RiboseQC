@@ -2662,7 +2662,9 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
 
 
         #define exonic bins, including regions overlapping multiple genes
-        nsns<-disjointExons(annotation,aggregateGenes=TRUE)
+        # nsns<-disjointExons(annotation,aggregateGenes=TRUE)
+   	nsns<-exonicParts(annotation, linked.to.single.gene.only=F)
+  	mcols(nsns) <- DataFrame(mcols(nsns)[c(3,2)],exonic_part=NA) #disjointExons is deprecated, so use exonicParts instead and mimic back to the disjoint format in ORFquant
 
 
 
