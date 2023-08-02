@@ -2662,7 +2662,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
 
 
         #define exonic bins, including regions overlapping multiple genes
-        nsns<-disjointExons(annotation,aggregateGenes=TRUE)
+        nsns<-exonicParts(annotation,linked.to.single.gene.only=FALSE)
 
 
 
