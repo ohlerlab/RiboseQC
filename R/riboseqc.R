@@ -108,7 +108,8 @@ create_html_report <- function(input_files, input_sample_names, output_file,exte
            params = list(input_files = input_files,
                          input_sample_names = input_sample_names,
                          output_fig_path = output_fig_path),
-           output_file = output_file))
+           output_file = output_file,
+           intermediates_dir = tempdir()))
     gici<-gc()
     sink()
 }
@@ -2662,7 +2663,8 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
 
 
         #define exonic bins, including regions overlapping multiple genes
-        nsns<-exonicParts(annotation,linked.to.single.gene.only=FALSE)
+        nsns<-exonicParts(annotation, linked.to.single.gene.only=F)
+        mcols(nsns) <- DataFrame(mcols(nsns)[c(3,2)],exonic_part=NA) #disjointExons is deprecated, so use exonicParts instead and mimic back to the disjoint format in ORFquant
 
 
 
